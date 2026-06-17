@@ -2,7 +2,7 @@
 
 ## Roadmap
 
-[Open AI PM Career Roadmap PDF](../AI_PM_Career_Roadmap.pdf)
+[Open AI PM Career Roadmap PDF](./AI_PM_Career_Roadmap.pdf)
 
 ## Screenshots
 
