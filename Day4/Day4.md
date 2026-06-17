@@ -1,8 +1,11 @@
-# Roadmap
+# Day 4
+
+## Roadmap
 
 [Open AI PM Career Roadmap PDF](../AI_PM_Career_Roadmap.pdf)
 
-# Screenshots
+## Screenshots
+
 **Q1**
 ![alt text](image.png)
 
