@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>30-Day Data Science & AI Roadmap</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+
+  header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%);
+    padding: 32px 24px 24px;
+    text-align: center;
+    border-bottom: 2px solid #2d5a9e;
+  }
+  header h1 { font-size: 1.8rem; font-weight: 700; color: #60a5fa; letter-spacing: -0.5px; }
+  header p { color: #94a3b8; margin-top: 6px; font-size: 0.9rem; }
+  .badges { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { background: #1e3a5f; border: 1px solid #2d5a9e; border-radius: 20px; padding: 4px 14px; font-size: 0.78rem; color: #93c5fd; }
+
+  .progress-bar-wrap { background: #1e293b; padding: 16px 24px; border-bottom: 1px solid #1e3a5f; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; margin-bottom: 8px; }
+  .progress-outer { background: #0f2030; border-radius: 8px; height: 10px; overflow: hidden; }
+  .progress-inner { background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; border-radius: 8px; transition: width 0.4s ease; }
+
+  nav { display: flex; gap: 6px; padding: 14px 24px; background: #0f1117; border-bottom: 1px solid #1e293b; overflow-x: auto; }
+  nav button {
+    padding: 6px 16px; border-radius: 20px; border: 1px solid #1e3a5f;
+    background: transparent; color: #94a3b8; cursor: pointer; font-size: 0.82rem; white-space: nowrap; transition: all 0.2s;
+  }
+  nav button.active, nav button:hover { background: #1e3a5f; color: #60a5fa; border-color: #3b82f6; }
+
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+
+  .week-header {
+    background: linear-gradient(135deg, #1e3a5f, #0f2744);
+    border: 1px solid #2d5a9e; border-radius: 12px;
+    padding: 18px 22px; margin-bottom: 16px;
+  }
+  .week-header h2 { font-size: 1.1rem; color: #60a5fa; font-weight: 700; }
+  .week-header .milestone { color: #93c5fd; font-size: 0.88rem; margin-top: 6px; }
+  .week-header .outcome { color: #64748b; font-size: 0.82rem; margin-top: 4px; }
+
+  .day-card {
+    background: #1a2235; border: 1px solid #1e3a5f; border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 10px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .day-card:hover { border-color: #3b82f6; background: #1e2d47; }
+  .day-card.done { border-color: #16a34a; background: #0d2318; }
+
+  .day-num {
+    min-width: 40px; height: 40px; border-radius: 50%; background: #0f2030;
+    border: 2px solid #2d5a9e; display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: #60a5fa; flex-shrink: 0;
+  }
+  .day-card.done .day-num { background: #14532d; border-color: #16a34a; color: #4ade80; }
+
+  .day-content { flex: 1; }
+  .day-title { font-weight: 600; font-size: 0.92rem; color: #e2e8f0; }
+  .day-detail { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+  .day-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .tag { font-size: 0.72rem; padding: 2px 10px; border-radius: 12px; }
+  .tag.concept { background: #1e3a5f; color: #93c5fd; }
+  .tag.practice { background: #1c3326; color: #4ade80; }
+  .tag.project { background: #3b1f5e; color: #c084fc; }
+  .tag.resource { background: #3b2b1a; color: #fb923c; }
+
+  .check { margin-left: auto; padding-left: 12px; }
+  .check input[type=checkbox] { width: 18px; height: 18px; accent-color: #16a34a; cursor: pointer; }
+
+  .resources-box {
+    background: #131c2e; border: 1px solid #1e3a5f; border-radius: 10px;
+    padding: 16px 20px; margin-top: 24px;
+  }
+  .resources-box h3 { color: #60a5fa; font-size: 0.95rem; margin-bottom: 12px; }
+  .resource-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1e293b; }
+  .resource-item:last-child { border-bottom: none; }
+  .res-icon { font-size: 1.1rem; }
+  .res-info { flex: 1; }
+  .res-name { font-size: 0.85rem; color: #e2e8f0; font-weight: 600; }
+  .res-desc { font-size: 0.78rem; color: #64748b; margin-top: 2px; }
+
+  .project-box {
+    background: #1a1330; border: 1px solid #4c1d95; border-radius: 10px;
+    padding: 16px 20px; margin-top: 16px;
+  }
+  .project-box h3 { color: #c084fc; font-size: 0.95rem; margin-bottom: 12px; }
+  .project-item { padding: 10px 0; border-bottom: 1px solid #2d1b5e; }
+  .project-item:last-child { border-bottom: none; }
+  .proj-title { font-size: 0.88rem; font-weight: 700; color: #ddd6fe; }
+  .proj-week { font-size: 0.75rem; color: #7c3aed; font-weight: 600; margin-bottom: 3px; }
+  .proj-desc { font-size: 0.78rem; color: #94a3b8; margin-top: 3px; }
+
+  .outcome-box {
+    background: linear-gradient(135deg, #0f2744, #1e3a5f);
+    border: 2px solid #3b82f6; border-radius: 12px; padding: 22px 24px; margin-top: 24px;
+    text-align: center;
+  }
+  .outcome-box h3 { color: #60a5fa; font-size: 1rem; margin-bottom: 10px; }
+  .outcome-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .outcome-list li { color: #e2e8f0; font-size: 0.85rem; }
+  .outcome-list li::before { content: "✅ "; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧠 30-Day Data Science & AI Roadmap</h1>
+  <p>From basics to building — 30–45 mins/day</p>
+  <div class="badges">
+    <span class="badge">📅 30 Days</span>
+    <span class="badge">⏱️ 30–45 mins/day</span>
+    <span class="badge">🎯 Some Basics</span>
+    <span class="badge">🐍 Python + AI</span>
+  </div>
+</header>
+
+<div class="progress-bar-wrap">
+  <div class="progress-label"><span>Overall Progress</span><span id="prog-text">0 / 30 days completed</span></div>
+  <div class="progress-outer"><div class="progress-inner" id="prog-bar" style="width:0%"></div></div>
+</div>
+
+<nav>
+  <button class="active" onclick="showWeek('all', this)">All Weeks</button>
+  <button onclick="showWeek('w1', this)">Week 1 — Data Foundations</button>
+  <button onclick="showWeek('w2', this)">Week 2 — ML Fundamentals</button>
+  <button onclick="showWeek('w3', this)">Week 3 — Applied ML</button>
+  <button onclick="showWeek('w4', this)">Week 4 — AI & Projects</button>
+  <button onclick="showWeek('resources', this)">Resources & Projects</button>
+</nav>
+
+<main>
+
+<!-- WEEK 1 -->
+<div class="week-block" id="w1">
+  <div class="week-header">
+    <h2>📊 Week 1 — Data Foundations</h2>
+    <div class="milestone">🎯 Milestone: Confidently manipulate and visualize datasets using Python</div>
+    <div class="outcome">Tools: Python, NumPy, Pandas, Matplotlib, Seaborn</div>
+  </div>
+  <div id="days-w1"></div>
+</div>
+
+<!-- WEEK 2 -->
+<div class="week-block" id="w2">
+  <div class="week-header">
+    <h2>🤖 Week 2 — Machine Learning Fundamentals</h2>
+    <div class="milestone">🎯 Milestone: Train, evaluate, and tune your first ML models</div>
+    <div class="outcome">Tools: Scikit-learn, Jupyter Notebooks, Kaggle datasets</div>
+  </div>
+  <div id="days-w2"></div>
+</div>
+
+<!-- WEEK 3 -->
+<div class="week-block" id="w3">
+  <div class="week-header">
+    <h2>🔬 Week 3 — Applied ML & Feature Engineering</h2>
+    <div class="milestone">🎯 Milestone: Build a complete ML pipeline from raw data to predictions</div>
+    <div class="outcome">Tools: Scikit-learn Pipelines, XGBoost, SHAP, Cross-validation</div>
+  </div>
+  <div id="days-w3"></div>
+</div>
+
+<!-- WEEK 4 -->
+<div class="week-block" id="w4">
+  <div class="week-header">
+    <h2>🚀 Week 4 — Deep Learning & AI Applications</h2>
+    <div class="milestone">🎯 Milestone: Build a neural network and deploy a simple AI-powered app</div>
+    <div class="outcome">Tools: TensorFlow / Keras, Hugging Face, Streamlit, Google Colab</div>
+  </div>
+  <div id="days-w4"></div>
+</div>
+
+<!-- Resources -->
+<div class="week-block" id="resources">
+  <div class="resources-box">
+    <h3>📚 Essential Free Resources</h3>
+    <div class="resource-item"><span class="res-icon">🎓</span><div class="res-info"><div class="res-name">Kaggle Learn (kaggle.com/learn)</div><div class="res-desc">Free micro-courses: Python, Pandas, ML, Deep Learning — bite-sized and hands-on</div></div></div>
+    <div class="resource-item"><span class="res-icon">📺</span><div class="res-info"><div class="res-name">StatQuest with Josh Starmer (YouTube)</div><div class="res-desc">Best visual explanations of ML concepts — starts from scratch, very beginner-friendly</div></div></div>
+    <div class="resource-item"><span class="res-icon">📖</span><div class="res-info"><div class="res-name">Hands-On Machine Learning (O'Reilly)</div><div class="res-desc">The definitive book — free preview chapters widely available; covers Week 2–4 topics</div></div></div>
+    <div class="resource-item"><span class="res-icon">🧪</span><div class="res-info"><div class="res-name">Google Colab (colab.research.google.com)</div><div class="res-desc">Free GPU notebooks in your browser — no local setup needed</div></div></div>
+    <div class="resource-item"><span class="res-icon">🤗</span><div class="res-info"><div class="res-name">Hugging Face (huggingface.co)</div><div class="res-desc">Pre-trained AI models, datasets, and tutorials for NLP and computer vision</div></div></div>
+    <div class="resource-item"><span class="res-icon">📊</span><div class="res-info"><div class="res-name">fast.ai (course.fast.ai)</div><div class="res-desc">Top-down practical deep learning — for Week 4 and beyond</div></div></div>
+  </div>
+
+  <div class="project-box">
+    <h3>🛠️ Capstone Projects</h3>
+    <div class="project-item"><div class="proj-week">Week 1 Project</div><div class="proj-title">📈 Exploratory Data Analysis — Titanic or Zomato Dataset</div><div class="proj-desc">Load a real dataset, clean nulls, create 5 visualizations, and write a summary of insights. Post on GitHub.</div></div>
+    <div class="project-item"><div class="proj-week">Week 2 Project</div><div class="proj-title">🏠 House Price Predictor</div><div class="proj-desc">Train a Linear Regression and Random Forest on the Boston Housing dataset. Compare RMSE, tune hyperparameters, plot feature importances.</div></div>
+    <div class="project-item"><div class="proj-week">Week 3 Project</div><div class="proj-title">💳 Fraud Detection Pipeline</div><div class="proj-desc">Build a full Scikit-learn Pipeline: imputation → encoding → scaling → XGBoost classifier. Handle class imbalance with SMOTE. Explain predictions with SHAP.</div></div>
+    <div class="project-item"><div class="proj-week">Week 4 Project</div><div class="proj-title">🤖 AI Mini-App with Streamlit</div><div class="proj-desc">Build a Streamlit web app that takes user input and returns predictions from your Week 3 model — or uses a Hugging Face sentiment analysis model. Deploy free on Streamlit Cloud.</div></div>
+  </div>
+
+  <div class="outcome-box">
+    <h3>🏆 Final Outcome — What You'll Have After 30 Days</h3>
+    <ul class="outcome-list">
+      <li>Strong command of Pandas, NumPy, and Matplotlib for data work</li>
+      <li>Ability to train, evaluate, and tune ML models with Scikit-learn</li>
+      <li>Understanding of core algorithms: Linear/Logistic Regression, Random Forest, XGBoost</li>
+      <li>Complete ML pipeline skill — from raw data to deployed predictions</li>
+      <li>Exposure to Deep Learning concepts and Hugging Face AI models</li>
+      <li>A GitHub portfolio with 4 real data science projects</li>
+      <li>A live Streamlit app you can share with anyone</li>
+      <li>Foundation to tackle Kaggle competitions or a DS/AI job prep track</li>
+    </ul>
+  </div>
+</div>
+
+</main>
+
+<script>
+const days = [
+  // WEEK 1
+  { w:"w1", d:1, title:"Python Refresher for Data Science", detail:"Review lists, dicts, functions, list comprehensions", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w1", d:2, title:"NumPy Essentials", detail:"Arrays, slicing, broadcasting, vectorized operations", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w1", d:3, title:"Pandas — DataFrames & Series", detail:"Load CSV, inspect data, select rows/columns", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w1", d:4, title:"Data Cleaning with Pandas", detail:"Handle nulls, duplicates, data types, rename columns", tags:["practice"], t1:"Practice" },
+  { w:"w1", d:5, title:"Matplotlib Basics — Line & Bar Charts", detail:"Plot trends and comparisons from real datasets", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w1", d:6, title:"Seaborn — Beautiful Statistical Visuals", detail:"Heatmaps, pair plots, box plots, distributions", tags:["practice"], t1:"Practice" },
+  { w:"w1", d:7, title:"Week 1 Project: EDA on Titanic/Zomato", detail:"Apply all week's skills: clean, analyze, visualize, summarize insights", tags:["project"], t1:"Project" },
+
+  // WEEK 2
+  { w:"w2", d:8, title:"What is ML? Core Concepts", detail:"Supervised vs unsupervised, train/test split, bias-variance", tags:["concept"], t1:"Concept" },
+  { w:"w2", d:9, title:"Linear Regression", detail:"Fit your first model, interpret coefficients, plot the fit line", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w2", d:10, title:"Logistic Regression & Classification", detail:"Predict binary outcomes, confusion matrix, accuracy vs precision/recall", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w2", d:11, title:"Decision Trees", detail:"How trees split, overfitting, max_depth tuning", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w2", d:12, title:"Random Forest — Ensemble Power", detail:"Bagging, feature importance, compare vs single tree", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w2", d:13, title:"Model Evaluation Deep Dive", detail:"Cross-validation, ROC-AUC, F1-score, when to use what", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w2", d:14, title:"Week 2 Project: House Price Predictor", detail:"Train Linear Regression + Random Forest, compare metrics, tune hyperparameters", tags:["project"], t1:"Project" },
+
+  // WEEK 3
+  { w:"w3", d:15, title:"Feature Engineering — Create Better Inputs", detail:"Binning, log transforms, date features, domain-specific features", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w3", d:16, title:"Encoding Categorical Variables", detail:"Label encoding, one-hot, target encoding — when to use each", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w3", d:17, title:"Scikit-learn Pipelines", detail:"Chain preprocessing + model into a single reusable Pipeline object", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w3", d:18, title:"XGBoost & Gradient Boosting", detail:"Intuition behind boosting, train XGBoost, compare with Random Forest", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w3", d:19, title:"Hyperparameter Tuning — GridSearchCV", detail:"Systematically find best model parameters, avoid overfitting", tags:["practice"], t1:"Practice" },
+  { w:"w3", d:20, title:"Explainability with SHAP", detail:"Why did the model predict this? SHAP values, summary plots", tags:["concept","resource"], t1:"Concept", t2:"Resource" },
+  { w:"w3", d:21, title:"Week 3 Project: Fraud Detection Pipeline", detail:"End-to-end: clean → encode → Pipeline → XGBoost → SHAP explanations", tags:["project"], t1:"Project" },
+
+  // WEEK 4
+  { w:"w4", d:22, title:"Intro to Neural Networks", detail:"Neurons, layers, activation functions — the intuition, no heavy math", tags:["concept","resource"], t1:"Concept", t2:"Resource" },
+  { w:"w4", d:23, title:"Build Your First Neural Net with Keras", detail:"Train a simple network on MNIST digits in Google Colab", tags:["practice"], t1:"Practice" },
+  { w:"w4", d:24, title:"Convolutional Neural Networks (CNNs)", detail:"How CNNs see images — filters, pooling, use a pre-trained ResNet", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w4", d:25, title:"NLP Basics & Text Classification", detail:"Tokenization, TF-IDF, simple text classifier on review data", tags:["concept","practice"], t1:"Concept", t2:"Practice" },
+  { w:"w4", d:26, title:"Hugging Face Transformers — Use Pre-trained AI", detail:"Load a BERT/GPT model, run sentiment analysis in 10 lines of code", tags:["practice","resource"], t1:"Practice", t2:"Resource" },
+  { w:"w4", d:27, title:"Build a Streamlit App", detail:"Turn your ML model into a simple web UI anyone can use", tags:["practice","project"], t1:"Practice", t2:"Project" },
+  { w:"w4", d:28, title:"Deploy to Streamlit Cloud", detail:"Push to GitHub, deploy for free, share the public link", tags:["practice"], t1:"Practice" },
+  { w:"w4", d:29, title:"Portfolio Review & GitHub Polish", detail:"README files, notebooks cleaned up, 4 projects documented", tags:["practice"], t1:"Practice" },
+  { w:"w4", d:30, title:"Reflect, Plan Next 30 Days & Celebrate 🎉", detail:"What to learn next: Kaggle competitions, SQL, MLOps, LLM fine-tuning", tags:["concept","resource"], t1:"Concept", t2:"Resource" },
+];
+
+const tagClass = { concept:"concept", practice:"practice", project:"project", resource:"resource" };
+const tagLabel = { concept:"📘 Concept", practice:"💻 Practice", project:"🛠️ Project", resource:"📚 Resource" };
+
+let checked = JSON.parse(localStorage.getItem('ds30_checked') || '{}');
+
+function renderDays() {
+  ['w1','w2','w3','w4'].forEach(w => {
+    const container = document.getElementById('days-' + w);
+    container.innerHTML = '';
+    days.filter(d => d.w === w).forEach(d => {
+      const isDone = !!checked[d.d];
+      const card = document.createElement('div');
+      card.className = 'day-card' + (isDone ? ' done' : '');
+      card.innerHTML = `
+        <div class="day-num">D${d.d}</div>
+        <div class="day-content">
+          <div class="day-title">${d.title}</div>
+          <div class="day-detail">${d.detail}</div>
+          <div class="day-tags">${d.tags.map(t => `<span class="tag ${tagClass[t]}">${tagLabel[t]}</span>`).join('')}</div>
+        </div>
+        <div class="check"><input type="checkbox" ${isDone ? 'checked' : ''} onclick="toggleDay(event, ${d.d})"></div>
+      `;
+      container.appendChild(card);
+    });
+  });
+  updateProgress();
+}
+
+function toggleDay(e, dayNum) {
+  e.stopPropagation();
+  checked[dayNum] = e.target.checked;
+  localStorage.setItem('ds30_checked', JSON.stringify(checked));
+  renderDays();
+}
+
+function updateProgress() {
+  const done = Object.values(checked).filter(Boolean).length;
+  const pct = Math.round((done / 30) * 100);
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = `${done} / 30 days completed`;
+}
+
+function showWeek(id, btn) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.week-block').forEach(b => {
+    if (id === 'all') b.classList.remove('hidden');
+    else b.classList.toggle('hidden', b.id !== id);
+  });
+}
+
+renderDays();
+</script>
+</body>
+</html>

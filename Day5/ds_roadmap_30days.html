@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>30-Day Data Science Roadmap</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 24px; }
+  h1 { text-align: center; font-size: 1.8rem; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 28px; }
+  .badges { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+  .badge { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 4px 14px; font-size: 0.78rem; color: #7dd3fc; }
+  .tabs { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+  .tab { padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; background: #1e293b; color: #94a3b8; transition: all 0.2s; }
+  .tab.active { background: #3b82f6; color: #fff; }
+  .tab:hover:not(.active) { background: #334155; color: #e2e8f0; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* OVERVIEW */
+  .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .week-card { background: #1e293b; border-radius: 12px; padding: 20px; border-left: 4px solid; }
+  .week-card.w1 { border-color: #3b82f6; }
+  .week-card.w2 { border-color: #8b5cf6; }
+  .week-card.w3 { border-color: #10b981; }
+  .week-card.w4 { border-color: #f59e0b; }
+  .week-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .w1 .week-label { color: #3b82f6; }
+  .w2 .week-label { color: #8b5cf6; }
+  .w3 .week-label { color: #10b981; }
+  .w4 .week-label { color: #f59e0b; }
+  .week-title { font-size: 1rem; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
+  .week-milestone { font-size: 0.82rem; color: #94a3b8; line-height: 1.6; }
+  .milestone-item { display: flex; gap: 6px; margin-bottom: 4px; }
+  .milestone-item::before { content: '✓'; color: #10b981; flex-shrink: 0; }
+
+  .outcome-box { background: linear-gradient(135deg, #1e3a5f, #1e293b); border: 1px solid #3b82f6; border-radius: 12px; padding: 24px; margin-top: 20px; }
+  .outcome-title { font-size: 1rem; font-weight: 700; color: #7dd3fc; margin-bottom: 12px; }
+  .outcome-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .outcome-item { background: #0f172a; border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #cbd5e1; }
+  .outcome-item strong { color: #f8fafc; display: block; margin-bottom: 4px; }
+
+  /* DAILY PLAN */
+  .week-section { margin-bottom: 28px; }
+  .week-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .week-badge { padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; }
+  .wb1 { background: #1d3461; color: #7dd3fc; }
+  .wb2 { background: #2e1065; color: #c4b5fd; }
+  .wb3 { background: #064e3b; color: #6ee7b7; }
+  .wb4 { background: #451a03; color: #fcd34d; }
+  .week-header h3 { font-size: 1rem; font-weight: 700; color: #f8fafc; }
+  .days-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .day-card { background: #1e293b; border-radius: 10px; padding: 14px; border-top: 3px solid; }
+  .d1 { border-color: #3b82f6; } .d2 { border-color: #8b5cf6; } .d3 { border-color: #10b981; } .d4 { border-color: #f59e0b; }
+  .day-num { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+  .day-topic { font-size: 0.9rem; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+  .day-tasks { list-style: none; }
+  .day-tasks li { font-size: 0.8rem; color: #94a3b8; padding: 3px 0; display: flex; gap: 6px; }
+  .day-tasks li::before { content: '→'; color: #3b82f6; flex-shrink: 0; }
+  .time-tag { display: inline-block; background: #0f172a; color: #64748b; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; margin-top: 6px; }
+
+  /* RESOURCES */
+  .res-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .res-card { background: #1e293b; border-radius: 10px; padding: 16px; }
+  .res-category { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+  .cat-video { color: #f87171; }
+  .cat-practice { color: #34d399; }
+  .cat-project { color: #fbbf24; }
+  .cat-reference { color: #818cf8; }
+  .res-item { margin-bottom: 10px; }
+  .res-name { font-size: 0.85rem; font-weight: 600; color: #f1f5f9; }
+  .res-desc { font-size: 0.78rem; color: #64748b; margin-top: 2px; }
+  .res-tag { display: inline-block; font-size: 0.68rem; padding: 2px 7px; border-radius: 4px; margin-top: 4px; }
+  .tag-free { background: #064e3b; color: #6ee7b7; }
+  .tag-freemium { background: #1e3a5f; color: #7dd3fc; }
+  .tag-paid { background: #3b1f28; color: #fca5a5; }
+
+  /* PROJECTS */
+  .proj-list { display: flex; flex-direction: column; gap: 16px; }
+  .proj-card { background: #1e293b; border-radius: 12px; padding: 20px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; }
+  .proj-num { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; flex-shrink: 0; }
+  .pn1 { background: #1d3461; color: #7dd3fc; }
+  .pn2 { background: #2e1065; color: #c4b5fd; }
+  .pn3 { background: #064e3b; color: #6ee7b7; }
+  .pn4 { background: #451a03; color: #fcd34d; }
+  .proj-title { font-size: 1rem; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
+  .proj-week { font-size: 0.75rem; color: #64748b; margin-bottom: 8px; }
+  .proj-desc { font-size: 0.83rem; color: #94a3b8; line-height: 1.6; margin-bottom: 10px; }
+  .proj-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .skill-tag { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 3px 9px; font-size: 0.73rem; color: #cbd5e1; }
+  .proj-steps { margin-top: 10px; }
+  .proj-steps h5 { font-size: 0.78rem; font-weight: 700; color: #7dd3fc; margin-bottom: 6px; text-transform: uppercase; }
+  .proj-steps ol { padding-left: 16px; }
+  .proj-steps li { font-size: 0.8rem; color: #94a3b8; margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<h1>🚀 30-Day Data Science Roadmap</h1>
+<p class="subtitle">From Generative AI & Python Pro → Job-Ready Data Scientist · 1 Hour/Day</p>
+
+<div class="badges">
+  <span class="badge">⏱ 1 hr/day</span>
+  <span class="badge">🎥 Videos + Projects</span>
+  <span class="badge">🐍 Python leverage</span>
+  <span class="badge">📊 4 portfolio projects</span>
+  <span class="badge">🎯 Beginner-friendly</span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('overview', this)">📋 Overview</button>
+  <button class="tab" onclick="show('daily', this)">📅 Daily Plan</button>
+  <button class="tab" onclick="show('resources', this)">📚 Resources</button>
+  <button class="tab" onclick="show('projects', this)">🛠 Projects</button>
+</div>
+
+<!-- OVERVIEW -->
+<div id="overview" class="panel active">
+  <div class="week-grid">
+    <div class="week-card w1">
+      <div class="week-label">Week 1 · Days 1–7</div>
+      <div class="week-title">Data Foundations & EDA</div>
+      <div class="week-milestone">
+        <div class="milestone-item">Master NumPy & Pandas for data wrangling</div>
+        <div class="milestone-item">Load, clean & explore a real dataset</div>
+        <div class="milestone-item">Build your first EDA notebook</div>
+        <div class="milestone-item">Understand data types, nulls, outliers</div>
+      </div>
+    </div>
+    <div class="week-card w2">
+      <div class="week-label">Week 2 · Days 8–14</div>
+      <div class="week-title">Statistics & Visualization</div>
+      <div class="week-milestone">
+        <div class="milestone-item">Descriptive & inferential statistics</div>
+        <div class="milestone-item">Matplotlib + Seaborn visualizations</div>
+        <div class="milestone-item">Correlation, distributions, hypothesis tests</div>
+        <div class="milestone-item">Project 1: Customer Churn EDA complete</div>
+      </div>
+    </div>
+    <div class="week-card w3">
+      <div class="week-label">Week 3 · Days 15–22</div>
+      <div class="week-title">Machine Learning Core</div>
+      <div class="week-milestone">
+        <div class="milestone-item">Scikit-learn workflow: fit, predict, evaluate</div>
+        <div class="milestone-item">Regression, Classification, Clustering</div>
+        <div class="milestone-item">Train/test split, cross-validation</div>
+        <div class="milestone-item">Project 2: House Price Predictor complete</div>
+      </div>
+    </div>
+    <div class="week-card w4">
+      <div class="week-label">Week 4 · Days 23–30</div>
+      <div class="week-title">Advanced ML + Portfolio</div>
+      <div class="week-milestone">
+        <div class="milestone-item">Feature engineering & model tuning</div>
+        <div class="milestone-item">Ensemble methods (Random Forest, XGBoost)</div>
+        <div class="milestone-item">GenAI integration with DS pipelines</div>
+        <div class="milestone-item">Projects 3 & 4 + GitHub portfolio live</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="outcome-box">
+    <div class="outcome-title">🎯 Final Outcome — What You'll Have After 30 Days</div>
+    <div class="outcome-grid">
+      <div class="outcome-item"><strong>4 Portfolio Projects</strong>Real datasets, GitHub-hosted notebooks with results</div>
+      <div class="outcome-item"><strong>Core DS Stack</strong>NumPy, Pandas, Matplotlib, Seaborn, Scikit-learn</div>
+      <div class="outcome-item"><strong>ML Skills</strong>Regression, Classification, Clustering, XGBoost</div>
+      <div class="outcome-item"><strong>GenAI Edge</strong>LLM-assisted EDA & feature engineering (your differentiator)</div>
+      <div class="outcome-item"><strong>SQL Leverage</strong>Advanced analytics queries powering DS pipelines</div>
+      <div class="outcome-item"><strong>Interview-Ready</strong>Able to tackle DS case studies & technical screens</div>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY PLAN -->
+<div id="daily" class="panel">
+
+  <div class="week-section">
+    <div class="week-header">
+      <span class="week-badge wb1">Week 1</span>
+      <h3>Data Foundations & Exploratory Data Analysis</h3>
+    </div>
+    <div class="days-grid">
+      <div class="day-card d1">
+        <div class="day-num">Day 1</div>
+        <div class="day-topic">NumPy Essentials</div>
+        <ul class="day-tasks">
+          <li>Watch: NumPy in 1 hour (freeCodeCamp YT)</li>
+          <li>Practice: arrays, slicing, broadcasting</li>
+          <li>Mini-task: reshape a dataset array</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d1">
+        <div class="day-num">Day 2</div>
+        <div class="day-topic">Pandas Part 1 — DataFrames</div>
+        <ul class="day-tasks">
+          <li>Watch: Pandas Crash Course (Keith Galli YT)</li>
+          <li>Load CSV, inspect, filter, sort</li>
+          <li>Mini-task: answer 5 questions on a dataset</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d1">
+        <div class="day-num">Day 3</div>
+        <div class="day-topic">Pandas Part 2 — Cleaning</div>
+        <ul class="day-tasks">
+          <li>Handle nulls, duplicates, data types</li>
+          <li>groupby, merge, pivot tables</li>
+          <li>Mini-task: clean a messy Kaggle dataset</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d1">
+        <div class="day-num">Day 4</div>
+        <div class="day-topic">SQL for Data Science</div>
+        <ul class="day-tasks">
+          <li>Window functions, CTEs, subqueries</li>
+          <li>Connect SQL output to Pandas df</li>
+          <li>Mini-task: 10 Mode Analytics SQL queries</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d1">
+        <div class="day-num">Day 5</div>
+        <div class="day-topic">Matplotlib Basics</div>
+        <ul class="day-tasks">
+          <li>Line, bar, scatter, histogram plots</li>
+          <li>Customize titles, labels, colors</li>
+          <li>Mini-task: 5 charts from real dataset</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d1">
+        <div class="day-num">Day 6</div>
+        <div class="day-topic">Seaborn & Advanced Viz</div>
+        <ul class="day-tasks">
+          <li>heatmap, pairplot, boxplot, violinplot</li>
+          <li>Combine Seaborn with Pandas</li>
+          <li>Mini-task: visualize correlations in Titanic dataset</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d1">
+        <div class="day-num">Day 7</div>
+        <div class="day-topic">EDA Notebook (Mini-Project)</div>
+        <ul class="day-tasks">
+          <li>Pick any Kaggle dataset</li>
+          <li>Write a structured EDA: shape → clean → visualize → insights</li>
+          <li>Push to GitHub</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="week-section">
+    <div class="week-header">
+      <span class="week-badge wb2">Week 2</span>
+      <h3>Statistics & Deep-Dive Visualization</h3>
+    </div>
+    <div class="days-grid">
+      <div class="day-card d2">
+        <div class="day-num">Day 8</div>
+        <div class="day-topic">Descriptive Statistics</div>
+        <ul class="day-tasks">
+          <li>Mean, median, mode, variance, std dev</li>
+          <li>Skewness, kurtosis — when they matter</li>
+          <li>StatQuest: Statistics Fundamentals (YT)</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d2">
+        <div class="day-num">Day 9</div>
+        <div class="day-topic">Probability & Distributions</div>
+        <ul class="day-tasks">
+          <li>Normal, Binomial, Poisson distributions</li>
+          <li>scipy.stats — fit and visualize</li>
+          <li>Mini-task: identify distribution of 3 columns</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d2">
+        <div class="day-num">Day 10</div>
+        <div class="day-topic">Hypothesis Testing</div>
+        <ul class="day-tasks">
+          <li>p-values, t-tests, chi-square tests</li>
+          <li>A/B testing intuition</li>
+          <li>Mini-task: test if two groups differ significantly</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d2">
+        <div class="day-num">Day 11</div>
+        <div class="day-topic">Correlation & Causation</div>
+        <ul class="day-tasks">
+          <li>Pearson vs Spearman correlation</li>
+          <li>Multicollinearity awareness</li>
+          <li>Mini-task: correlation matrix + heatmap</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d2">
+        <div class="day-num">Day 12</div>
+        <div class="day-topic">Plotly & Interactive Viz</div>
+        <ul class="day-tasks">
+          <li>Plotly Express: interactive charts</li>
+          <li>Dash basics for simple dashboards</li>
+          <li>Mini-task: build interactive scatter plot</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d2">
+        <div class="day-num">Day 13</div>
+        <div class="day-topic">Storytelling with Data</div>
+        <ul class="day-tasks">
+          <li>Chart selection framework</li>
+          <li>Annotating insights directly on charts</li>
+          <li>Mini-task: turn raw analysis into a 5-chart story</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d2">
+        <div class="day-num">Day 14</div>
+        <div class="day-topic">Project 1: Customer Churn EDA</div>
+        <ul class="day-tasks">
+          <li>Full EDA on Telco Churn dataset (Kaggle)</li>
+          <li>Stats + visualizations + business insights</li>
+          <li>Write a markdown summary, push to GitHub</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="week-section">
+    <div class="week-header">
+      <span class="week-badge wb3">Week 3</span>
+      <h3>Machine Learning Core</h3>
+    </div>
+    <div class="days-grid">
+      <div class="day-card d3">
+        <div class="day-num">Day 15</div>
+        <div class="day-topic">ML Fundamentals</div>
+        <ul class="day-tasks">
+          <li>Supervised vs Unsupervised learning</li>
+          <li>Scikit-learn pipeline: fit → predict → score</li>
+          <li>Watch: ML Crash Course — Google (video)</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d3">
+        <div class="day-num">Day 16</div>
+        <div class="day-topic">Linear Regression</div>
+        <ul class="day-tasks">
+          <li>Theory: slope, intercept, loss function</li>
+          <li>Build and evaluate with Scikit-learn</li>
+          <li>Mini-task: predict salary from experience</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d3">
+        <div class="day-num">Day 17</div>
+        <div class="day-topic">Logistic Regression & Metrics</div>
+        <ul class="day-tasks">
+          <li>Binary classification intuition</li>
+          <li>Accuracy, Precision, Recall, F1, AUC-ROC</li>
+          <li>Mini-task: Titanic survival classifier</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d3">
+        <div class="day-num">Day 18</div>
+        <div class="day-topic">Decision Trees & Overfitting</div>
+        <ul class="day-tasks">
+          <li>Decision tree visualization</li>
+          <li>Train vs test error — bias-variance tradeoff</li>
+          <li>Mini-task: tune max_depth to reduce overfit</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d3">
+        <div class="day-num">Day 19</div>
+        <div class="day-topic">Cross-Validation & Pipelines</div>
+        <ul class="day-tasks">
+          <li>K-Fold cross-validation</li>
+          <li>Scikit-learn Pipeline + ColumnTransformer</li>
+          <li>Mini-task: proper CV on last week's model</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d3">
+        <div class="day-num">Day 20</div>
+        <div class="day-topic">Clustering (Unsupervised ML)</div>
+        <ul class="day-tasks">
+          <li>K-Means: intuition + elbow method</li>
+          <li>DBSCAN basics</li>
+          <li>Mini-task: segment customers into clusters</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d3">
+        <div class="day-num">Day 21</div>
+        <div class="day-topic">Feature Engineering</div>
+        <ul class="day-tasks">
+          <li>Encoding: one-hot, label, target encoding</li>
+          <li>Scaling: StandardScaler, MinMaxScaler</li>
+          <li>Feature importance from tree models</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d3">
+        <div class="day-num">Day 22</div>
+        <div class="day-topic">Project 2: House Price Predictor</div>
+        <ul class="day-tasks">
+          <li>Ames Housing dataset (Kaggle)</li>
+          <li>Full pipeline: EDA → feature eng → model → eval</li>
+          <li>Document RMSE, top features, push to GitHub</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="week-section">
+    <div class="week-header">
+      <span class="week-badge wb4">Week 4</span>
+      <h3>Advanced ML, GenAI Integration & Portfolio</h3>
+    </div>
+    <div class="days-grid">
+      <div class="day-card d4">
+        <div class="day-num">Day 23</div>
+        <div class="day-topic">Ensemble Methods</div>
+        <ul class="day-tasks">
+          <li>Random Forest — how bagging works</li>
+          <li>Gradient Boosting intuition</li>
+          <li>Mini-task: compare RF vs single tree</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d4">
+        <div class="day-num">Day 24</div>
+        <div class="day-topic">XGBoost & Hyperparameter Tuning</div>
+        <ul class="day-tasks">
+          <li>XGBoost installation and usage</li>
+          <li>GridSearchCV / RandomizedSearchCV</li>
+          <li>Mini-task: tune XGBoost on Day 22 dataset</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d4">
+        <div class="day-num">Day 25</div>
+        <div class="day-topic">GenAI + Data Science</div>
+        <ul class="day-tasks">
+          <li>Use Claude/ChatGPT to generate EDA code</li>
+          <li>LLM-assisted feature brainstorming</li>
+          <li>Mini-task: automate EDA report with GenAI</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d4">
+        <div class="day-num">Day 26</div>
+        <div class="day-topic">Project 3: Fraud Detection</div>
+        <ul class="day-tasks">
+          <li>Credit card fraud dataset (Kaggle)</li>
+          <li>Imbalanced class handling: SMOTE, class_weight</li>
+          <li>XGBoost model + ROC-AUC evaluation</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d4">
+        <div class="day-num">Day 27</div>
+        <div class="day-topic">ML Model Deployment Basics</div>
+        <ul class="day-tasks">
+          <li>Save model with joblib/pickle</li>
+          <li>Simple FastAPI endpoint for predictions</li>
+          <li>Mini-task: serve your House Price model as API</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d4">
+        <div class="day-num">Day 28</div>
+        <div class="day-topic">Project 4: Healthcare Claims Insights</div>
+        <ul class="day-tasks">
+          <li>CMS public claims or synthetic dataset</li>
+          <li>SQL + Pandas + ML — your domain advantage</li>
+          <li>Denial prediction or cost segmentation model</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d4">
+        <div class="day-num">Day 29</div>
+        <div class="day-topic">GitHub Portfolio Polish</div>
+        <ul class="day-tasks">
+          <li>README for each project: problem → approach → results</li>
+          <li>Add badges, charts, output screenshots</li>
+          <li>Create a pinned portfolio README</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+      <div class="day-card d4">
+        <div class="day-num">Day 30</div>
+        <div class="day-topic">Capstone Review + Next Steps</div>
+        <ul class="day-tasks">
+          <li>Self-assess: can you explain all 4 projects?</li>
+          <li>Review ML concepts you struggled with</li>
+          <li>Map out Month 2: Deep Learning, Time Series, or NLP</li>
+        </ul>
+        <span class="time-tag">⏱ 60 min</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RESOURCES -->
+<div id="resources" class="panel">
+  <div class="res-grid">
+    <div class="res-card">
+      <div class="res-category cat-video">🎥 Video Courses</div>
+      <div class="res-item">
+        <div class="res-name">freeCodeCamp — Data Science with Python</div>
+        <div class="res-desc">Full NumPy + Pandas + ML tutorial in one shot</div>
+        <span class="res-tag tag-free">Free · YouTube</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">StatQuest with Josh Starmer</div>
+        <div class="res-desc">Best visual explanations of statistics & ML algorithms</div>
+        <span class="res-tag tag-free">Free · YouTube</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">Keith Galli — Pandas Tutorial</div>
+        <div class="res-desc">Practical, project-based Pandas from scratch</div>
+        <span class="res-tag tag-free">Free · YouTube</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">Kaggle Learn Micro-courses</div>
+        <div class="res-desc">Pandas, ML, Feature Eng — bite-sized + interactive</div>
+        <span class="res-tag tag-free">Free · Kaggle</span>
+      </div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-category cat-practice">🟢 Practice Platforms</div>
+      <div class="res-item">
+        <div class="res-name">Kaggle Competitions & Datasets</div>
+        <div class="res-desc">Real datasets for all 4 projects; community notebooks to learn from</div>
+        <span class="res-tag tag-free">Free</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">Mode Analytics SQL Tutorial</div>
+        <div class="res-desc">DS-focused SQL with window functions and analytics</div>
+        <span class="res-tag tag-free">Free</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">Google Colab</div>
+        <div class="res-desc">Free GPU notebooks — run all projects without local setup</div>
+        <span class="res-tag tag-free">Free</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">LeetCode — SQL 50 Study Plan</div>
+        <div class="res-desc">Sharpen SQL skills with DS-relevant query challenges</div>
+        <span class="res-tag tag-freemium">Freemium</span>
+      </div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-category cat-reference">📘 Reference & Reading</div>
+      <div class="res-item">
+        <div class="res-name">Scikit-learn Documentation</div>
+        <div class="res-desc">Best ML reference — read the User Guide, not just API docs</div>
+        <span class="res-tag tag-free">Free</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">Towards Data Science (Medium)</div>
+        <div class="res-desc">Practical articles on EDA, ML, and DS career tips</div>
+        <span class="res-tag tag-freemium">Freemium</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">Hands-On ML with Scikit-Learn (Aurélien Géron)</div>
+        <div class="res-desc">The go-to book for practical ML — read chapters 1–6</div>
+        <span class="res-tag tag-paid">Paid (optional)</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">Python Data Science Handbook (Jake VanderPlas)</div>
+        <div class="res-desc">Free online — best NumPy/Pandas/Matplotlib reference</div>
+        <span class="res-tag tag-free">Free online</span>
+      </div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-category cat-project">🟡 Your Advantage — GenAI Tools</div>
+      <div class="res-item">
+        <div class="res-name">Claude / ChatGPT</div>
+        <div class="res-desc">Generate EDA code, explain model outputs, debug errors in seconds</div>
+        <span class="res-tag tag-freemium">Freemium</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">GitHub Copilot</div>
+        <div class="res-desc">Autocomplete data wrangling and ML pipeline code</div>
+        <span class="res-tag tag-paid">Paid (free for students)</span>
+      </div>
+      <div class="res-item">
+        <div class="res-name">ydata-profiling (pandas-profiling)</div>
+        <div class="res-desc">Auto-generate EDA reports in one line of code</div>
+        <span class="res-tag tag-free">Free · pip install</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div id="projects" class="panel">
+  <div class="proj-list">
+
+    <div class="proj-card">
+      <div class="proj-num pn1">1</div>
+      <div>
+        <div class="proj-title">Customer Churn EDA & Insights</div>
+        <div class="proj-week">Week 2 · Day 14 · Exploratory Data Analysis</div>
+        <div class="proj-desc">Analyze the Telco Customer Churn dataset to uncover what factors drive customers to leave. Produce a stakeholder-ready notebook with charts and business recommendations — like the EDA you'd do for a payer client.</div>
+        <div class="proj-skills">
+          <span class="skill-tag">Pandas</span><span class="skill-tag">Seaborn</span>
+          <span class="skill-tag">Matplotlib</span><span class="skill-tag">Statistics</span>
+          <span class="skill-tag">Storytelling</span>
+        </div>
+        <div class="proj-steps">
+          <h5>Steps</h5>
+          <ol>
+            <li>Load & clean Telco Churn dataset from Kaggle</li>
+            <li>Univariate analysis: distributions of all features</li>
+            <li>Bivariate analysis: churn vs each feature</li>
+            <li>Correlation heatmap + key findings summary</li>
+            <li>3 actionable business recommendations in markdown</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num pn2">2</div>
+      <div>
+        <div class="proj-title">House Price Predictor</div>
+        <div class="proj-week">Week 3 · Day 22 · Regression ML</div>
+        <div class="proj-desc">Build an end-to-end regression pipeline on the Ames Housing dataset. Covers the full ML workflow from raw data to a tuned model with documented performance metrics.</div>
+        <div class="proj-skills">
+          <span class="skill-tag">Scikit-learn</span><span class="skill-tag">Feature Engineering</span>
+          <span class="skill-tag">Linear Regression</span><span class="skill-tag">Pipeline</span>
+          <span class="skill-tag">Cross-Validation</span>
+        </div>
+        <div class="proj-steps">
+          <h5>Steps</h5>
+          <ol>
+            <li>EDA + handle missing values strategically</li>
+            <li>Feature engineering: new features from existing columns</li>
+            <li>Build Scikit-learn Pipeline with preprocessor + model</li>
+            <li>Compare Linear Regression vs Ridge vs Lasso</li>
+            <li>Report RMSE, R², top feature importances</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num pn3">3</div>
+      <div>
+        <div class="proj-title">Credit Card Fraud Detection</div>
+        <div class="proj-week">Week 4 · Day 26 · Classification + Class Imbalance</div>
+        <div class="proj-desc">Tackle one of the most common real-world DS challenges — extreme class imbalance. Build a fraud classifier with XGBoost and handle the 99:1 class ratio correctly, a critical skill for healthcare payment integrity.</div>
+        <div class="proj-skills">
+          <span class="skill-tag">XGBoost</span><span class="skill-tag">SMOTE</span>
+          <span class="skill-tag">AUC-ROC</span><span class="skill-tag">Precision-Recall</span>
+          <span class="skill-tag">Imbalanced-learn</span>
+        </div>
+        <div class="proj-steps">
+          <h5>Steps</h5>
+          <ol>
+            <li>Load Kaggle Credit Card Fraud dataset</li>
+            <li>Show why accuracy is misleading here</li>
+            <li>Apply SMOTE oversampling on training set only</li>
+            <li>Train XGBoost with class_weight parameter</li>
+            <li>Evaluate with Precision-Recall curve + F1 score</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num pn4">4</div>
+      <div>
+        <div class="proj-title">Healthcare Claims Analytics (Domain Capstone)</div>
+        <div class="proj-week">Week 4 · Day 28 · Full Stack DS + Your Domain</div>
+        <div class="proj-desc">Your differentiator project. Use your healthcare AI background to build something no generic DS bootcamp grad has — a claims analytics model using SQL + Pandas + ML. Denial prediction or cost segmentation both work great here.</div>
+        <div class="proj-skills">
+          <span class="skill-tag">SQL</span><span class="skill-tag">Pandas</span>
+          <span class="skill-tag">XGBoost</span><span class="skill-tag">Domain Knowledge</span>
+          <span class="skill-tag">GenAI-assisted</span>
+        </div>
+        <div class="proj-steps">
+          <h5>Steps</h5>
+          <ol>
+            <li>Use CMS public data or generate synthetic claims data</li>
+            <li>SQL-level aggregation (denial rates, cost by procedure)</li>
+            <li>Feature engineer from claims fields (ICD codes, payer type)</li>
+            <li>Train classifier: predict denial vs approval</li>
+            <li>Write executive summary tying to real payer business value</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function show(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
