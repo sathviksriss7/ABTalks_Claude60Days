@@ -27,6 +27,7 @@ PART 2 — FINAL RESUME
 Generate the optimized resume and provide it in a PDF-ready one-page A4 format.
 
 Formatting:
+
 - Single column
 - No tables, columns, icons, images, or text boxes
 - Name large and bold
@@ -40,6 +41,7 @@ Formatting:
 - Certifications (if present)
 
 Rules:
+
 - Use ONLY information from the resume.
 - Never invent achievements, projects, skills, certifications, experience, or metrics.
 - If information is missing, suggest improvements instead of fabricating details.
@@ -50,6 +52,7 @@ Rules:
 - Optimize for ATS and recruiter readability.
 
 If no resume is uploaded, ask for:
+
 - Name
 - Contact Information
 - Education
