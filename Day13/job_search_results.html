@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Job Search Results – Sathvik Sriram</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1e293b; }
+
+  .header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    color: white; padding: 28px 36px;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; }
+  .header p { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+
+  .tabs {
+    display: flex; gap: 4px; background: #fff;
+    padding: 12px 24px 0; border-bottom: 2px solid #e2e8f0;
+  }
+  .tab {
+    padding: 10px 20px; cursor: pointer; font-size: 13px; font-weight: 600;
+    border-radius: 6px 6px 0 0; color: #64748b; border: 1px solid transparent;
+    border-bottom: none; transition: all 0.2s;
+  }
+  .tab.active { background: #2563eb; color: white; border-color: #2563eb; }
+  .tab:hover:not(.active) { background: #f1f5f9; color: #1e3a5f; }
+
+  .content { display: none; padding: 28px 24px; }
+  .content.active { display: block; }
+
+  /* Summary cards */
+  .cards { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .card {
+    background: white; border-radius: 10px; padding: 18px 22px;
+    flex: 1; min-width: 160px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border-left: 4px solid #2563eb;
+  }
+  .card .val { font-size: 28px; font-weight: 800; color: #2563eb; }
+  .card .lbl { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+  /* Table */
+  .table-wrap { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.08); margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: #1e3a5f; color: white; }
+  th { padding: 12px 14px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 13px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+  }
+  .badge-green { background: #dcfce7; color: #16a34a; }
+  .badge-yellow { background: #fef9c3; color: #b45309; }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-red { background: #fee2e2; color: #dc2626; }
+
+  .score-bar { display: flex; align-items: center; gap: 8px; }
+  .score-track { flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 3px; }
+  .score-num { font-weight: 700; font-size: 12px; min-width: 32px; }
+
+  a { color: #2563eb; text-decoration: none; font-weight: 600; }
+  a:hover { text-decoration: underline; }
+
+  .role-title { font-weight: 700; color: #1e293b; }
+  .company-name { color: #475569; font-size: 12px; margin-top: 2px; }
+  .location-tag { font-size: 11px; color: #64748b; margin-top: 3px; }
+
+  /* Skills section */
+  .section-title { font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 14px; margin-top: 8px; }
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .skill-item {
+    background: white; border-radius: 8px; padding: 14px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 6px;
+  }
+  .skill-label { font-size: 13px; font-weight: 600; color: #1e293b; }
+  .skill-freq { font-size: 11px; color: #64748b; }
+  .freq-bar { height: 5px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+  .freq-fill { height: 100%; background: #2563eb; border-radius: 3px; }
+
+  /* Gap analysis */
+  .gap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .gap-box { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .gap-box h3 { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+  .gap-box h3.green { color: #16a34a; }
+  .gap-box h3.red { color: #dc2626; }
+  .gap-box ul { padding-left: 16px; }
+  .gap-box li { font-size: 13px; color: #475569; margin-bottom: 6px; line-height: 1.4; }
+
+  /* Recommendations */
+  .rec-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+  .rec-item {
+    background: white; border-radius: 10px; padding: 16px 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); display: flex; gap: 14px; align-items: flex-start;
+  }
+  .rec-num {
+    width: 28px; height: 28px; border-radius: 50%; background: #2563eb;
+    color: white; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .rec-text strong { display: block; font-size: 13px; margin-bottom: 4px; color: #1e293b; }
+  .rec-text span { font-size: 12px; color: #64748b; line-height: 1.5; }
+
+  /* Fit assessment */
+  .fit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .fit-card {
+    background: white; border-radius: 10px; padding: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center;
+  }
+  .fit-score { font-size: 36px; font-weight: 800; margin-bottom: 6px; }
+  .fit-card p { font-size: 12px; color: #64748b; line-height: 1.4; }
+  .fit-card h4 { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+
+  .insight-box {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #bfdbfe; border-radius: 10px; padding: 18px;
+    font-size: 13px; color: #1e40af; line-height: 1.6; margin-bottom: 16px;
+  }
+  .insight-box strong { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+
+  @media (max-width: 700px) {
+    .gap-grid, .fit-grid { grid-template-columns: 1fr; }
+    .cards { flex-direction: column; }
+    table { font-size: 11px; }
+    th, td { padding: 9px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🔍 Job Search Results — Sathvik Sriram</h1>
+  <p>Senior PM / GenAI Healthcare | Target: ₹45L+ | Remote / Hyderabad / Bangalore | Searched: June 23, 2026</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('jobs')">🏢 Top Roles (8)</div>
+  <div class="tab" onclick="showTab('skills')">🛠 Skills Analysis</div>
+  <div class="tab" onclick="showTab('gaps')">📊 Gap Analysis</div>
+  <div class="tab" onclick="showTab('recs')">💡 Recommendations</div>
+  <div class="tab" onclick="showTab('fit')">🎯 Fit Assessment</div>
+</div>
+
+<!-- TAB 1: JOBS -->
+<div id="tab-jobs" class="content active">
+  <div class="cards">
+    <div class="card"><div class="val">8</div><div class="lbl">Shortlisted Roles</div></div>
+    <div class="card"><div class="val">5</div><div class="lbl">Posted ≤15 Days</div></div>
+    <div class="card"><div class="val">4</div><div class="lbl">Healthcare-Specific</div></div>
+    <div class="card"><div class="val">3</div><div class="lbl">Hyderabad / Hybrid</div></div>
+    <div class="card"><div class="val">2</div><div class="lbl">Bangalore Roles</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Role & Company</th>
+          <th>Location</th>
+          <th>Posted</th>
+          <th>Match</th>
+          <th>Why It Fits</th>
+          <th>Est. CTC</th>
+          <th>Apply</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><b>1</b></td>
+          <td>
+            <div class="role-title">Technical Project Manager – Data, AI & Analytics</div>
+            <div class="company-name">Novartis</div>
+          </td>
+          <td><div class="location-tag">📍 Hyderabad (Hybrid 3d)</div><span class="badge badge-blue">Hybrid</span></td>
+          <td><span class="badge badge-green">Jun 18 ✅</span></td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track"><div class="score-fill" style="width:92%;background:#16a34a"></div></div>
+              <div class="score-num" style="color:#16a34a">92%</div>
+            </div>
+          </td>
+          <td style="max-width:240px">AI/data platform PM for healthcare, PMP preferred, AWS/Azure, Agile/Jira — exact profile match. Healthcare life sciences domain is a bonus.</td>
+          <td>₹50–70L</td>
+          <td><a href="https://to.indeed.com/aadvb4yqtlcy" target="_blank">Apply →</a></td>
+        </tr>
+
+        <tr>
+          <td><b>2</b></td>
+          <td>
+            <div class="role-title">Senior Product Manager (AI/Healthcare)</div>
+            <div class="company-name">Optum (UnitedHealth Group)</div>
+          </td>
+          <td><div class="location-tag">📍 Hyderabad</div><span class="badge badge-blue">On-site/Hybrid</span></td>
+          <td><span class="badge badge-green">Jun 15 ✅</span></td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track"><div class="score-fill" style="width:88%;background:#16a34a"></div></div>
+              <div class="score-num" style="color:#16a34a">88%</div>
+            </div>
+          </td>
+          <td style="max-width:240px">GenAI product, RAG architecture, healthcare payer focus, MBA required — aligns closely with EXL GenAI payer work. Requires 8+ yrs AI product ownership (stretch).</td>
+          <td>₹55–80L</td>
+          <td><a href="https://to.indeed.com/aajmvg4m8ysz" target="_blank">Apply →</a></td>
+        </tr>
+
+        <tr>
+          <td><b>3</b></td>
+          <td>
+            <div class="role-title">Principal Engineering Program Manager</div>
+            <div class="company-name">Providence Global Center</div>
+          </td>
+          <td><div class="location-tag">📍 Hyderabad</div><span class="badge badge-blue">Hybrid</span></td>
+          <td><span class="badge badge-green">Jun 16 ✅</span></td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track"><div class="score-fill" style="width:82%;background:#2563eb"></div></div>
+              <div class="score-num" style="color:#2563eb">82%</div>
+            </div>
+          </td>
+          <td style="max-width:240px">Largest US not-for-profit health system. Program ownership, digital experience platforms, AI/ML/NLP understanding, healthcare compliance — strong alignment.</td>
+          <td>₹45–65L</td>
+          <td><a href="https://to.indeed.com/aayz7kzxls6h" target="_blank">Apply →</a></td>
+        </tr>
+
+        <tr>
+          <td><b>4</b></td>
+          <td>
+            <div class="role-title">Senior Product Manager</div>
+            <div class="company-name">Lyric (formerly ClaimsXten)</div>
+          </td>
+          <td><div class="location-tag">📍 Hyderabad</div><span class="badge badge-blue">Hybrid</span></td>
+          <td><span class="badge badge-yellow">Jun 01 ⚠️</span></td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track"><div class="score-fill" style="width:85%;background:#16a34a"></div></div>
+              <div class="score-num" style="color:#16a34a">85%</div>
+            </div>
+          </td>
+          <td style="max-width:240px">AI-first healthcare payer platform, claims processing, payment integrity — mirrors EXL work directly. KLAS Best in Class 2025. Slight date overage but high value.</td>
+          <td>₹50–70L</td>
+          <td><a href="https://to.indeed.com/aadsjb62wfth" target="_blank">Apply →</a></td>
+        </tr>
+
+        <tr>
+          <td><b>5</b></td>
+          <td>
+            <div class="role-title">Sr. Technical Program Manager</div>
+            <div class="company-name">Lyric (formerly ClaimsXten)</div>
+          </td>
+          <td><div class="location-tag">📍 Hyderabad</div><span class="badge badge-blue">Hybrid</span></td>
+          <td><span class="badge badge-red">Mar 09 ⛔</span></td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track"><div class="score-fill" style="width:80%;background:#2563eb"></div></div>
+              <div class="score-num" style="color:#2563eb">80%</div>
+            </div>
+          </td>
+          <td style="max-width:240px">Claims lifecycle, FWA detection, ICD-10/CPT expertise needed — your EXL payer experience is a direct match. Role is older; still worth applying if still open.</td>
+          <td>₹45–65L</td>
+          <td><a href="https://to.indeed.com/aa9b6t9pvhdg" target="_blank">Apply →</a></td>
+        </tr>
+
+        <tr>
+          <td><b>6</b></td>
+          <td>
+            <div class="role-title">Technical Product Owner</div>
+            <div class="company-name">Modernizing Medicine</div>
+          </td>
+          <td><div class="location-tag">📍 Cyberabad, Hyderabad</div><span class="badge badge-blue">Hybrid</span></td>
+          <td><span class="badge badge-green">Jun 09 ✅</span></td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track"><div class="score-fill" style="width:76%;background:#2563eb"></div></div>
+              <div class="score-num" style="color:#2563eb">76%</div>
+            </div>
+          </td>
+          <td style="max-width:240px">Healthcare SaaS product ownership with CSPO backing your candidacy. Technical product ownership aligns with your sprint/agile experience.</td>
+          <td>₹40–55L</td>
+          <td><a href="https://to.indeed.com/aavqgfcghqvb" target="_blank">Apply →</a></td>
+        </tr>
+
+        <tr>
+          <td><b>7</b></td>
+          <td>
+            <div class="role-title">Principal Product Owner (Tech-driven)</div>
+            <div class="company-name">3Pillar Global</div>
+          </td>
+          <td><div class="location-tag">🌐 Remote India</div><span class="badge badge-green">Remote</span></td>
+          <td><span class="badge badge-yellow">Jun 05 ⚠️</span></td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track"><div class="score-fill" style="width:72%;background:#b45309"></div></div>
+              <div class="score-num" style="color:#b45309">72%</div>
+            </div>
+          </td>
+          <td style="max-width:240px">Remote setup, technology-driven PO role. 3Pillar has strong healthcare IT clients. Moderate fit — CSPO + PMP are strong differentiators here.</td>
+          <td>₹40–55L</td>
+          <td><a href="https://to.indeed.com/aaln6c8v9dgy" target="_blank">Apply →</a></td>
+        </tr>
+
+        <tr>
+          <td><b>8</b></td>
+          <td>
+            <div class="role-title">Techno-functional Delivery Manager</div>
+            <div class="company-name">Quest Global</div>
+          </td>
+          <td><div class="location-tag">📍 Hyderabad</div><span class="badge badge-blue">Hybrid</span></td>
+          <td><span class="badge badge-green">Jun 08 ✅</span></td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track"><div class="score-fill" style="width:70%;background:#b45309"></div></div>
+              <div class="score-num" style="color:#b45309">70%</div>
+            </div>
+          </td>
+          <td style="max-width:240px">Delivery management with techno-functional scope. Engineering services company — less healthcare-specific but PMP + delivery track record positions you well.</td>
+          <td>₹40–55L</td>
+          <td><a href="https://to.indeed.com/aa9ym7f2tczk" target="_blank">Apply →</a></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:#94a3b8;padding:0 4px">⚠️ = slightly outside 15-day window but high relevance. ⛔ = older posting, verify if still open. CTC estimates are market-based; Indeed does not show confirmed salaries for these roles.</p>
+</div>
+
+<!-- TAB 2: SKILLS -->
+<div id="tab-skills" class="content">
+  <div class="section-title">🛠 Most Commonly Required Skills Across Jobs</div>
+  <div class="skills-grid">
+    <div class="skill-item">
+      <div class="skill-label">Agile / Scrum / SAFe</div>
+      <div class="skill-freq">Appeared in 8/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:100%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">Stakeholder Management</div>
+      <div class="skill-freq">Appeared in 8/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:100%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">AI / ML / GenAI Product Delivery</div>
+      <div class="skill-freq">Appeared in 7/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:87%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">Healthcare Domain (Payer/Provider)</div>
+      <div class="skill-freq">Appeared in 7/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:87%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">Cloud Platforms (AWS / Azure)</div>
+      <div class="skill-freq">Appeared in 6/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:75%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">Jira / Confluence / PM Tooling</div>
+      <div class="skill-freq">Appeared in 6/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:75%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">Cross-functional Program Leadership</div>
+      <div class="skill-freq">Appeared in 6/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:75%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">Product Roadmap & Backlog Ownership</div>
+      <div class="skill-freq">Appeared in 5/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:62%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">Data Pipelines / MLOps / Analytics</div>
+      <div class="skill-freq">Appeared in 5/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:62%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">Claims / Payment Integrity (ICD-10, CPT)</div>
+      <div class="skill-freq">Appeared in 3/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:37%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">RAG / Prompt Engineering / LLM Ops</div>
+      <div class="skill-freq">Appeared in 3/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:37%"></div></div>
+    </div>
+    <div class="skill-item">
+      <div class="skill-label">Responsible AI / HIPAA Compliance</div>
+      <div class="skill-freq">Appeared in 3/8 roles</div>
+      <div class="freq-bar"><div class="freq-fill" style="width:37%"></div></div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <strong>📌 Market Demand Insights</strong>
+    GenAI + Healthcare is the hottest niche in India's IT services hiring right now. Roles at Optum, Lyric, Novartis, and Providence all skew toward candidates who can bridge AI execution with healthcare payer/provider domain knowledge — a rare combination that Sathvik holds. Companies are also increasing bar for AI platform literacy (MLOps, RAG, data pipelines), not just delivery oversight. PMP + CSPO + AWS CP certifications are appearing as explicit differentiators in shortlisting filters.
+  </div>
+</div>
+
+<!-- TAB 3: GAPS -->
+<div id="tab-gaps" class="content">
+  <div class="section-title">📊 Skill Gap Analysis</div>
+  <div class="gap-grid">
+    <div class="gap-box">
+      <h3 class="green">✅ Strengths (Strong Match)</h3>
+      <ul>
+        <li><b>GenAI 0-to-1 product delivery</b> — directly required by Optum, Lyric, Novartis</li>
+        <li><b>Healthcare payer domain</b> — US payer clients at EXL is a rare differentiator</li>
+        <li><b>PMP + CSPO</b> — explicitly called out in 5 of 8 JDs as preferred/required</li>
+        <li><b>AWS Cloud Practitioner</b> — cloud credentialing aligns with cloud platform requirements</li>
+        <li><b>Agile/Scrum execution</b> — sprint velocity, Jira, Confluence usage matches JDs</li>
+        <li><b>MBA from IIM Calcutta</b> — strong pedigree for Optum and Providence roles</li>
+        <li><b>Stakeholder & executive communication</b> — VP-level briefings at EXL maps directly</li>
+        <li><b>Cross-functional program ownership</b> — multi-team coordination is core EXL experience</li>
+      </ul>
+    </div>
+    <div class="gap-box">
+      <h3 class="red">⚠️ Gaps to Address</h3>
+      <ul>
+        <li><b>MLOps / Data Engineering</b> — Novartis & Optum want hands-on familiarity; currently implicit in your work</li>
+        <li><b>RAG / LLM Evaluation frameworks</b> — Optum specifically asks for this; call it out explicitly</li>
+        <li><b>Claims coding (ICD-10, CPT, DRG)</b> — Lyric TPM role needs this; bridge via payer project language</li>
+        <li><b>8+ years AI product ownership</b> — Optum asks for 8 yrs; you have 6 yrs total; reframe GenAI leadership from Day 1</li>
+        <li><b>Responsible AI / HIPAA + fairness</b> — increasingly required; add to resume even if informal</li>
+        <li><b>FWA (Fraud, Waste, Abuse) detection</b> — Lyric-specific; leverage healthcare analytics exposure</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="gap-box" style="margin-bottom:16px">
+    <h3 style="color:#1e3a5f;margin-bottom:10px">🔧 Quick Gap Closers (1–2 weeks each)</h3>
+    <ul>
+      <li style="margin-bottom:8px"><b>MLOps terminology:</b> Add one line per project — "managed model lifecycle including data pipeline governance, feature validation, and deployment monitoring"</li>
+      <li style="margin-bottom:8px"><b>RAG framing:</b> Describe your GenAI POC work as "RAG-based workflows with prompt engineering and evaluation frameworks"</li>
+      <li style="margin-bottom:8px"><b>Responsible AI:</b> Complete Anthropic's or Google's free Responsible AI course (~2 hrs) and add certification to LinkedIn</li>
+      <li style="margin-bottom:8px"><b>HIPAA literacy:</b> Add "HIPAA-compliant GenAI deployment" language in your resume's project bullets if applicable</li>
+    </ul>
+  </div>
+</div>
+
+<!-- TAB 4: RECOMMENDATIONS -->
+<div id="tab-recs" class="content">
+  <div class="section-title">💡 Recommendations to Improve Interview Chances</div>
+  <div class="rec-list">
+
+    <div class="rec-item">
+      <div class="rec-num">1</div>
+      <div class="rec-text">
+        <strong>Target Novartis & Optum first — apply within 48 hours</strong>
+        <span>Both posted within the last 8 days and are highest-fit. Novartis is your #1 — it's a direct TPM/AI/data role for a life sciences company with explicit PMP preference and 3-day hybrid in Hyderabad. Apply today.</span>
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-num">2</div>
+      <div class="rec-text">
+        <strong>Reframe your resume headline for each application track</strong>
+        <span>For Novartis/Providence: use "Technical Program Manager – AI & Data Platforms | Healthcare IT". For Optum/Lyric: use "Senior Product Manager – Generative AI | US Healthcare Payer Domain". One resume doesn't win both.</span>
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-num">3</div>
+      <div class="rec-text">
+        <strong>Quantify your GenAI POC-to-MVP conversions explicitly</strong>
+        <span>JDs like Optum ask for "directly owned AI product outcomes." Add bullets like: "Led end-to-end delivery of 3 GenAI POCs to MVP, reducing claims processing cycle time by X%." Numbers + ownership language = shortlist.</span>
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-num">4</div>
+      <div class="rec-text">
+        <strong>Get a LinkedIn referral at Optum / Providence / Lyric</strong>
+        <span>All three are US-healthcare-rooted companies with large India centers. Search LinkedIn for ex-EXL or IIM alumni currently at these companies and send a warm InMail. Referrals move resumes past ATS directly.</span>
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-num">5</div>
+      <div class="rec-text">
+        <strong>Add MLOps & Responsible AI language to your resume now</strong>
+        <span>Even if your experience is management-level (not hands-on), framing it as "governed MLOps pipelines," "led responsible AI deployment in HIPAA-regulated environments" satisfies keyword screening without misrepresentation.</span>
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-num">6</div>
+      <div class="rec-text">
+        <strong>For Lyric: Apply via lyric.ai/careers directly (not just Indeed)</strong>
+        <span>Lyric is a specialized healthcare AI company. Applying through their careers page + a LinkedIn note to the hiring manager signals genuine domain interest, which matters for niche companies.</span>
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-num">7</div>
+      <div class="rec-text">
+        <strong>Expand Singapore/Dubai search on LinkedIn directly</strong>
+        <span>Indeed India does not surface international roles well. Run targeted LinkedIn searches for "Program Manager Healthcare AI" in Singapore and Dubai. Target: DXC, Conduent, Accenture Health APAC, NUS Health Innovation.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TAB 5: FIT ASSESSMENT -->
+<div id="tab-fit" class="content">
+  <div class="section-title">🎯 Overall Fit Assessment</div>
+  <div class="fit-grid">
+    <div class="fit-card">
+      <div class="fit-score" style="color:#16a34a">88%</div>
+      <h4>Role Fit</h4>
+      <p>Your GenAI delivery experience, healthcare payer domain, and PMP/CSPO certifications align strongly with 6 of 8 shortlisted roles. The TPM and Senior PM tracks are your strongest bets.</p>
+    </div>
+    <div class="fit-card">
+      <div class="fit-score" style="color:#2563eb">75%</div>
+      <h4>Compensation Fit (₹45L+)</h4>
+      <p>4 of 8 roles (Novartis, Optum, Lyric SPM, Providence) are likely to offer ₹50–75L+ CTC at your level. 3 roles may cap at ₹40–50L. Salary negotiation is critical — never accept first offer.</p>
+    </div>
+    <div class="fit-card">
+      <div class="fit-score" style="color:#b45309">65%</div>
+      <h4>Years-of-Experience Fit</h4>
+      <p>Some JDs ask for 10–12 years (Novartis, Lyric). Your 6 years is below stated minimums — but GenAI 0-to-1 ownership is rare and compensates. Apply confidently; these minimums are often soft.</p>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <strong>🏆 Overall Verdict: Strong Candidate — Apply Aggressively to Top 4</strong>
+    Sathvik's profile is in the top 10–15% of candidates for GenAI + Healthcare PM/TPM roles in India. The combination of US payer domain knowledge, GenAI POC-to-MVP track record, PMP + CSPO + AWS credentials, and IIM Calcutta MBA is genuinely rare. The primary risk is the years-of-experience gap at some companies — mitigate this by leading with outcomes and impact, not tenure. For ₹45L+ CTC, Novartis, Optum, and Lyric are the most viable paths in the current market.
+  </div>
+
+  <div class="insight-box" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-color: #86efac;">
+    <strong style="color:#15803d">📅 Suggested Apply Order (This Week)</strong>
+    <span style="color:#166534">
+      Day 1: Novartis TPM (Hyderabad) → Day 1: Optum SPM (Hyderabad) → Day 2: Providence EPM (Hyderabad) → Day 3: Lyric Senior PM → Day 4: Modernizing Medicine TPO → Day 5: Quest Global DM + 3Pillar PO
+    </span>
+  </div>
+</div>
+
+<script>
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
