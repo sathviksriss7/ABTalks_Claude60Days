@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E85 Fuel Dashboard · Suzuki Vitara</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0a0f1e;
+    --navy2: #0d1428;
+    --navy3: #111b35;
+    --glass: rgba(255,255,255,0.04);
+    --glass-border: rgba(255,255,255,0.08);
+    --amber: #f5a623;
+    --amber-dim: rgba(245,166,35,0.18);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59,130,246,0.18);
+    --grey: #94a3b8;
+    --grey-dim: rgba(148,163,184,0.15);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.15);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.15);
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --red: #ef4444;
+  }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d1428 0%, #111b35 50%, #0a1628 100%);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 20px 24px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(245,166,35,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-title {
+    font-size: clamp(16px, 2.5vw, 22px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+  }
+  .header-title span.fuel-tag {
+    color: var(--blue);
+    background: var(--blue-dim);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+  .header-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .meta-chip {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .meta-chip strong { color: var(--text); }
+
+  /* LAYOUT */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 28px 0 12px;
+    padding-left: 2px;
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .kpi-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 16px;
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.14); }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent, var(--blue));
+  }
+  .kpi-label { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.04em; }
+  .kpi-value { font-size: clamp(20px, 3vw, 26px); font-weight: 700; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .kpi-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); }
+
+  /* CHARTS GRID */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 680px) { .charts-row { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(8px);
+  }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .chart-title span { color: var(--text-muted); font-weight: 400; font-size: 11px; margin-left: 6px; }
+
+  /* SVG TOOLTIP */
+  .tooltip {
+    position: fixed;
+    background: #1e2a45;
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 9999;
+    white-space: nowrap;
+  }
+  .tooltip.show { opacity: 1; }
+
+  /* LINE CHART CARD */
+  .line-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(8px);
+  }
+
+  /* GAUGE CARD */
+  .gauge-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 680px) { .gauge-row { grid-template-columns: 1fr; } }
+
+  .gauge-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .gauge-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 16px; align-self: flex-start; }
+
+  /* GAUGE ARC */
+  .gauge-svg { overflow: visible; }
+  .gauge-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 14; stroke-linecap: round; }
+  .gauge-fill {
+    fill: none;
+    stroke: var(--amber);
+    stroke-width: 14;
+    stroke-linecap: round;
+    stroke-dasharray: 0 251.2;
+    animation: gaugeAnim 1.6s ease-out forwards;
+  }
+  @keyframes gaugeAnim {
+    from { stroke-dasharray: 0 251.2; }
+    to { stroke-dasharray: var(--dash) 251.2; }
+  }
+  .gauge-score { font-size: 36px; font-weight: 700; fill: #fff; text-anchor: middle; dominant-baseline: middle; }
+  .gauge-label { font-size: 11px; fill: var(--text-muted); text-anchor: middle; }
+  .gauge-verdict {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.5;
+  }
+  .gauge-verdict strong { color: var(--amber); }
+
+  /* PARADOX CARD */
+  .paradox-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(8px);
+  }
+  .paradox-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .paradox-row:last-child { border-bottom: none; }
+  .paradox-label { font-size: 12px; color: var(--text-muted); }
+  .paradox-val { font-size: 18px; font-weight: 700; }
+  .val-green { color: var(--green); }
+  .val-red { color: var(--red); }
+  .val-amber { color: var(--amber); }
+
+  /* FUEL CARDS */
+  .fuel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .fuel-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 18px;
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .fuel-card:hover { transform: translateY(-2px); }
+  .fuel-card.active {
+    border-color: var(--f-color, var(--blue));
+    box-shadow: 0 0 20px rgba(59,130,246,0.2);
+  }
+  .fuel-card.active .fuel-card-stripe {
+    background: var(--f-color, var(--blue));
+    opacity: 0.12;
+  }
+  .fuel-card-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .fuel-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--f-color);
+    margin-right: 6px;
+  }
+  .fuel-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .fuel-stat { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .fuel-stat strong { color: var(--text); }
+  .pros-cons { margin-top: 12px; }
+  .pros-cons-title { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .pro, .con { font-size: 11px; margin-bottom: 3px; line-height: 1.4; }
+  .pro { color: #86efac; }
+  .con { color: #fca5a5; }
+  .best-for { font-size: 10px; color: var(--amber); margin-top: 8px; }
+
+  /* AGE BUCKET TABLE */
+  .age-table-wrap { overflow-x: auto; }
+  table.age-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.age-table th {
+    background: rgba(255,255,255,0.04);
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  table.age-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: var(--text-dim);
+  }
+  table.age-table tr.car-age td { color: var(--amber); font-weight: 600; }
+  table.age-table td .dot { display: inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  @media (max-width: 375px) {
+    .header-title { font-size: 14px; }
+    .kpi-value { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      🚗 Suzuki Vitara &nbsp;·&nbsp;
+      <span class="fuel-tag">Petrol (E20)</span>
+      &nbsp;·&nbsp; Age: 3y &nbsp;·&nbsp; 300 km/mo
+    </div>
+    <div class="header-meta">
+      <div class="meta-chip">Usage: <strong>Mixed</strong></div>
+      <div class="meta-chip">Dataset: <strong>52 records</strong></div>
+      <div class="meta-chip">E85 Score: <strong style="color:var(--amber)">5.71/10</strong></div>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- KPI CARDS -->
+  <div class="section-label">Your Vehicle · Key Metrics</div>
+  <div class="kpi-grid">
+    <div class="kpi-card" style="--accent:var(--blue)">
+      <div class="kpi-label">YOUR COST / KM (Petrol E20)</div>
+      <div class="kpi-value">₹6.15</div>
+      <div class="kpi-sub">avg ₹6.1543/km from dataset</div>
+    </div>
+    <div class="kpi-card" style="--accent:var(--amber)">
+      <div class="kpi-label">E85 COST / KM</div>
+      <div class="kpi-value">₹6.37</div>
+      <div class="kpi-sub">avg ₹6.3742/km from dataset</div>
+    </div>
+    <div class="kpi-card" style="--accent:var(--red)">
+      <div class="kpi-label">E85 RUNNING PENALTY vs PETROL</div>
+      <div class="kpi-value" style="color:var(--red)">+3.57%</div>
+      <div class="kpi-sub">costs more per km despite cheaper pump price</div>
+      <span class="kpi-badge badge-red">Higher cost/km</span>
+    </div>
+    <div class="kpi-card" style="--accent:var(--green)">
+      <div class="kpi-label">E85 BREAK-EVEN PRICE</div>
+      <div class="kpi-value" style="color:var(--green)">₹79.11</div>
+      <div class="kpi-sub">E85 must be ≤ ₹79.11 to match Petrol cost/km</div>
+      <span class="kpi-badge badge-green">Current: ₹82 → above break-even</span>
+    </div>
+    <div class="kpi-card" style="--accent:var(--blue)">
+      <div class="kpi-label">YOUR MONTHLY COST</div>
+      <div class="kpi-value">₹1,846</div>
+      <div class="kpi-sub">Petrol · 300 km/mo · ₹6.15/km</div>
+    </div>
+  </div>
+
+  <!-- BAR + DONUT -->
+  <div class="section-label">Cost & Emissions by Fuel Type</div>
+  <div class="charts-row">
+    <!-- Bar Chart -->
+    <div class="chart-card">
+      <div class="chart-title">Avg Cost / km <span>₹ INR · lower is better</span></div>
+      <svg id="barChart" viewBox="0 0 420 220" width="100%" style="overflow:visible;"></svg>
+      <div class="legend" id="barLegend"></div>
+    </div>
+    <!-- Donut Chart -->
+    <div class="chart-card">
+      <div class="chart-title">CO₂ / km <span>kg · lower is better</span></div>
+      <svg id="donutChart" viewBox="0 0 280 220" width="100%" style="overflow:visible;"></svg>
+    </div>
+  </div>
+
+  <!-- LINE CHART -->
+  <div class="section-label">Cost / km vs Vehicle Age</div>
+  <div class="line-card">
+    <div class="chart-title">Cost/km Trajectory by Fuel &amp; Age <span>vertical line = your car (3y)</span></div>
+    <svg id="lineChart" viewBox="0 0 800 260" width="100%" style="overflow:visible;"></svg>
+    <div class="legend" id="lineLegend"></div>
+  </div>
+
+  <!-- AGE BUCKET TABLE -->
+  <div class="section-label">Cost &amp; Maintenance by Age Bucket</div>
+  <div class="chart-card">
+    <div class="chart-title">Cost/km &amp; Maint/km per Age Bucket <span>★ = your age group (Mid-life 3-5y)</span></div>
+    <div class="age-table-wrap">
+      <table class="age-table">
+        <thead>
+          <tr>
+            <th>Fuel Type</th>
+            <th>Age Bucket</th>
+            <th>Cost/km (₹)</th>
+            <th>Maint/km (₹)</th>
+          </tr>
+        </thead>
+        <tbody id="ageTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- E85 PARADOX + GAUGE -->
+  <div class="section-label">E85 Paradox Analysis &amp; Score</div>
+  <div class="gauge-row">
+    <!-- Paradox -->
+    <div class="paradox-card">
+      <div class="chart-title">⚡ The E85 Paradox</div>
+      <div class="paradox-row">
+        <div>
+          <div class="paradox-label">Pump Price Saving</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">vs Petrol at pump (₹82 vs ₹100)</div>
+        </div>
+        <div class="paradox-val val-green">−18.0%</div>
+      </div>
+      <div class="paradox-row">
+        <div>
+          <div class="paradox-label">Running Cost Penalty</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">E85 cost/km vs Petrol cost/km</div>
+        </div>
+        <div class="paradox-val val-red">+3.57%</div>
+      </div>
+      <div class="paradox-row">
+        <div>
+          <div class="paradox-label">Break-even E85 Price</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">E85 must cost ≤ this to be cheaper/km</div>
+        </div>
+        <div class="paradox-val val-amber">₹79.11/L</div>
+      </div>
+      <div class="paradox-row">
+        <div>
+          <div class="paradox-label">Current E85 Price</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">₹82.00 — ₹2.89 above break-even</div>
+        </div>
+        <div class="paradox-val" style="color:var(--red)">₹82.00/L</div>
+      </div>
+      <div class="paradox-row">
+        <div>
+          <div class="paradox-label">E85 CO₂ Advantage</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">0.0698 vs 0.1706 kg/km</div>
+        </div>
+        <div class="paradox-val val-green">−59.1%</div>
+      </div>
+    </div>
+
+    <!-- Gauge -->
+    <div class="gauge-card">
+      <div class="gauge-title">🎯 E85 Overall Score</div>
+      <svg class="gauge-svg" viewBox="0 0 180 130" width="220">
+        <circle class="gauge-track" cx="90" cy="90" r="70" stroke-dasharray="219.9 251.2" transform="rotate(135 90 90)"/>
+        <circle class="gauge-fill" cx="90" cy="90" r="70" transform="rotate(135 90 90)"
+          style="--dash:125.7"></circle>
+        <!-- score 5.71/10 → 57.1% of 219.9 = 125.7 -->
+        <text class="gauge-score" x="90" y="90" style="font-family:system-ui;font-size:28px;fill:#fff;font-weight:700;text-anchor:middle;dominant-baseline:middle">5.71</text>
+        <text x="90" y="112" style="font-family:system-ui;font-size:10px;fill:#64748b;text-anchor:middle">OUT OF 10</text>
+        <text x="22" y="112" style="font-family:system-ui;font-size:9px;fill:#64748b">0</text>
+        <text x="148" y="112" style="font-family:system-ui;font-size:9px;fill:#64748b">10</text>
+      </svg>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+        <span style="font-size:11px;background:rgba(245,166,35,0.12);color:var(--amber);padding:3px 8px;border-radius:4px">Cost 2.5/4</span>
+        <span style="font-size:11px;background:rgba(34,197,94,0.12);color:var(--green);padding:3px 8px;border-radius:4px">CO₂ 2.5/3</span>
+        <span style="font-size:11px;background:var(--blue-dim);color:var(--blue);padding:3px 8px;border-radius:4px">Refuel 2/2</span>
+        <span style="font-size:11px;background:var(--purple-dim);color:var(--purple);padding:3px 8px;border-radius:4px">Maint 0.7/1</span>
+      </div>
+      <div class="gauge-verdict">
+        E85 earns its place on <strong>CO₂</strong> and <strong>refuel speed</strong>, but its pump-price advantage is eaten by lower mileage — switch only if E85 drops below <strong>₹79/L</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- FUEL CARDS -->
+  <div class="section-label">Fuel Type Comparison</div>
+  <div class="fuel-grid" id="fuelCards"></div>
+
+</div><!-- /main -->
+
+<script>
+const FUELS = {
+  'CNG':            { color: '#22c55e', label: 'CNG' },
+  'Diesel':         { color: '#94a3b8', label: 'Diesel' },
+  'E85 (Flex-Fuel)':{ color: '#f5a623', label: 'E85' },
+  'Electric (EV)':  { color: '#a78bfa', label: 'EV' },
+  'Petrol (E20)':   { color: '#3b82f6', label: 'Petrol' },
+};
+
+const METRICS = {
+  avg_cost_per_km:  { CNG:3.3248, Diesel:4.6742, 'E85 (Flex-Fuel)':6.3742, 'Electric (EV)':1.752,  'Petrol (E20)':6.1543 },
+  avg_co2_per_km:   { CNG:0.1253, Diesel:0.1787, 'E85 (Flex-Fuel)':0.0698, 'Electric (EV)':0.0912, 'Petrol (E20)':0.1706 },
+  avg_maint_per_km: { CNG:0.6616, Diesel:1.0046, 'E85 (Flex-Fuel)':0.4597, 'Electric (EV)':0.2331, 'Petrol (E20)':0.4661 },
+  avg_refuel_time:  { CNG:8,      Diesel:5,      'E85 (Flex-Fuel)':5,      'Electric (EV)':45,     'Petrol (E20)':5 },
+};
+
+const AGE_LINE = {
+  'CNG':           {2:3.0786,3:3.2398,4:3.2376,5:3.2394,6:3.4919,7:3.4954,8:3.4943},
+  'Diesel':        {3:4.3529,4:4.3541,6:4.6907,9:4.6902,11:5.2893,12:5.2913},
+  'E85 (Flex-Fuel)':{1:6.3088,2:6.3093,3:6.6677},
+  'Electric (EV)': {1:1.7142,2:1.714,3:1.8182,4:1.8182},
+  'Petrol (E20)':  {3:5.8498,4:5.8501,5:5.849,6:6.3267,7:6.3279,8:6.3306},
+};
+
+const AGE_BUCKETS = [
+  { fuel:'CNG',            bucket:'New(0-2y)',     cost:3.0786, maint:0.5034, age_grp:'new' },
+  { fuel:'CNG',            bucket:'Mid-life(3-5y)',cost:3.2393, maint:0.6600, age_grp:'mid' },
+  { fuel:'CNG',            bucket:'Aged(6-9y)',    cost:3.4934, maint:0.7030, age_grp:'aged' },
+  { fuel:'Diesel',         bucket:'Mid-life(3-5y)',cost:4.3538, maint:0.7031, age_grp:'mid' },
+  { fuel:'Diesel',         bucket:'Aged(6-9y)',    cost:4.6905, maint:1.1362, age_grp:'aged' },
+  { fuel:'Diesel',         bucket:'Old(10+y)',     cost:5.2903, maint:1.4100, age_grp:'old' },
+  { fuel:'E85 (Flex-Fuel)',bucket:'New(0-2y)',     cost:6.3089, maint:0.4333, age_grp:'new' },
+  { fuel:'E85 (Flex-Fuel)',bucket:'Mid-life(3-5y)',cost:6.6677, maint:0.5783, age_grp:'mid' },
+  { fuel:'Electric (EV)', bucket:'New(0-2y)',     cost:1.7142, maint:0.2140, age_grp:'new' },
+  { fuel:'Electric (EV)', bucket:'Mid-life(3-5y)',cost:1.8182, maint:0.2664, age_grp:'mid' },
+  { fuel:'Petrol (E20)',  bucket:'Mid-life(3-5y)',cost:5.8495, maint:0.5683, age_grp:'mid' },
+  { fuel:'Petrol (E20)',  bucket:'Aged(6-9y)',    cost:6.3285, maint:0.4078, age_grp:'aged' },
+];
+
+const tooltip = document.getElementById('tooltip');
+function showTip(e, html) {
+  tooltip.innerHTML = html;
+  tooltip.classList.add('show');
+  moveTip(e);
+}
+function moveTip(e) {
+  tooltip.style.left = (e.clientX + 14) + 'px';
+  tooltip.style.top  = (e.clientY - 10) + 'px';
+}
+function hideTip() { tooltip.classList.remove('show'); }
+
+// ── BAR CHART ──────────────────────────────────────────────────────────────
+(function() {
+  const svg = document.getElementById('barChart');
+  const fuelList = Object.keys(FUELS);
+  const values = fuelList.map(f => METRICS.avg_cost_per_km[f]);
+  const maxV = Math.max(...values) * 1.12;
+  const W = 420, H = 220, padL = 36, padR = 10, padT = 10, padB = 30;
+  const bW = (W - padL - padR) / fuelList.length;
+  const bPad = bW * 0.25;
+
+  // Y-axis gridlines
+  [0, 2, 4, 6, 8].forEach(v => {
+    if (v > maxV) return;
+    const y = padT + (H - padT - padB) * (1 - v / maxV);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', padL); line.setAttribute('x2', W - padR);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('stroke', 'rgba(255,255,255,0.05)');
+    line.setAttribute('stroke-width', '1');
+    svg.appendChild(line);
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x', padL - 4); t.setAttribute('y', y + 4);
+    t.setAttribute('text-anchor','end'); t.setAttribute('fill','#475569');
+    t.setAttribute('font-size','9');
+    t.textContent = v;
+    svg.appendChild(t);
+  });
+
+  fuelList.forEach((f, i) => {
+    const v = values[i];
+    const x = padL + i * bW + bPad;
+    const bH = (H - padT - padB) * (v / maxV);
+    const y = padT + (H - padT - padB) - bH;
+    const color = FUELS[f].color;
+
+    // Bar
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x', x); rect.setAttribute('y', y);
+    rect.setAttribute('width', bW - 2*bPad); rect.setAttribute('height', bH);
+    rect.setAttribute('rx','4');
+    rect.setAttribute('fill', color);
+    rect.setAttribute('opacity', f === 'Petrol (E20)' ? '1' : '0.72');
+    rect.style.cursor = 'pointer';
+    rect.addEventListener('mousemove', e => showTip(e, `<strong style="color:${color}">${FUELS[f].label}</strong><br>₹${v.toFixed(4)}/km`));
+    rect.addEventListener('mouseleave', hideTip);
+    svg.appendChild(rect);
+
+    // Value label
+    const vt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    vt.setAttribute('x', x + (bW - 2*bPad)/2); vt.setAttribute('y', y - 4);
+    vt.setAttribute('text-anchor','middle'); vt.setAttribute('fill', color);
+    vt.setAttribute('font-size','9'); vt.setAttribute('font-weight','600');
+    vt.textContent = v.toFixed(2);
+    svg.appendChild(vt);
+
+    // X label
+    const xt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    xt.setAttribute('x', x + (bW - 2*bPad)/2);
+    xt.setAttribute('y', H - padB + 14);
+    xt.setAttribute('text-anchor','middle'); xt.setAttribute('fill','#64748b');
+    xt.setAttribute('font-size','9');
+    xt.textContent = FUELS[f].label;
+    svg.appendChild(xt);
+  });
+
+  // Legend
+  const leg = document.getElementById('barLegend');
+  fuelList.forEach(f => {
+    const d = document.createElement('div');
+    d.className = 'legend-item';
+    d.innerHTML = `<div class="legend-dot" style="background:${FUELS[f].color}"></div>${FUELS[f].label}`;
+    leg.appendChild(d);
+  });
+})();
+
+// ── DONUT CHART ────────────────────────────────────────────────────────────
+(function() {
+  const svg = document.getElementById('donutChart');
+  const fuelList = Object.keys(FUELS);
+  const values = fuelList.map(f => METRICS.avg_co2_per_km[f]);
+  const total = values.reduce((a,b)=>a+b,0);
+  const cx=140, cy=105, r=75, inner=48;
+  let angle = -Math.PI/2;
+
+  fuelList.forEach((f,i) => {
+    const share = values[i] / total;
+    const sweep = share * 2 * Math.PI;
+    const x1 = cx + r * Math.cos(angle);
+    const y1 = cy + r * Math.sin(angle);
+    const x2 = cx + r * Math.cos(angle + sweep);
+    const y2 = cy + r * Math.sin(angle + sweep);
+    const ix1 = cx + inner * Math.cos(angle);
+    const iy1 = cy + inner * Math.sin(angle);
+    const ix2 = cx + inner * Math.cos(angle + sweep);
+    const iy2 = cy + inner * Math.sin(angle + sweep);
+    const large = sweep > Math.PI ? 1 : 0;
+    const d = `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${inner} ${inner} 0 ${large} 0 ${ix1} ${iy1} Z`;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', FUELS[f].color);
+    path.setAttribute('opacity', f === 'Petrol (E20)' ? '1' : '0.75');
+    path.setAttribute('stroke', '#0a0f1e'); path.setAttribute('stroke-width','1.5');
+    path.style.cursor = 'pointer';
+    const v = values[i];
+    path.addEventListener('mousemove', e => showTip(e, `<strong style="color:${FUELS[f].color}">${FUELS[f].label}</strong><br>${v.toFixed(4)} kg/km<br>${(share*100).toFixed(1)}% of total`));
+    path.addEventListener('mouseleave', hideTip);
+    svg.appendChild(path);
+    angle += sweep;
+  });
+
+  // Center label
+  const ct = document.createElementNS('http://www.w3.org/2000/svg','text');
+  ct.setAttribute('x', cx); ct.setAttribute('y', cy-4);
+  ct.setAttribute('text-anchor','middle'); ct.setAttribute('fill','#94a3b8');
+  ct.setAttribute('font-size','10'); ct.textContent = 'CO₂';
+  svg.appendChild(ct);
+  const ct2 = document.createElementNS('http://www.w3.org/2000/svg','text');
+  ct2.setAttribute('x', cx); ct2.setAttribute('y', cy+12);
+  ct2.setAttribute('text-anchor','middle'); ct2.setAttribute('fill','#64748b');
+  ct2.setAttribute('font-size','9'); ct2.textContent = 'kg/km';
+  svg.appendChild(ct2);
+
+  // Right-side legend
+  const legX = 228, legStartY = 30;
+  fuelList.forEach((f, i) => {
+    const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('cx', legX); dot.setAttribute('cy', legStartY + i*22);
+    dot.setAttribute('r','5'); dot.setAttribute('fill', FUELS[f].color);
+    svg.appendChild(dot);
+    const lt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    lt.setAttribute('x', legX+10); lt.setAttribute('y', legStartY+i*22+4);
+    lt.setAttribute('fill','#94a3b8'); lt.setAttribute('font-size','9');
+    lt.textContent = `${FUELS[f].label}: ${METRICS.avg_co2_per_km[f].toFixed(4)}`;
+    svg.appendChild(lt);
+  });
+})();
+
+// ── LINE CHART ─────────────────────────────────────────────────────────────
+(function() {
+  const svg = document.getElementById('lineChart');
+  const W=800, H=260, padL=44, padR=20, padT=16, padB=36;
+  const minX=0, maxX=12, minY=0, maxY=8;
+  const toSVG = (age, cost) => ({
+    x: padL + (age - minX)/(maxX - minX) * (W - padL - padR),
+    y: padT + (1 - (cost - minY)/(maxY - minY)) * (H - padT - padB)
+  });
+
+  // Gridlines Y
+  [0,2,4,6,8].forEach(v => {
+    const y = toSVG(0,v).y;
+    const gl = document.createElementNS('http://www.w3.org/2000/svg','line');
+    gl.setAttribute('x1',padL); gl.setAttribute('x2',W-padR);
+    gl.setAttribute('y1',y); gl.setAttribute('y2',y);
+    gl.setAttribute('stroke','rgba(255,255,255,0.04)'); gl.setAttribute('stroke-width','1');
+    svg.appendChild(gl);
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',padL-6); t.setAttribute('y',y+4);
+    t.setAttribute('text-anchor','end'); t.setAttribute('fill','#475569');
+    t.setAttribute('font-size','10'); t.textContent = v;
+    svg.appendChild(t);
+  });
+  // Gridlines X
+  for (let x=0; x<=12; x+=2) {
+    const px = toSVG(x,0).x;
+    const gl = document.createElementNS('http://www.w3.org/2000/svg','line');
+    gl.setAttribute('x1',px); gl.setAttribute('x2',px);
+    gl.setAttribute('y1',padT); gl.setAttribute('y2',H-padB);
+    gl.setAttribute('stroke','rgba(255,255,255,0.04)'); gl.setAttribute('stroke-width','1');
+    svg.appendChild(gl);
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',px); t.setAttribute('y',H-padB+16);
+    t.setAttribute('text-anchor','middle'); t.setAttribute('fill','#475569');
+    t.setAttribute('font-size','10'); t.textContent = x+'y';
+    svg.appendChild(t);
+  }
+
+  // Car age line at 3y
+  const carX = toSVG(3,0).x;
+  const ageLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+  ageLine.setAttribute('x1',carX); ageLine.setAttribute('x2',carX);
+  ageLine.setAttribute('y1',padT); ageLine.setAttribute('y2',H-padB);
+  ageLine.setAttribute('stroke','rgba(245,166,35,0.6)');
+  ageLine.setAttribute('stroke-width','1.5');
+  ageLine.setAttribute('stroke-dasharray','4,3');
+  svg.appendChild(ageLine);
+  const ageLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+  ageLabel.setAttribute('x',carX+4); ageLabel.setAttribute('y',padT+12);
+  ageLabel.setAttribute('fill','#f5a623'); ageLabel.setAttribute('font-size','9');
+  ageLabel.textContent = 'YOUR CAR';
+  svg.appendChild(ageLabel);
+
+  // Lines per fuel
+  Object.keys(AGE_LINE).forEach(f => {
+    const data = AGE_LINE[f];
+    const ages = Object.keys(data).map(Number).sort((a,b)=>a-b);
+    const points = ages.map(age => toSVG(age, data[age]));
+    if (points.length < 2) return;
+    const color = FUELS[f].color;
+
+    // Line
+    let d = points.map((p,i) => `${i===0?'M':'L'} ${p.x} ${p.y}`).join(' ');
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',d);
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', f==='Petrol (E20)' ? '2.5' : '1.8');
+    path.setAttribute('fill','none');
+    path.setAttribute('opacity', f==='Petrol (E20)' ? '1' : '0.75');
+    svg.appendChild(path);
+
+    // Dots
+    ages.forEach((age, i) => {
+      const p = points[i];
+      const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      circle.setAttribute('cx',p.x); circle.setAttribute('cy',p.y);
+      circle.setAttribute('r','3.5');
+      circle.setAttribute('fill', color);
+      circle.setAttribute('stroke','#0a0f1e'); circle.setAttribute('stroke-width','1.5');
+      circle.style.cursor = 'pointer';
+      circle.addEventListener('mousemove', e => showTip(e, `<strong style="color:${color}">${FUELS[f].label}</strong><br>Age: ${age}y<br>₹${data[age].toFixed(4)}/km`));
+      circle.addEventListener('mouseleave', hideTip);
+      svg.appendChild(circle);
+    });
+  });
+
+  // Legend
+  const leg = document.getElementById('lineLegend');
+  Object.keys(FUELS).forEach(f => {
+    const d = document.createElement('div');
+    d.className = 'legend-item';
+    d.innerHTML = `<div class="legend-dot" style="background:${FUELS[f].color}"></div>${FUELS[f].label}`;
+    leg.appendChild(d);
+  });
+})();
+
+// ── AGE BUCKET TABLE ───────────────────────────────────────────────────────
+(function() {
+  const tbody = document.getElementById('ageTbody');
+  AGE_BUCKETS.forEach(row => {
+    const isMid = row.age_grp === 'mid';
+    const tr = document.createElement('tr');
+    if (isMid) tr.classList.add('car-age');
+    const color = FUELS[row.fuel] ? FUELS[row.fuel].color : '#fff';
+    const label = FUELS[row.fuel] ? FUELS[row.fuel].label : row.fuel;
+    tr.innerHTML = `
+      <td><span class="dot" style="background:${color}"></span>${label}</td>
+      <td>${row.bucket} ${isMid ? '★' : ''}</td>
+      <td>₹${row.cost.toFixed(4)}</td>
+      <td>₹${row.maint.toFixed(4)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+})();
+
+// ── FUEL CARDS ─────────────────────────────────────────────────────────────
+(function() {
+  const PROS_CONS = {
+    'CNG': {
+      pros: ['Lowest cost/km in the dataset','Clean burning – low CO₂ per km'],
+      cons: ['8-min refuel time (slowest)','Boot space reduced by CNG tank'],
+      best: 'High-mileage city/intercity fleets'
+    },
+    'Diesel': {
+      pros: ['Strong highway torque & range','Wide fuel availability nationwide'],
+      cons: ['Highest maintenance cost/km','NOx & PM2.5 emissions higher'],
+      best: 'Long-haul, high-distance users'
+    },
+    'E85 (Flex-Fuel)': {
+      pros: ['−59% CO₂ vs Petrol per km','Pump price ₹18 cheaper than Petrol'],
+      cons: ['Lower mileage erases price saving','Cost/km still 3.6% above Petrol'],
+      best: 'Eco-conscious drivers where E85 < ₹79/L'
+    },
+    'Electric (EV)': {
+      pros: ['Lowest cost/km (₹1.75)','Near-zero tailpipe CO₂'],
+      cons: ['45-min recharge is longest wait','High upfront vehicle cost'],
+      best: 'Urban commuters with home charging'
+    },
+    'Petrol (E20)': {
+      pros: ['Widest fuel station network','Familiar ownership & service ecosystem'],
+      cons: ['High cost/km similar to E85','More CO₂/km than CNG or EV'],
+      best: 'General-purpose mixed usage (your vehicle)'
+    },
+  };
+
+  const container = document.getElementById('fuelCards');
+  const isUserFuel = f => f === 'Petrol (E20)';
+
+  Object.keys(FUELS).forEach(f => {
+    const color = FUELS[f].color;
+    const pc = PROS_CONS[f];
+    const card = document.createElement('div');
+    card.className = 'fuel-card' + (isUserFuel(f) ? ' active' : '');
+    card.style.setProperty('--f-color', color);
+    card.innerHTML = `
+      <div class="fuel-card-stripe"></div>
+      <div class="fuel-name"><span class="fuel-dot" style="background:${color}"></span>${FUELS[f].label}${isUserFuel(f) ? ' <span style="font-size:10px;color:var(--amber)">◀ YOUR FUEL</span>':''}</div>
+      <div class="fuel-stat">Cost/km: <strong>₹${METRICS.avg_cost_per_km[f].toFixed(4)}</strong></div>
+      <div class="fuel-stat">CO₂/km: <strong>${METRICS.avg_co2_per_km[f].toFixed(4)} kg</strong></div>
+      <div class="fuel-stat">Maint/km: <strong>₹${METRICS.avg_maint_per_km[f].toFixed(4)}</strong></div>
+      <div class="fuel-stat">Refuel: <strong>${METRICS.avg_refuel_time[f]} min</strong></div>
+      <div class="pros-cons">
+        <div class="pros-cons-title">Pros / Cons</div>
+        ${pc.pros.map(p=>`<div class="pro">✅ ${p}</div>`).join('')}
+        ${pc.cons.map(c=>`<div class="con">❌ ${c}</div>`).join('')}
+      </div>
+      <div class="best-for">🚗 Best for: ${pc.best}</div>
+    `;
+    container.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>
