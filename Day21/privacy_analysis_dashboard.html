@@ -1,0 +1,686 @@
+<style>
+  :root{
+    --bg-0:#08090c;
+    --bg-1:#0e1116;
+    --bg-2:#141822;
+    --bg-3:#1b202c;
+    --line:#262c3a;
+    --line-soft:#1d2230;
+    --text-0:#eef1f7;
+    --text-1:#aab2c5;
+    --text-2:#6b7387;
+    --amber:#ffb454;
+    --amber-dim:#7a5a2c;
+    --cyan:#5ee6d8;
+    --cyan-dim:#1f4a47;
+    --red:#ff5d5d;
+    --red-dim:#5a2424;
+    --green:#5ddc8c;
+    --green-dim:#1f4530;
+    --mono:'JetBrains Mono','SF Mono',ui-monospace,Consolas,monospace;
+    --sans:'Inter',-apple-system,'Segoe UI',sans-serif;
+  }
+
+  * { box-sizing:border-box; }
+
+  .dfp-root{
+    background:
+      radial-gradient(ellipse 1200px 600px at 15% -10%, rgba(255,180,84,0.05), transparent),
+      radial-gradient(ellipse 900px 500px at 100% 10%, rgba(94,230,216,0.04), transparent),
+      var(--bg-0);
+    color:var(--text-0);
+    font-family:var(--sans);
+    font-size:14px;
+    line-height:1.5;
+    padding:28px;
+    min-height:100%;
+    background-image:
+      radial-gradient(ellipse 1200px 600px at 15% -10%, rgba(255,180,84,0.05), transparent),
+      radial-gradient(ellipse 900px 500px at 100% 10%, rgba(94,230,216,0.04), transparent),
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size:auto, auto, 48px 48px, 48px 48px;
+    background-position:0 0,0 0,-1px -1px,-1px -1px;
+  }
+  .dfp-root *{ box-sizing:border-box; }
+
+  /* ===== Top bar ===== */
+  .dfp-topbar{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom:24px; flex-wrap:wrap; gap:16px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:20px;
+  }
+  .dfp-brand{ display:flex; flex-direction:column; gap:4px; }
+  .dfp-brand-row{ display:flex; align-items:center; gap:10px; }
+  .dfp-dot{ width:8px;height:8px;border-radius:50%;background:var(--cyan); box-shadow:0 0 12px var(--cyan); animation:dfp-pulse 2.4s ease-in-out infinite; }
+  @keyframes dfp-pulse{ 0%,100%{opacity:1} 50%{opacity:.35} }
+  .dfp-title{ font-family:var(--mono); font-size:18px; font-weight:600; letter-spacing:0.02em; }
+  .dfp-subtitle{ color:var(--text-2); font-size:12px; font-family:var(--mono); }
+  .dfp-scan-meta{ text-align:right; font-family:var(--mono); font-size:11px; color:var(--text-2); }
+  .dfp-scan-meta b{ color:var(--text-1); font-weight:500; }
+
+  .dfp-disclaimer{
+    font-family:var(--mono); font-size:11.5px; color:var(--text-1);
+    background:var(--bg-2); border:1px solid var(--line); border-left:3px solid var(--amber);
+    padding:12px 16px; border-radius:6px; margin-bottom:24px;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .dfp-disclaimer .ic{ color:var(--amber); flex-shrink:0; }
+
+  /* legend */
+  .dfp-legend{ display:flex; gap:18px; font-family:var(--mono); font-size:11px; color:var(--text-2); margin-bottom:20px; flex-wrap:wrap; }
+  .dfp-legend-item{ display:flex; align-items:center; gap:6px; }
+  .dfp-swatch{ width:14px; height:14px; border-radius:3px; flex-shrink:0; }
+  .dfp-swatch.fact{ background:var(--bg-3); border:1.5px solid var(--cyan); }
+  .dfp-swatch.estimate{ background:repeating-linear-gradient(135deg, var(--bg-3), var(--bg-3) 3px, var(--amber-dim) 3px, var(--amber-dim) 6px); border:1.5px dashed var(--amber); }
+
+  /* ===== Section shell ===== */
+  .dfp-section{ margin-bottom:28px; }
+  .dfp-section-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; }
+  .dfp-section-num{ font-family:var(--mono); font-size:11px; color:var(--text-2); }
+  .dfp-section-title{ font-family:var(--mono); font-size:13px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-0); }
+  .dfp-section-line{ flex:1; height:1px; background:var(--line); }
+  .dfp-tag{ font-family:var(--mono); font-size:9.5px; padding:2px 7px; border-radius:3px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600; }
+  .dfp-tag.fact{ color:var(--cyan); border:1px solid var(--cyan-dim); background:rgba(94,230,216,0.06); }
+  .dfp-tag.estimate{ color:var(--amber); border:1px dashed var(--amber-dim); background:rgba(255,180,84,0.06); }
+
+  .dfp-card{ background:var(--bg-1); border:1px solid var(--line); border-radius:10px; padding:18px; }
+
+  /* ===== Score row ===== */
+  .dfp-score-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media(max-width:680px){ .dfp-score-grid{ grid-template-columns:1fr; } }
+  .dfp-score-card{ background:var(--bg-1); border:1px solid var(--line); border-radius:10px; padding:20px; position:relative; overflow:hidden; }
+  .dfp-score-card::before{ content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+  .dfp-score-card.footprint::before{ background:linear-gradient(90deg,var(--amber),var(--red)); }
+  .dfp-score-card.privacy::before{ background:linear-gradient(90deg,var(--red),var(--green)); }
+  .dfp-score-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .dfp-score-label{ font-family:var(--mono); font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; }
+  .dfp-score-band{ font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .dfp-score-num-row{ display:flex; align-items:baseline; gap:8px; }
+  .dfp-score-num{ font-family:var(--mono); font-size:48px; font-weight:700; line-height:1; }
+  .dfp-score-max{ font-family:var(--mono); font-size:16px; color:var(--text-2); }
+  .dfp-score-bar-track{ height:8px; background:var(--bg-3); border-radius:5px; margin-top:14px; overflow:hidden; }
+  .dfp-score-bar-fill{ height:100%; border-radius:5px; }
+  .dfp-score-desc{ font-size:12px; color:var(--text-1); margin-top:10px; }
+
+  /* stat strip */
+  .dfp-stat-strip{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:8px; }
+  @media(max-width:680px){ .dfp-stat-strip{ grid-template-columns:1fr 1fr; } }
+  .dfp-stat{ background:var(--bg-1); border:1px solid var(--line); border-radius:8px; padding:14px; }
+  .dfp-stat-val{ font-family:var(--mono); font-size:24px; font-weight:700; color:var(--text-0); }
+  .dfp-stat-key{ font-family:var(--mono); font-size:10.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.04em; margin-top:4px; }
+
+  /* ===== Heatmap ===== */
+  .dfp-heatmap{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+  @media(max-width:680px){ .dfp-heatmap{ grid-template-columns:repeat(2,1fr); } }
+  .dfp-heat-cell{ border-radius:8px; padding:12px; border:1px solid var(--line); position:relative; min-height:84px; display:flex; flex-direction:column; justify-content:space-between; }
+  .dfp-heat-app{ font-family:var(--mono); font-weight:600; font-size:12.5px; }
+  .dfp-heat-bottom{ display:flex; justify-content:space-between; align-items:flex-end; }
+  .dfp-heat-score{ font-family:var(--mono); font-size:18px; font-weight:700; }
+  .dfp-heat-level{ font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.04em; opacity:.85; }
+
+  /* ===== Company ranking ===== */
+  .dfp-rank-row{ display:grid; grid-template-columns:28px 1fr 110px 90px; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid var(--line-soft); }
+  .dfp-rank-row:last-child{ border-bottom:none; }
+  .dfp-rank-idx{ font-family:var(--mono); color:var(--text-2); font-size:12px; }
+  .dfp-rank-name-wrap{ display:flex; flex-direction:column; gap:3px; }
+  .dfp-rank-name{ font-weight:600; font-size:13px; }
+  .dfp-rank-apps{ font-family:var(--mono); font-size:10.5px; color:var(--text-2); }
+  .dfp-rank-bar-track{ height:6px; background:var(--bg-3); border-radius:4px; overflow:hidden; }
+  .dfp-rank-bar-fill{ height:100%; border-radius:4px; background:linear-gradient(90deg,var(--cyan),var(--amber)); }
+  .dfp-rank-score{ font-family:var(--mono); text-align:right; font-size:13px; font-weight:700; }
+
+  /* ===== Data Collection Matrix ===== */
+  .dfp-matrix-wrap{ overflow-x:auto; }
+  table.dfp-matrix{ width:100%; border-collapse:collapse; font-size:12px; min-width:760px; }
+  table.dfp-matrix th{ text-align:left; font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-2); padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  table.dfp-matrix td{ padding:9px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  table.dfp-matrix tr:hover td{ background:rgba(255,255,255,0.015); }
+  .dfp-matrix-app{ font-weight:600; }
+  .dfp-matrix-parent{ font-family:var(--mono); font-size:10.5px; color:var(--text-2); }
+  .dfp-dot-cell{ display:flex; justify-content:center; }
+  .dfp-collect-dot{ width:9px; height:9px; border-radius:50%; }
+  .dfp-collect-dot.high{ background:var(--red); box-shadow:0 0 6px rgba(255,93,93,0.5); }
+  .dfp-collect-dot.med{ background:var(--amber); }
+  .dfp-collect-dot.low{ background:var(--text-2); opacity:.5; }
+
+  /* ===== Risk radar ===== */
+  .dfp-radar-wrap{ display:flex; gap:24px; flex-wrap:wrap; align-items:center; }
+  .dfp-radar-svg{ flex-shrink:0; }
+  .dfp-radar-legend{ display:flex; flex-direction:column; gap:10px; flex:1; min-width:220px; }
+  .dfp-radar-item{ display:flex; justify-content:space-between; align-items:center; font-size:12px; }
+  .dfp-radar-item .lbl{ display:flex; align-items:center; gap:8px; }
+  .dfp-radar-item .sw{ width:10px; height:10px; border-radius:50%; }
+  .dfp-radar-item .val{ font-family:var(--mono); font-weight:700; }
+
+  /* ===== Digital twin ===== */
+  .dfp-twin-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:680px){ .dfp-twin-grid{ grid-template-columns:1fr; } }
+  .dfp-twin-card{ background:var(--bg-2); border:1px dashed var(--amber-dim); border-radius:8px; padding:14px; }
+  .dfp-twin-trait{ font-family:var(--mono); font-size:10px; color:var(--amber); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+  .dfp-twin-desc{ font-size:12.5px; color:var(--text-1); }
+  .dfp-confidence{ display:inline-flex; gap:2px; margin-left:auto; }
+  .dfp-confidence i{ width:5px; height:5px; border-radius:50%; background:var(--line); }
+  .dfp-confidence i.on{ background:var(--amber); }
+
+  /* ===== Asset cards ===== */
+  .dfp-asset-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  @media(max-width:680px){ .dfp-asset-grid{ grid-template-columns:1fr; } }
+  .dfp-asset-card{ background:var(--bg-1); border:1px solid var(--cyan-dim); border-radius:8px; padding:14px; position:relative; }
+  .dfp-asset-rank{ position:absolute; top:10px; right:12px; font-family:var(--mono); font-size:10px; color:var(--text-2); }
+  .dfp-asset-name{ font-weight:600; font-size:13.5px; margin-bottom:4px; }
+  .dfp-asset-source{ font-family:var(--mono); font-size:10px; color:var(--cyan); margin-bottom:8px; }
+  .dfp-asset-val-bar-track{ height:5px; background:var(--bg-3); border-radius:3px; overflow:hidden; margin-bottom:6px; }
+  .dfp-asset-val-bar-fill{ height:100%; background:var(--cyan); border-radius:3px; }
+  .dfp-asset-why{ font-size:11.5px; color:var(--text-2); }
+
+  /* ===== Improvement plan / simulator ===== */
+  .dfp-plan-list{ display:flex; flex-direction:column; gap:10px; }
+  .dfp-plan-item{ display:flex; gap:12px; align-items:flex-start; background:var(--bg-2); border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+  .dfp-plan-impact{ font-family:var(--mono); font-size:10px; font-weight:700; padding:3px 8px; border-radius:5px; flex-shrink:0; white-space:nowrap; margin-top:1px; }
+  .dfp-plan-impact.high{ background:rgba(255,93,93,0.12); color:var(--red); }
+  .dfp-plan-impact.med{ background:rgba(255,180,84,0.12); color:var(--amber); }
+  .dfp-plan-impact.low{ background:rgba(94,230,216,0.12); color:var(--cyan); }
+  .dfp-plan-text b{ display:block; font-size:13px; margin-bottom:2px; }
+  .dfp-plan-text span{ font-size:12px; color:var(--text-2); }
+
+  .dfp-sim-box{ background:var(--bg-2); border:1px solid var(--line); border-radius:8px; padding:18px; margin-top:14px; }
+  .dfp-sim-row{ display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+  .dfp-sim-row label{ font-family:var(--mono); font-size:11px; color:var(--text-1); width:220px; flex-shrink:0; }
+  .dfp-sim-row input[type=range]{ flex:1; accent-color:var(--cyan); }
+  .dfp-sim-result{ display:flex; gap:24px; margin-top:8px; flex-wrap:wrap; }
+  .dfp-sim-result .blk{ flex:1; min-width:140px; }
+  .dfp-sim-result .num{ font-family:var(--mono); font-size:30px; font-weight:700; }
+  .dfp-sim-result .lbl{ font-family:var(--mono); font-size:10px; color:var(--text-2); text-transform:uppercase; }
+  .dfp-sim-arrow{ font-family:var(--mono); font-size:20px; color:var(--text-2); align-self:center; }
+
+  /* ===== Verdict ===== */
+  .dfp-verdict{ background:linear-gradient(135deg, var(--bg-2), var(--bg-1)); border:1px solid var(--line); border-radius:12px; padding:26px; text-align:center; }
+  .dfp-verdict-band{ display:inline-block; font-family:var(--mono); font-weight:700; font-size:13px; padding:6px 16px; border-radius:20px; margin-bottom:14px; letter-spacing:0.04em; }
+  .dfp-verdict-text{ font-size:14px; color:var(--text-1); max-width:680px; margin:0 auto; line-height:1.7; }
+  .dfp-verdict-text b{ color:var(--text-0); }
+
+  .dfp-footer{ margin-top:30px; padding-top:18px; border-top:1px solid var(--line); font-family:var(--mono); font-size:10.5px; color:var(--text-2); text-align:center; line-height:1.8; }
+</style>
+
+<div class="dfp-root">
+
+  <div class="dfp-topbar">
+    <div class="dfp-brand">
+      <div class="dfp-brand-row">
+        <span class="dfp-dot"></span>
+        <span class="dfp-title">DIGITAL_FOOTPRINT // AUDIT</span>
+      </div>
+      <span class="dfp-subtitle">heuristic estimation engine · not a data broker · no external lookups performed</span>
+    </div>
+    <div class="dfp-scan-meta">
+      INPUT SET: <b>15 services</b><br/>
+      MODE: <b>self-reported facts only</b><br/>
+      OUTPUT: <b>facts + labeled estimates</b>
+    </div>
+  </div>
+
+  <div class="dfp-disclaimer">
+    <span class="ic">&#9888;</span>
+    <span>This report is generated entirely from the 15 services you listed. Claude has <b style="color:var(--text-0)">no access to any private database, account, or real usage history</b>. Every score below is a heuristic built only from public knowledge of what these categories of apps <i>typically</i> collect &mdash; nothing here is measured or verified. Anything not directly stated as a Fact is an <b style="color:var(--amber)">Estimate</b>, and estimates are never certain.</span>
+  </div>
+
+  <div class="dfp-legend">
+    <div class="dfp-legend-item"><span class="dfp-swatch fact"></span> FACT — directly from your input list</div>
+    <div class="dfp-legend-item"><span class="dfp-swatch estimate"></span> ESTIMATE — inferred, uncertain, never verified</div>
+  </div>
+
+  <!-- 1 & 2: SCORES -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">01–02</span>
+      <span class="dfp-section-title">Footprint &amp; Privacy Scores</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-score-grid">
+      <div class="dfp-score-card footprint">
+        <div class="dfp-score-top">
+          <span class="dfp-score-label">Digital Footprint Score</span>
+          <span class="dfp-score-band" style="background:rgba(255,180,84,0.14); color:var(--amber);">🟠 SIGNIFICANT</span>
+        </div>
+        <div class="dfp-score-num-row">
+          <span class="dfp-score-num" style="color:var(--amber);">68</span>
+          <span class="dfp-score-max">/ 100</span>
+        </div>
+        <div class="dfp-score-bar-track"><div class="dfp-score-bar-fill" style="width:68%; background:linear-gradient(90deg,var(--amber),var(--red));"></div></div>
+        <div class="dfp-score-desc">Driven by breadth (15 services), category diversity (social, gaming, messaging, payments, shopping), and overlap across 3 major ecosystems. Estimated, not measured.</div>
+      </div>
+      <div class="dfp-score-card privacy">
+        <div class="dfp-score-top">
+          <span class="dfp-score-label">Privacy Score</span>
+          <span class="dfp-score-band" style="background:rgba(255,93,93,0.14); color:var(--red);">🟠 FAIR</span>
+        </div>
+        <div class="dfp-score-num-row">
+          <span class="dfp-score-num" style="color:#ff8a5c;">46</span>
+          <span class="dfp-score-max">/ 100</span>
+        </div>
+        <div class="dfp-score-bar-track"><div class="dfp-score-bar-fill" style="width:46%; background:linear-gradient(90deg,var(--red),var(--green));"></div></div>
+        <div class="dfp-score-desc">Lowered by deep concentration inside Google and Meta-adjacent products, plus financial (Google Pay) and location-rich (messaging, gaming) data categories. Estimated, not measured.</div>
+      </div>
+    </div>
+
+    <div class="dfp-stat-strip">
+      <div class="dfp-stat">
+        <div class="dfp-stat-val">15</div>
+        <div class="dfp-stat-key">Total Services <span style="color:var(--cyan)">· Fact</span></div>
+      </div>
+      <div class="dfp-stat">
+        <div class="dfp-stat-val">8</div>
+        <div class="dfp-stat-key">Parent Companies <span style="color:var(--amber)">· Estimate</span></div>
+      </div>
+      <div class="dfp-stat">
+        <div class="dfp-stat-val">41%</div>
+        <div class="dfp-stat-key">Ecosystem Concentration <span style="color:var(--amber)">· Estimate</span></div>
+      </div>
+      <div class="dfp-stat">
+        <div class="dfp-stat-val">High</div>
+        <div class="dfp-stat-key">Tracking Surface <span style="color:var(--amber)">· Estimate</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3: HEATMAP -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">03</span>
+      <span class="dfp-section-title">Exposure Heatmap</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-card">
+      <div class="dfp-heatmap" id="dfp-heatmap"></div>
+    </div>
+  </div>
+
+  <!-- 4: COMPANY RANKING -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">04</span>
+      <span class="dfp-section-title">Company Exposure Ranking</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-card" id="dfp-ranking"></div>
+  </div>
+
+  <!-- 5: DATA COLLECTION MATRIX -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">05</span>
+      <span class="dfp-section-title">Data Collection Matrix</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-card dfp-matrix-wrap">
+      <table class="dfp-matrix" id="dfp-matrix-table"></table>
+    </div>
+  </div>
+
+  <!-- 6: RISK RADAR -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">06</span>
+      <span class="dfp-section-title">Risk Radar</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-card dfp-radar-wrap">
+      <svg class="dfp-radar-svg" id="dfp-radar-svg" width="320" height="320" viewBox="0 0 320 320"></svg>
+      <div class="dfp-radar-legend" id="dfp-radar-legend"></div>
+    </div>
+  </div>
+
+  <!-- 7: DIGITAL TWIN -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">07</span>
+      <span class="dfp-section-title">Digital Twin Profile</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-card">
+      <div style="font-size:12px; color:var(--text-2); margin-bottom:14px; font-family:var(--mono);">
+        Speculative composite persona built only from app-category patterns. Dots = confidence level (low&rarr;high). Treat as a rough sketch, not a profile of you.
+      </div>
+      <div class="dfp-twin-grid" id="dfp-twin"></div>
+    </div>
+  </div>
+
+  <!-- 8: MOST VALUABLE DATA ASSETS -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">08</span>
+      <span class="dfp-section-title">Most Valuable Data Assets</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-asset-grid" id="dfp-assets"></div>
+  </div>
+
+  <!-- WOW INSIGHTS -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">09</span>
+      <span class="dfp-section-title">WOW Insights</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-card" id="dfp-wow"></div>
+  </div>
+
+  <!-- PRIVACY IMPROVEMENT PLAN + SIMULATOR -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">10</span>
+      <span class="dfp-section-title">Privacy Improvement Plan</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-card">
+      <div class="dfp-plan-list" id="dfp-plan"></div>
+
+      <div class="dfp-sim-box">
+        <div style="font-family:var(--mono); font-size:11px; color:var(--text-1); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:14px;">Privacy Improvement Simulator</div>
+        <div class="dfp-sim-row">
+          <label id="dfp-sim-label-1">Limit ad personalization: 0 apps</label>
+          <input type="range" min="0" max="15" value="0" id="dfp-sim-slider-1"/>
+        </div>
+        <div class="dfp-sim-row">
+          <label id="dfp-sim-label-2">Disable precise location: 0 apps</label>
+          <input type="range" min="0" max="15" value="0" id="dfp-sim-slider-2"/>
+        </div>
+        <div class="dfp-sim-row">
+          <label id="dfp-sim-label-3">Remove unused / consolidate: 0 apps</label>
+          <input type="range" min="0" max="6" value="0" id="dfp-sim-slider-3"/>
+        </div>
+        <div class="dfp-sim-result">
+          <div class="blk"><div class="num" id="dfp-sim-before" style="color:var(--red);">46</div><div class="lbl">Privacy score · before</div></div>
+          <div class="dfp-sim-arrow">&rarr;</div>
+          <div class="blk"><div class="num" id="dfp-sim-after" style="color:var(--green);">46</div><div class="lbl">Privacy score · simulated</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL VERDICT -->
+  <div class="dfp-section">
+    <div class="dfp-section-head">
+      <span class="dfp-section-num">11</span>
+      <span class="dfp-section-title">Final Verdict</span>
+      <div class="dfp-section-line"></div>
+      <span class="dfp-tag estimate">Estimate</span>
+    </div>
+    <div class="dfp-verdict">
+      <div class="dfp-verdict-band" style="background:rgba(255,180,84,0.14); color:var(--amber); border:1px solid var(--amber-dim);">🟠 SIGNIFICANT FOOTPRINT · FAIR PRIVACY</div>
+      <div class="dfp-verdict-text">
+        Across <b>15 self-reported services</b> spanning <b>~8 estimated parent companies</b>, this profile shows broad, multi-category exposure — social, messaging, gaming, shopping, and payments all represented. The heaviest concentration sits inside <b>Google's ecosystem</b> (Search, Pay, Photos, YouTube), which alone can connect identity, location, spending, and behavioral signals if account data were ever combined. Nothing here is verified or accessed — it is a structural read of what 15 well-known app categories <i>tend to</i> collect, scored for illustration only.
+      </div>
+    </div>
+  </div>
+
+  <div class="dfp-footer">
+    GENERATED FROM USER-PROVIDED FACTS ONLY · NO PRIVATE DATABASES QUERIED · NO REAL-TIME TRACKING DATA ACCESSED<br/>
+    ALL SCORES ARE HEURISTIC ESTIMATES FOR EDUCATIONAL ILLUSTRATION — NOT A CERTIFIED PRIVACY AUDIT
+  </div>
+
+</div>
+
+<script>
+(function(){
+
+  // ---------- DATA MODEL ----------
+  // category collection-likelihood, 0-100, estimate
+  var apps = [
+    {name:'Instagram',     parent:'Meta',        cat:'Social',        exposure:88, collect:{identity:'high',contacts:'high',location:'med',behavior:'high',financial:'low',content:'high',device:'high'}},
+    {name:'WhatsApp',      parent:'Meta',        cat:'Messaging',     exposure:70, collect:{identity:'high',contacts:'high',location:'med',behavior:'med',financial:'low',content:'med',device:'high'}},
+    {name:'TikTok',        parent:'ByteDance',   cat:'Social/Video',  exposure:90, collect:{identity:'high',contacts:'med',location:'med',behavior:'high',financial:'low',content:'high',device:'high'}},
+    {name:'Snapchat',      parent:'Snap Inc.',   cat:'Social',        exposure:80, collect:{identity:'high',contacts:'high',location:'high',behavior:'high',financial:'low',content:'high',device:'high'}},
+    {name:'YouTube',       parent:'Google',      cat:'Video',         exposure:82, collect:{identity:'high',contacts:'low',location:'med',behavior:'high',financial:'low',content:'high',device:'high'}},
+    {name:'Discord',       parent:'Discord Inc.',cat:'Messaging',     exposure:60, collect:{identity:'med',contacts:'med',location:'low',behavior:'med',financial:'low',content:'med',device:'med'}},
+    {name:'iMessage',      parent:'Apple',       cat:'Messaging',     exposure:35, collect:{identity:'med',contacts:'med',location:'low',behavior:'low',financial:'low',content:'low',device:'high'}},
+    {name:'Spotify',       parent:'Spotify',     cat:'Entertainment', exposure:55, collect:{identity:'med',contacts:'low',location:'med',behavior:'high',financial:'low',content:'med',device:'med'}},
+    {name:'Roblox',        parent:'Roblox Corp', cat:'Gaming',        exposure:65, collect:{identity:'med',contacts:'low',location:'low',behavior:'med',financial:'med',content:'med',device:'med'}},
+    {name:'PUBG Mobile',   parent:'Krafton',     cat:'Gaming',        exposure:62, collect:{identity:'med',contacts:'low',location:'med',behavior:'med',financial:'med',content:'low',device:'high'}},
+    {name:'Amazon',        parent:'Amazon',      cat:'Shopping',      exposure:78, collect:{identity:'high',contacts:'low',location:'high',behavior:'high',financial:'high',content:'low',device:'med'}},
+    {name:'Meesho',        parent:'Meesho',      cat:'Shopping',      exposure:58, collect:{identity:'med',contacts:'low',location:'high',behavior:'med',financial:'med',content:'low',device:'med'}},
+    {name:'Google Search', parent:'Google',      cat:'Search',        exposure:85, collect:{identity:'high',contacts:'low',location:'high',behavior:'high',financial:'low',content:'high',device:'high'}},
+    {name:'Google Pay',    parent:'Google',      cat:'Finance',       exposure:92, collect:{identity:'high',contacts:'low',location:'high',behavior:'high',financial:'high',content:'low',device:'high'}},
+    {name:'Google Photos', parent:'Google',      cat:'Cloud/Media',   exposure:75, collect:{identity:'high',contacts:'low',location:'high',behavior:'med',financial:'low',content:'high',device:'med'}}
+  ];
+
+  var levelColor = {high:'var(--red)', med:'var(--amber)', low:'var(--text-2)'};
+  function levelOf(score){
+    if(score>=81) return {label:'Extensive', emoji:'🔴', color:'var(--red)'};
+    if(score>=61) return {label:'Significant', emoji:'🟠', color:'var(--amber)'};
+    if(score>=31) return {label:'Moderate', emoji:'🟡', color:'#e0d24a'};
+    return {label:'Minimal', emoji:'🟢', color:'var(--green)'};
+  }
+
+  // ---------- 3. HEATMAP ----------
+  var hm = document.getElementById('dfp-heatmap');
+  apps.slice().sort(function(a,b){return b.exposure-a.exposure;}).forEach(function(a){
+    var lv = levelOf(a.exposure);
+    var cell = document.createElement('div');
+    cell.className = 'dfp-heat-cell';
+    cell.style.background = 'linear-gradient(160deg, rgba(255,255,255,0.02), transparent), ' + 'color-mix(in srgb, ' + lv.color + ' 10%, var(--bg-1))';
+    cell.style.borderColor = lv.color;
+    cell.innerHTML =
+      '<div class="dfp-heat-app">'+a.name+'</div>' +
+      '<div class="dfp-heat-bottom">' +
+        '<div><div class="dfp-heat-score" style="color:'+lv.color+'">'+a.exposure+'</div>' +
+        '<div class="dfp-heat-level" style="color:'+lv.color+'">'+lv.emoji+' '+lv.label+'</div></div>' +
+      '</div>';
+    hm.appendChild(cell);
+  });
+
+  // ---------- 4. COMPANY RANKING ----------
+  var byParent = {};
+  apps.forEach(function(a){
+    byParent[a.parent] = byParent[a.parent] || {apps:[], total:0};
+    byParent[a.parent].apps.push(a.name);
+    byParent[a.parent].total += a.exposure;
+  });
+  var parentArr = Object.keys(byParent).map(function(p){
+    var d = byParent[p];
+    return {parent:p, apps:d.apps, score: Math.round(d.total / d.apps.length) + (d.apps.length-1)*4 };
+  }).sort(function(a,b){return b.score-a.score;});
+  var maxScore = Math.max.apply(null, parentArr.map(function(p){return p.score;}));
+
+  var rk = document.getElementById('dfp-ranking');
+  parentArr.forEach(function(p, i){
+    var lv = levelOf(Math.min(p.score,100));
+    var row = document.createElement('div');
+    row.className = 'dfp-rank-row';
+    row.innerHTML =
+      '<div class="dfp-rank-idx">'+String(i+1).padStart(2,'0')+'</div>' +
+      '<div class="dfp-rank-name-wrap"><div class="dfp-rank-name">'+p.parent+'</div><div class="dfp-rank-apps">'+p.apps.join(' · ')+'</div></div>' +
+      '<div class="dfp-rank-bar-track"><div class="dfp-rank-bar-fill" style="width:'+Math.min(100,(p.score/maxScore)*100)+'%"></div></div>' +
+      '<div class="dfp-rank-score" style="color:'+lv.color+'">'+Math.min(p.score,100)+'</div>';
+    rk.appendChild(row);
+  });
+
+  // ---------- 5. DATA COLLECTION MATRIX ----------
+  var cats = ['identity','contacts','location','behavior','financial','content','device'];
+  var catLabels = {identity:'Identity',contacts:'Contacts',location:'Location',behavior:'Behavior',financial:'Financial',content:'Content',device:'Device'};
+  var table = document.getElementById('dfp-matrix-table');
+  var thead = '<thead><tr><th>App</th><th>Parent</th>' + cats.map(function(c){return '<th style="text-align:center">'+catLabels[c]+'</th>';}).join('') + '</tr></thead>';
+  var tbody = '<tbody>' + apps.map(function(a){
+    return '<tr><td class="dfp-matrix-app">'+a.name+'</td><td class="dfp-matrix-parent">'+a.parent+'</td>' +
+      cats.map(function(c){
+        return '<td><div class="dfp-dot-cell"><span class="dfp-collect-dot '+a.collect[c]+'" title="'+a.collect[c]+'"></span></div></td>';
+      }).join('') + '</tr>';
+  }).join('') + '</tbody>';
+  table.innerHTML = thead + tbody;
+
+  // ---------- 6. RISK RADAR ----------
+  var riskCats = [
+    {key:'Identity Exposure', val:78, color:'var(--red)'},
+    {key:'Location Tracking', val:64, color:'var(--amber)'},
+    {key:'Financial Visibility', val:58, color:'var(--amber)'},
+    {key:'Social Graph Mapping', val:82, color:'var(--red)'},
+    {key:'Behavioral Profiling', val:74, color:'var(--red)'},
+    {key:'Content/Media Exposure', val:60, color:'var(--amber)'}
+  ];
+  (function drawRadar(){
+    var svg = document.getElementById('dfp-radar-svg');
+    var cx=160, cy=160, R=110;
+    var n = riskCats.length;
+    var ns = 'http://www.w3.org/2000/svg';
+    function pt(i, r){
+      var ang = (Math.PI*2*i/n) - Math.PI/2;
+      return [cx + r*Math.cos(ang), cy + r*Math.sin(ang)];
+    }
+    // grid rings
+    [0.25,0.5,0.75,1].forEach(function(f){
+      var poly = document.createElementNS(ns,'polygon');
+      var pts = [];
+      for(var i=0;i<n;i++){ pts.push(pt(i, R*f).join(',')); }
+      poly.setAttribute('points', pts.join(' '));
+      poly.setAttribute('fill','none');
+      poly.setAttribute('stroke','rgba(255,255,255,0.07)');
+      poly.setAttribute('stroke-width','1');
+      svg.appendChild(poly);
+    });
+    // axes
+    for(var i=0;i<n;i++){
+      var p = pt(i,R);
+      var line = document.createElementNS(ns,'line');
+      line.setAttribute('x1',cx); line.setAttribute('y1',cy);
+      line.setAttribute('x2',p[0]); line.setAttribute('y2',p[1]);
+      line.setAttribute('stroke','rgba(255,255,255,0.07)');
+      svg.appendChild(line);
+    }
+    // data polygon
+    var dataPts = riskCats.map(function(c,i){ return pt(i, R*(c.val/100)); });
+    var poly = document.createElementNS(ns,'polygon');
+    poly.setAttribute('points', dataPts.map(function(p){return p.join(',');}).join(' '));
+    poly.setAttribute('fill','rgba(255,180,84,0.16)');
+    poly.setAttribute('stroke','var(--amber)');
+    poly.setAttribute('stroke-width','2');
+    svg.appendChild(poly);
+    dataPts.forEach(function(p){
+      var c = document.createElementNS(ns,'circle');
+      c.setAttribute('cx',p[0]); c.setAttribute('cy',p[1]); c.setAttribute('r','3.5');
+      c.setAttribute('fill','#ffb454');
+      svg.appendChild(c);
+    });
+    // labels
+    riskCats.forEach(function(c,i){
+      var p = pt(i, R+24);
+      var t = document.createElementNS(ns,'text');
+      t.setAttribute('x',p[0]); t.setAttribute('y',p[1]);
+      t.setAttribute('text-anchor', Math.abs(p[0]-cx)<5 ? 'middle' : (p[0]>cx?'start':'end'));
+      t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('font-family','var(--mono)');
+      t.setAttribute('font-size','9');
+      t.setAttribute('fill','#6b7387');
+      t.textContent = c.key.split(' ')[0];
+      svg.appendChild(t);
+    });
+  })();
+
+  var rl = document.getElementById('dfp-radar-legend');
+  riskCats.forEach(function(c){
+    var div = document.createElement('div');
+    div.className = 'dfp-radar-item';
+    div.innerHTML = '<span class="lbl"><span class="sw" style="background:'+c.color+'"></span>'+c.key+'</span><span class="val" style="color:'+c.color+'">'+c.val+'</span>';
+    rl.appendChild(div);
+  });
+
+  // ---------- 7. DIGITAL TWIN ----------
+  var twinTraits = [
+    {trait:'Life stage', desc:'Mix of gaming (Roblox, PUBG Mobile), social/video (TikTok, Instagram, Snapchat) and a payments app suggests either a younger user with growing independence, or a shared/family device.', conf:2},
+    {trait:'Geography', desc:'Meesho is predominantly used in India; combined with Google Pay (strong UPI presence in India), a India-based usage pattern is plausible.', conf:3},
+    {trait:'Social style', desc:'Presence across Instagram, Snapchat, TikTok, Discord and two messengers (WhatsApp, iMessage) points to a highly social, multi-platform communicator.', conf:3},
+    {trait:'Spending behavior', desc:'Amazon + Meesho + Google Pay together suggest comfort with online shopping and digital payments, possibly price-comparison shopping across platforms.', conf:2},
+    {trait:'Entertainment habits', desc:'YouTube + Spotify + TikTok indicate heavy video/audio streaming consumption, likely daily.', conf:3},
+    {trait:'Device ecosystem', desc:'iMessage suggests an iPhone is in use; Google Photos/Pay suggest an Android device or Google account may also be active — possibly a mixed-device household.', conf:1}
+  ];
+  var tw = document.getElementById('dfp-twin');
+  twinTraits.forEach(function(t){
+    var dots = '';
+    for(var i=1;i<=3;i++){ dots += '<i class="'+(i<=t.conf?'on':'')+'"></i>'; }
+    var div = document.createElement('div');
+    div.className = 'dfp-twin-card';
+    div.innerHTML = '<div class="dfp-twin-trait">'+t.trait+'<span class="dfp-confidence">'+dots+'</span></div><div class="dfp-twin-desc">'+t.desc+'</div>';
+    tw.appendChild(div);
+  });
+
+  // ---------- 8. MOST VALUABLE DATA ASSETS ----------
+  var assets = [
+    {name:'Real-time & home location', source:'Google Pay, Google Search, Meesho', val:95, why:'Payment + search + delivery apps together can estimate home, work, and routine locations with high estimated commercial value.'},
+    {name:'Social graph', source:'WhatsApp, Instagram, Discord, Snapchat', val:90, why:'Contacts and connections across 4 messaging/social apps form a dense estimated relationship map.'},
+    {name:'Purchase intent & spend signals', source:'Amazon, Meesho, Google Pay', val:88, why:'Shopping plus payment apps are estimated to carry the highest direct advertising/resale value.'},
+    {name:'Content consumption profile', source:'YouTube, TikTok, Spotify', val:82, why:'Watch/listen history is estimated to build a detailed interest and mood profile over time.'},
+    {name:'Identity & biometric-adjacent data', source:'Google Photos, Instagram, Snapchat', val:80, why:'Camera-heavy apps may estimate facial/photo metadata, though exact use is unverified.'},
+    {name:'Behavioral & device fingerprint', source:'All 15 apps (cumulative)', val:76, why:'Combined app usage patterns are estimated to enable cross-app device fingerprinting.'}
+  ];
+  var ag = document.getElementById('dfp-assets');
+  assets.sort(function(a,b){return b.val-a.val;}).forEach(function(a,i){
+    var div = document.createElement('div');
+    div.className = 'dfp-asset-card';
+    div.innerHTML =
+      '<div class="dfp-asset-rank">#'+(i+1)+'</div>' +
+      '<div class="dfp-asset-name">'+a.name+'</div>' +
+      '<div class="dfp-asset-source">'+a.source+'</div>' +
+      '<div class="dfp-asset-val-bar-track"><div class="dfp-asset-val-bar-fill" style="width:'+a.val+'%"></div></div>' +
+      '<div class="dfp-asset-why">'+a.why+'</div>';
+    ag.appendChild(div);
+  });
+
+  // ---------- WOW INSIGHTS ----------
+  var wow = document.getElementById('dfp-wow');
+  wow.innerHTML =
+    '<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:14px;">' +
+    '<div class="dfp-twin-card"><div class="dfp-twin-trait">Cross-app overlap <span class="dfp-confidence"><i class="on"></i><i class="on"></i><i></i></span></div><div class="dfp-twin-desc">4 of your 15 apps sit inside Google alone (Search, Pay, Photos, YouTube) — an estimated single point capable of correlating identity, finances, and media if account data were ever linked.</div></div>' +
+    '<div class="dfp-twin-card"><div class="dfp-twin-trait">Messaging redundancy <span class="dfp-confidence"><i class="on"></i><i class="on"></i><i></i></span></div><div class="dfp-twin-desc">Running WhatsApp, iMessage, and Discord in parallel is estimated to triple the number of places your contact list and message metadata could exist.</div></div>' +
+    '<div class="dfp-twin-card"><div class="dfp-twin-trait">Gaming + payments adjacency <span class="dfp-confidence"><i class="on"></i><i></i><i></i></span></div><div class="dfp-twin-desc">Roblox and PUBG Mobile both support in-app purchases; combined with Google Pay in your stack, an estimated in-app spending pattern may exist, though not confirmed.</div></div>' +
+    '<div class="dfp-twin-card"><div class="dfp-twin-trait">Highest single-app exposure <span class="dfp-confidence"><i class="on"></i><i class="on"></i><i class="on"></i></span></div><div class="dfp-twin-desc">Google Pay carries the highest estimated exposure score (92/100) in this set — financial apps typically combine identity, location, and transaction data in one place.</div></div>' +
+    '</div>';
+
+  // ---------- 10. PRIVACY IMPROVEMENT PLAN ----------
+  var plan = [
+    {impact:'high', title:'Review Google account-level ad personalization', desc:'Google Pay, Search, YouTube and Photos all feed the same Google ad profile — one settings change affects 4 apps at once.'},
+    {impact:'high', title:'Limit location permissions on shopping & payment apps', desc:'Amazon, Meesho and Google Pay are estimated to request precise location by default; set to "while using" or off where possible.'},
+    {impact:'med', title:'Audit social app contact-sync permissions', desc:'Instagram, Snapchat, TikTok and WhatsApp commonly request contact list access — review and revoke where not needed.'},
+    {impact:'med', title:'Separate gaming accounts from primary identity', desc:'Roblox and PUBG Mobile profiles tied to a real name/email are estimated to widen the identity-linkage surface.'},
+    {impact:'low', title:'Consolidate messaging apps where possible', desc:'Running 3 messengers (WhatsApp, iMessage, Discord) is estimated to fragment your data across more companies than necessary.'}
+  ];
+  var pl = document.getElementById('dfp-plan');
+  plan.forEach(function(p){
+    var div = document.createElement('div');
+    div.className = 'dfp-plan-item';
+    div.innerHTML = '<span class="dfp-plan-impact '+p.impact+'">'+p.impact.toUpperCase()+'</span><div class="dfp-plan-text"><b>'+p.title+'</b><span>'+p.desc+'</span></div>';
+    pl.appendChild(div);
+  });
+
+  // ---------- SIMULATOR ----------
+  var s1 = document.getElementById('dfp-sim-slider-1');
+  var s2 = document.getElementById('dfp-sim-slider-2');
+  var s3 = document.getElementById('dfp-sim-slider-3');
+  var l1 = document.getElementById('dfp-sim-label-1');
+  var l2 = document.getElementById('dfp-sim-label-2');
+  var l3 = document.getElementById('dfp-sim-label-3');
+  var after = document.getElementById('dfp-sim-after');
+
+  function updateSim(){
+    l1.textContent = 'Limit ad personalization: ' + s1.value + ' apps';
+    l2.textContent = 'Disable precise location: ' + s2.value + ' apps';
+    l3.textContent = 'Remove unused / consolidate: ' + s3.value + ' apps';
+    var gain = (parseInt(s1.value)*1.6) + (parseInt(s2.value)*1.8) + (parseInt(s3.value)*3.2);
+    var newScore = Math.min(100, Math.round(46 + gain));
+    after.textContent = newScore;
+    after.style.color = newScore>=81?'var(--green)': newScore>=61?'#9fdb5e' : newScore>=31?'var(--amber)':'var(--red)';
+  }
+  [s1,s2,s3].forEach(function(s){ s.addEventListener('input', updateSim); });
+  updateSim();
+
+})();
+</script>
