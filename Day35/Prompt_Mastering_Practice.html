@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧩 Prompt Puzzle — Master AI Prompting Through Play</title>
+<style>
+  :root{
+    --bg-0:#0a0e17;
+    --bg-1:#0f1420;
+    --bg-2:#161d2e;
+    --card:#141a29;
+    --card-2:#1b2436;
+    --border:#2a3450;
+    --accent:#7c5cff;
+    --accent-2:#22d3ee;
+    --accent-3:#34d399;
+    --warn:#fbbf24;
+    --danger:#fb7185;
+    --text-0:#f4f6fb;
+    --text-1:#b8c1d9;
+    --text-2:#7c88a8;
+    --shadow: 0 20px 60px rgba(0,0,0,0.45);
+    --radius: 16px;
+    font-size: 16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family: 'Segoe UI', 'Helvetica Neue', system-ui, -apple-system, Arial, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(124,92,255,0.18), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(34,211,238,0.14), transparent 55%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-0));
+    color: var(--text-0);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  #app{max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px;}
+  ::selection{background: rgba(124,92,255,0.4);}
+
+  /* ---------- Header ---------- */
+  .app-header{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; flex-wrap:wrap; margin-bottom: 22px;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand .logo{
+    font-size:28px; width:52px; height:52px; display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius:14px; box-shadow: var(--shadow);
+  }
+  .brand h1{font-size:19px; margin:0; font-weight:700; letter-spacing:0.2px;}
+  .brand .sub{font-size:12px; color:var(--text-2); margin-top:2px;}
+
+  .score-panel{
+    display:flex; gap:10px; flex-wrap:wrap; background: rgba(255,255,255,0.03);
+    border:1px solid var(--border); border-radius: 14px; padding:10px 14px;
+    backdrop-filter: blur(8px);
+  }
+  .score-item{text-align:center; min-width:58px; position:relative;}
+  .score-item .val{font-size:16px; font-weight:800; font-variant-numeric: tabular-nums;}
+  .score-item .lbl{font-size:9px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-2); margin-top:1px;}
+  .score-item.pulse .val{animation: pop 0.45s ease;}
+  @keyframes pop{
+    0%{transform:scale(1); color:var(--text-0);}
+    40%{transform:scale(1.35); color:var(--accent-3);}
+    100%{transform:scale(1);}
+  }
+  .floatnum{
+    position:absolute; top:-8px; left:50%; transform:translateX(-50%);
+    font-size:11px; font-weight:800; color:var(--accent-3);
+    animation: floatUp 0.9s ease forwards; pointer-events:none; white-space:nowrap;
+  }
+  @keyframes floatUp{
+    0%{opacity:0; transform:translate(-50%,4px);}
+    20%{opacity:1;}
+    100%{opacity:0; transform:translate(-50%,-26px);}
+  }
+
+  /* ---------- Progress ---------- */
+  .progress-wrap{display:flex; align-items:center; gap:8px; margin-bottom:22px;}
+  .progress-track{
+    flex:1; height:8px; background: rgba(255,255,255,0.06); border-radius:999px; overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .progress-fill{
+    height:100%; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius:999px; transition: width 0.5s cubic-bezier(.4,1.6,.5,1);
+  }
+  .dots{display:flex; gap:6px;}
+  .dot{width:9px; height:9px; border-radius:50%; background: var(--border); transition: all 0.3s;}
+  .dot.done{background: var(--accent-3);}
+  .dot.active{background: var(--accent-2); transform: scale(1.3); box-shadow: 0 0 0 3px rgba(34,211,238,0.2);}
+
+  /* ---------- Cards ---------- */
+  .card{
+    background: linear-gradient(180deg, var(--card), var(--card-2));
+    border:1px solid var(--border); border-radius: var(--radius);
+    padding: 26px; box-shadow: var(--shadow);
+    animation: cardIn 0.45s ease;
+  }
+  @keyframes cardIn{
+    from{opacity:0; transform: translateY(14px);}
+    to{opacity:1; transform: translateY(0);}
+  }
+  .badge{
+    display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.06em; padding:5px 11px; border-radius:999px;
+    background: rgba(124,92,255,0.15); color: var(--accent-2); border:1px solid rgba(124,92,255,0.35);
+    margin-bottom:12px;
+  }
+  h2.title{margin:6px 0 10px; font-size:22px; letter-spacing:0.2px;}
+  .desired{
+    background: rgba(34,211,238,0.06); border-left:3px solid var(--accent-2);
+    padding:12px 16px; border-radius:8px; font-size:14px; color: var(--text-1); margin-bottom:20px; line-height:1.55;
+  }
+  .desired b{color:var(--text-0);}
+  .instructions{font-size:13px; color:var(--text-2); margin-bottom:18px; line-height:1.5;}
+
+  /* ---------- Bank & Slots ---------- */
+  .zone-label{font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-2); margin: 18px 0 8px; font-weight:700;}
+  .bank{
+    display:flex; flex-wrap:wrap; gap:10px; min-height:52px; padding:12px;
+    background: rgba(255,255,255,0.02); border:1px dashed var(--border); border-radius:12px;
+  }
+  .chip{
+    padding:10px 14px; background: var(--card-2); border:1px solid var(--border); border-radius:10px;
+    font-size:13px; cursor:grab; user-select:none; transition: all 0.18s ease; line-height:1.4;
+    max-width: 100%; color: var(--text-1);
+  }
+  .chip:hover{border-color: var(--accent); color:var(--text-0); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(124,92,255,0.15);}
+  .chip.selected{border-color: var(--accent-2); background: rgba(34,211,238,0.12); color:var(--text-0); box-shadow: 0 0 0 2px rgba(34,211,238,0.25);}
+  .chip.dragging{opacity:0.4;}
+  .chip.small{font-size:11.5px; padding:8px 11px;}
+
+  .slots{display:flex; flex-direction:column; gap:8px;}
+  .slot{
+    min-height:48px; border:1.5px dashed var(--border); border-radius:10px; padding:10px 14px;
+    display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-2);
+    transition: all 0.2s ease; background: rgba(255,255,255,0.015);
+  }
+  .slot .num{
+    width:22px; height:22px; border-radius:50%; background: var(--card-2); color:var(--text-2);
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0;
+  }
+  .slot.filled{border-style:solid; color:var(--text-0); border-color: var(--accent); cursor:pointer;}
+  .slot.filled .num{background: var(--accent); color:#fff;}
+  .slot.over{border-color: var(--accent-2); background: rgba(34,211,238,0.08); transform: scale(1.01);}
+  .slot.correct{border-color: var(--accent-3); background: rgba(52,211,153,0.08);}
+  .slot.correct .num{background: var(--accent-3);}
+  .slot.wrong{border-color: var(--danger); background: rgba(251,113,133,0.08);}
+  .slot.wrong .num{background: var(--danger);}
+  .slot.empty-warn{border-color: var(--warn);}
+
+  /* ---------- Choose cards ---------- */
+  .choices{display:flex; flex-direction:column; gap:12px;}
+  .choice-card{
+    border:1.5px solid var(--border); border-radius:12px; padding:14px 16px; cursor:pointer;
+    transition: all 0.2s ease; background: rgba(255,255,255,0.015); position:relative;
+  }
+  .choice-card:hover{border-color: var(--accent); transform: translateX(3px);}
+  .choice-card.picked{border-color: var(--accent-2); background: rgba(34,211,238,0.08); box-shadow: 0 0 0 2px rgba(34,211,238,0.2);}
+  .choice-card .clabel{
+    display:inline-flex; width:24px; height:24px; border-radius:50%; background: var(--card-2);
+    align-items:center; justify-content:center; font-size:11px; font-weight:800; margin-right:10px; color:var(--text-1);
+  }
+  .choice-card.picked .clabel{background: var(--accent-2); color:#04141a;}
+  .choice-card .ctext{font-size:13px; color:var(--text-1); line-height:1.5; white-space:pre-line;}
+  .choice-card.correct-reveal{border-color: var(--accent-3);}
+  .choice-card.wrong-reveal{border-color: var(--danger); opacity:0.75;}
+  .tag-reveal{font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; margin-left:8px; padding:2px 8px; border-radius:999px;}
+  .tag-optimized{background: rgba(52,211,153,0.18); color:var(--accent-3);}
+  .tag-weak{background: rgba(251,113,133,0.18); color:var(--danger);}
+  .tag-over{background: rgba(251,191,36,0.18); color:var(--warn);}
+  .tag-distractor{background: rgba(255,255,255,0.08); color:var(--text-2);}
+
+  /* ---------- Actions ---------- */
+  .actions{display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; align-items:center;}
+  .btn{
+    border:none; border-radius:10px; padding:12px 20px; font-size:14px; font-weight:700; cursor:pointer;
+    transition: all 0.18s ease; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff;}
+  .btn-primary:hover{transform: translateY(-2px); box-shadow: 0 10px 24px rgba(124,92,255,0.35);}
+  .btn-primary:disabled{opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none;}
+  .btn-ghost{background: rgba(255,255,255,0.05); color:var(--text-1); border:1px solid var(--border);}
+  .btn-ghost:hover{color:var(--text-0); border-color:var(--accent);}
+  .btn-ghost:disabled{opacity:0.35; cursor:not-allowed;}
+  .btn-danger{background: rgba(251,113,133,0.12); color:var(--danger); border:1px solid rgba(251,113,133,0.3);}
+
+  /* ---------- Feedback panel ---------- */
+  .feedback{margin-top:22px; padding-top:20px; border-top:1px dashed var(--border); animation: cardIn 0.4s ease;}
+  .fb-grid{display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin: 14px 0;}
+  @media(max-width:680px){.fb-grid{grid-template-columns:1fr;}}
+  .fb-box{border-radius:10px; padding:14px; font-size:12.5px; line-height:1.6;}
+  .fb-weak{background: rgba(251,113,133,0.06); border:1px solid rgba(251,113,133,0.25);}
+  .fb-opt{background: rgba(52,211,153,0.06); border:1px solid rgba(52,211,153,0.25);}
+  .fb-box h4{margin:0 0 8px; font-size:11.5px; text-transform:uppercase; letter-spacing:0.06em;}
+  .fb-weak h4{color:var(--danger);}
+  .fb-opt h4{color:var(--accent-3);}
+  .principle{
+    margin-top:14px; background: rgba(124,92,255,0.08); border:1px solid rgba(124,92,255,0.3);
+    border-radius:10px; padding:14px; font-size:13px; color:var(--text-1); line-height:1.6;
+  }
+  .principle b{color: var(--accent-2);}
+
+  /* ---------- Welcome ---------- */
+  .welcome-card{text-align:center; padding:44px 30px;}
+  .welcome-card .emoji{font-size:52px;}
+  .welcome-card h2{font-size:26px; margin: 10px 0 6px;}
+  .welcome-card p.lead{color:var(--text-1); font-size:14.5px; max-width:520px; margin:0 auto 22px; line-height:1.6;}
+  .pills{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:26px;}
+  .pill{background: rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:999px; padding:8px 16px; font-size:12.5px; color:var(--text-1);}
+  .pill b{color:var(--text-0);}
+  .types-grid{display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin: 26px 0; text-align:left;}
+  @media(max-width:680px){.types-grid{grid-template-columns:1fr;}}
+  .type-card{background: rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:16px;}
+  .type-card .ti{font-size:22px; margin-bottom:6px;}
+  .type-card h5{margin:0 0 6px; font-size:13.5px;}
+  .type-card p{margin:0; font-size:12px; color:var(--text-2); line-height:1.5;}
+
+  /* ---------- Report ---------- */
+  .report-hero{text-align:center; padding: 20px 10px 30px;}
+  .report-score{font-size:64px; font-weight:900; background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip:text; background-clip:text; color:transparent; line-height:1;}
+  .report-rating{font-size:18px; font-weight:800; margin-top:6px;}
+  .report-rank{color:var(--text-2); font-size:13px; margin-top:4px;}
+  .stat-row{display:grid; grid-template-columns: repeat(5,1fr); gap:10px; margin: 26px 0;}
+  @media(max-width:680px){.stat-row{grid-template-columns: repeat(2,1fr);}}
+  .stat-box{background: rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:14px 10px; text-align:center;}
+  .stat-box .sv{font-size:19px; font-weight:800;}
+  .stat-box .sl{font-size:10px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-top:3px;}
+
+  .dna-wrap{margin: 24px 0;}
+  .dna-row{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .dna-label{width:100px; font-size:12.5px; color:var(--text-1); flex-shrink:0;}
+  .dna-track{flex:1; height:10px; background: rgba(255,255,255,0.05); border-radius:999px; overflow:hidden; border:1px solid var(--border);}
+  .dna-fill{height:100%; border-radius:999px; width:0%; transition: width 1.1s cubic-bezier(.3,1.4,.5,1);}
+  .dna-val{width:34px; text-align:right; font-size:12px; font-weight:700; color:var(--text-1);}
+
+  .feedback-block{background: rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:18px; margin-top:8px; font-size:13.5px; line-height:1.65; color:var(--text-1);}
+  .feedback-block b{color:var(--text-0);}
+  .milestone{background: rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.3); border-radius:12px; padding:14px 16px; margin-top:14px; font-size:13px; color:var(--text-1);}
+  .milestone b{color:var(--warn);}
+  .final-prompt{background: var(--bg-0); border:1px solid var(--border); border-radius:12px; padding:16px; margin-top:14px; font-size:12.5px; color:var(--accent-2); white-space:pre-line; line-height:1.7; font-family: 'Consolas','Courier New',monospace;}
+
+  /* ---------- Toasts ---------- */
+  #toast-container{position:fixed; top:20px; right:20px; z-index:999; display:flex; flex-direction:column; gap:10px; max-width: 300px;}
+  .toast{
+    background: var(--card-2); border:1px solid var(--border); border-radius:10px; padding:12px 16px;
+    font-size:13px; box-shadow: var(--shadow); animation: toastIn 0.35s ease, toastOut 0.4s ease 2.6s forwards;
+    display:flex; align-items:center; gap:8px;
+  }
+  .toast.success{border-color: rgba(52,211,153,0.4); color:#a7f3d0;}
+  .toast.error{border-color: rgba(251,113,133,0.4); color:#fecdd3;}
+  .toast.info{border-color: rgba(34,211,238,0.4); color:#a5f3fc;}
+  @keyframes toastIn{from{opacity:0; transform: translateX(30px);} to{opacity:1; transform:translateX(0);}}
+  @keyframes toastOut{to{opacity:0; transform: translateX(30px);}}
+
+  .footer-note{text-align:center; color:var(--text-2); font-size:11.5px; margin-top:30px;}
+  a, a:visited{color:var(--accent-2);}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+<div id="app"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     SCENARIO DATA — Domain: Data Analysis & Business Intelligence
+     Difficulty: Advanced
+  ============================================================ */
+  const SCENARIOS = [
+    {
+      id:'s1', type:'build',
+      title:'Cohort Retention Deep-Dive',
+      desiredOutput:"A prompt that makes the AI compute monthly cohort retention, pinpoint the cohort with the steepest 90-day drop-off, and deliver 3 data-backed interventions in an executive-ready markdown report.",
+      correctBlocks:[
+        "Role: Act as a senior SaaS data analyst who specializes in retention and churn modeling.",
+        "Context: You are given monthly active user records for cohorts from Jan–Dec 2024, including signup month, plan tier, and last-active date.",
+        "Task: Calculate month-over-month retention for every cohort and identify which cohort shows the steepest 90-day drop-off.",
+        "Constraints: Base every conclusion strictly on the provided dataset and explicitly flag any assumption you make.",
+        "Output format: A markdown report containing a retention table, a 3-bullet root-cause summary, and 3 prioritized, data-backed interventions."
+      ],
+      distractorBlocks:[
+        "Make the tone extremely casual and add emojis to every line.",
+        "Skip the analysis and just guess based on typical SaaS industry averages.",
+        "Write a 1500-word history of subscription business models.",
+        "Answer in one word only."
+      ],
+      weakPrompt:"Check the retention data and tell me what's going on.",
+      overEngineeredPrompt:"Role: Act as the world's most elite, Nobel-prize-winning SaaS analyst. Context: [full dataset] but also factor in astrology and Twitter sentiment. Task: recompute retention 10 times for accuracy, cross-validate with 5 unrelated frameworks (RFM, NPS, CLV, cohort, Kaplan-Meier), output in JSON, XML, markdown, and a PowerPoint outline simultaneously, then translate the final answer into 3 languages. Constraints: none. Output format: a 6000-word exhaustive dissertation covering every possible angle, relevant or not.",
+      weakOutput:"It looks like some users are leaving over time. You might want to look into why and maybe improve onboarding.",
+      optimizedOutput:"Retention Table: Jan cohort 62% (Day90) ... Aug cohort steepest drop, 31% (Day90).\nRoot Causes: 1) Onboarding drop after day 7  2) Pricing-tier mismatch  3) Feature discovery gap.\nRecommended Interventions: 1) Guided in-app setup for week 1  2) Tier-based re-engagement email  3) Proactive CS outreach at day-60 risk flag.",
+      principle:"Specificity + Structure: naming the role, grounding the model in exact context, stating one clear task, adding constraints against hallucination, and specifying output format converts a vague ask into a reproducible, decision-ready analysis."
+    },
+    {
+      id:'s2', type:'build',
+      title:'Executive KPI Dashboard Narrative',
+      desiredOutput:"A prompt that turns a messy raw CSV export into a concise, board-ready KPI narrative highlighting the 3 most important trends and one recommended action.",
+      correctBlocks:[
+        "Role: Act as a BI analyst preparing a summary for a company's executive leadership team.",
+        "Context: The input is a raw CSV export of weekly revenue, churn, CAC, and NPS for the last 12 weeks, with some missing values.",
+        "Task: Clean the data, compute week-over-week trend for each KPI, and surface the 3 most business-critical trends.",
+        "Constraints: Do not editorialize beyond what the numbers support; note any weeks with missing or unreliable data.",
+        "Output format: A 150-word executive summary followed by a bullet list of the 3 trends and 1 recommended next action."
+      ],
+      distractorBlocks:[
+        "Include every single raw data point in the response.",
+        "Use as much technical jargon as possible to sound impressive.",
+        "Write a poem summarizing the KPIs.",
+        "Recommend firing the team responsible for the worst metric."
+      ],
+      weakPrompt:"Summarize this KPI data for my boss.",
+      overEngineeredPrompt:"Role: Act as a Fortune-500 Chief Data Officer with 40 years of experience. Context: [same data] plus assume hidden macroeconomic variables. Task: run seventeen different statistical tests, produce confidence intervals for everything, generate a slide deck outline, a memo, a tweet thread, and a haiku. Constraints: must be exactly 3000 words and cite fictional sources for credibility. Output format: nested bullet points 6 levels deep in 4 different formats.",
+      weakOutput:"Revenue went up a bit, churn is kind of high, and NPS looks okay I guess.",
+      optimizedOutput:"Executive Summary: Revenue grew 4% WoW driven by upsells, but churn ticked up 1.2pts in weeks 9–11, partially offsetting gains; NPS held steady at 42.\nKey Trends: 1) Revenue +4% WoW (upsell-driven)  2) Churn +1.2pts (weeks 9–11, missing data week 10)  3) CAC flat.\nRecommended Action: Investigate the week 9–11 churn spike before the next pricing change.",
+      principle:"Role framing plus explicit constraints against editorializing keep the model's output grounded, concise, and appropriately scoped for a real business audience."
+    },
+    {
+      id:'s3', type:'clean',
+      title:'A/B Test Significance Prompt Cleanup',
+      desiredOutput:"A clean, statistically rigorous prompt that gets the AI to correctly evaluate whether an A/B test result is statistically significant and explain the business implication.",
+      correctBlocks:[
+        "Role: Act as a statistician reviewing an A/B test for a product team.",
+        "Context: Variant A had 10,200 users with 612 conversions; Variant B had 10,150 users with 690 conversions.",
+        "Task: Determine whether the difference in conversion rate is statistically significant at a 95% confidence level, using a two-proportion z-test.",
+        "Constraints: Show the calculation logic, not just the conclusion; state the p-value explicitly.",
+        "Output format: A short verdict (Significant/Not Significant), the p-value, and one sentence on the business implication."
+      ],
+      distractorBlocks:[
+        "Just say yes or no, don't show any math.",
+        "Assume the sample sizes are equal even though they aren't.",
+        "Add a disclaimer that statistics are inherently untrustworthy.",
+        "Include a random inspirational quote about data-driven decisions."
+      ],
+      weakPrompt:"Is B better than A?",
+      overEngineeredPrompt:"Role: Act as a tenured statistics professor emeritus. Context: [same data] plus irrelevant historical A/B testing case studies from 1990s direct mail. Task: run z-test, t-test, chi-square, Bayesian A/B analysis, and bootstrap resampling with 100,000 iterations, then reconcile all five methods into one grand unified theory. Constraints: must include a proof from first principles. Output format: an 8-page academic paper with abstract, literature review, and appendix.",
+      weakOutput:"B has more conversions so it's probably better.",
+      optimizedOutput:"Verdict: Significant.\np-value: 0.031 (two-proportion z-test, 95% CI)\nBusiness Implication: Variant B's conversion lift is statistically real, not noise — safe to roll out to 100% of traffic.",
+      principle:"Naming the exact statistical method and requiring the calculation logic prevents the model from giving a confident-sounding but statistically unjustified answer."
+    },
+    {
+      id:'s4', type:'clean',
+      title:'Sales Forecasting Prompt Cleanup',
+      desiredOutput:"A clean prompt that produces a defensible Q3 sales forecast with a clearly stated method and confidence range, free of contradictions.",
+      correctBlocks:[
+        "Role: Act as a demand-planning analyst building a sales forecast for leadership.",
+        "Context: You have monthly sales data for the last 24 months, including seasonality and one known one-time promotional spike in month 14.",
+        "Task: Forecast Q3 sales using a method appropriate for seasonal data, excluding the one-time spike as an outlier.",
+        "Constraints: State the forecasting method used and provide a confidence range, not a single point estimate.",
+        "Output format: One paragraph explaining the method, followed by a 3-month forecast table with low/mid/high estimates."
+      ],
+      distractorBlocks:[
+        "Ignore seasonality entirely to keep it simple.",
+        "Include the one-time promotional spike as if it were a normal recurring month.",
+        "Give only a single exact number with no range, framed as 100% certain.",
+        "Change the forecasting method halfway through for variety."
+      ],
+      weakPrompt:"Forecast next quarter's sales.",
+      overEngineeredPrompt:"Role: Act as a quant hedge fund forecasting team. Context: [same data] plus unrelated macroeconomic indicators, weather patterns, and social media sentiment. Task: build 6 different forecasting models (ARIMA, Prophet, LSTM, exponential smoothing, linear regression, and a Ouija board), ensemble them with custom invented weights, and reconcile disagreements via a 12-round debate transcript between the models. Constraints: must be reproducible in Excel, R, Python, and by hand. Output format: a 40-page whitepaper.",
+      weakOutput:"Sales will probably keep going up like they usually do.",
+      optimizedOutput:"Method: Seasonal decomposition (excluding the month-14 promo spike as an outlier) with a 3-month moving trend projection.\nQ3 Forecast:\nJul: Low 210k / Mid 228k / High 245k\nAug: Low 205k / Mid 224k / High 240k\nSep: Low 220k / Mid 240k / High 258k",
+      principle:"Resolving contradictions (seasonality vs. simplicity, outlier handling) and requiring a stated method with a confidence range produces a forecast leadership can actually trust and act on."
+    },
+    {
+      id:'s5', type:'choose',
+      title:'Root Cause of Revenue Drop',
+      desiredOutput:"The best prompt for diagnosing why Q2 revenue dropped 12% versus Q1, backed by structured hypothesis testing against the data.",
+      weakPrompt:"Why did revenue drop?",
+      optimizedPrompt:"Role: Act as a senior revenue operations analyst.\nContext: Q2 revenue fell 12% vs Q1; you have deal-level CRM data (stage, close date, deal size, lost reason) and marketing spend by channel for both quarters.\nTask: Test the 3 most likely hypotheses (deal volume drop, average deal size drop, or win-rate drop) against the data and identify which one(s) actually explain the decline.\nConstraints: Quantify the contribution of each hypothesis; don't speculate beyond what the data shows.\nOutput format: A ranked list of hypotheses with % contribution to the drop, followed by 2 recommended next investigative steps.",
+      overEngineeredPrompt:"Role: Act as a McKinsey senior partner combined with a data scientist combined with a psychic.\nContext: [same data] plus require macroeconomic GDP data, competitor earnings calls, and lunar cycles.\nTask: test 47 hypotheses across every conceivable business dimension simultaneously, build a full attribution model with Shapley values, a causal DAG, and a Monte Carlo simulation with 1 million runs, then write a fictional narrative from the CFO's perspective.\nConstraints: must resolve with 100% certainty.\nOutput format: a 25-slide board deck with speaker notes, an appendix, and a movie-trailer-style summary.",
+      distractorPrompt:"Write a motivational speech for the sales team about hitting next quarter's targets.",
+      weakOutput:"Revenue probably dropped because the market is tough right now.",
+      optimizedOutput:"Hypothesis Ranking: 1) Win-rate drop — 61% of the decline (win rate fell from 28% to 19%)  2) Avg deal size drop — 27% of the decline  3) Deal volume — 12% of the decline (not significant).\nNext Steps: 1) Audit lost-reason tags on deals lost in Q2  2) Review competitive positioning in deals lost to 'chose competitor'.",
+      principle:"The best diagnostic prompt scopes the investigation to a few testable, data-grounded hypotheses and demands quantified attribution — broad enough to be useful, narrow enough to be answerable from the actual data."
+    },
+    {
+      id:'s6', type:'choose',
+      title:'RFM Customer Segmentation',
+      desiredOutput:"The best prompt for segmenting a customer base using Recency, Frequency, Monetary (RFM) analysis to identify the highest-value at-risk segment.",
+      weakPrompt:"Group my customers into categories.",
+      optimizedPrompt:"Role: Act as a CRM analytics specialist.\nContext: You have transaction-level data (customer ID, order date, order value) for the last 18 months.\nTask: Compute Recency, Frequency, and Monetary scores for each customer, segment them into standard RFM tiers, and identify the segment that is both high-value and at risk of churning (high Monetary, declining Recency).\nConstraints: Use quintile-based scoring (1–5) for each RFM dimension and show the scoring thresholds used.\nOutput format: A segment summary table (segment name, customer count, avg monetary value) plus a 2-sentence call-out on the highest-priority at-risk segment.",
+      overEngineeredPrompt:"Role: Act as the inventor of RFM analysis reincarnated as an AI.\nContext: [same data] plus require zodiac sign and shoe size per customer.\nTask: compute RFM plus 30 additional invented dimensions, cluster with k-means, hierarchical clustering, DBSCAN, and a neural network simultaneously, then merge all four into a single mystical 'Customer Value Constant'.\nConstraints: must be philosophically defensible.\nOutput format: a 5000-word manifesto with footnotes in Latin.",
+      distractorPrompt:"Design a loyalty program logo for the top customer segment.",
+      weakOutput:"Some customers buy a lot, some don't buy much. You could call them 'big spenders' and 'small spenders'.",
+      optimizedOutput:"Segment Summary:\nChampions — 412 customers — avg $2,140\nAt-Risk High-Value — 187 customers — avg $1,860\nNew — 305 customers — avg $310\nCall-out: The At-Risk High-Value segment (187 customers, R-score ≤2, M-score ≥4) represents disproportionate revenue risk — prioritize a win-back campaign here first.",
+      principle:"A strong segmentation prompt specifies the exact method (RFM, quintile scoring) and the specific business question (which segment is high-value AND at risk) instead of leaving 'group my customers' open to any arbitrary clustering approach."
+    }
+  ];
+
+  const INSTRUCTIONS = {
+    build:"Drag or click the correct blocks into the slots below, in the right order, to construct an optimized prompt.",
+    clean:"This prompt got messy — noisy, vague, or contradictory blocks got mixed in. Select only the essential blocks, in the right order, and leave the noise behind in the bank.",
+    choose:"Read all the options carefully, then click the single best prompt for the desired output."
+  };
+  const TYPE_LABEL = { build:'🧱 Build the Prompt', clean:'🧹 Clean the Prompt', choose:'🎯 Choose the Best Prompt' };
+
+  /* ============================================================
+     UTILITIES
+  ============================================================ */
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+  function toast(msg, type){
+    type = type || 'info';
+    const c = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    const icon = type==='success' ? '✅' : type==='error' ? '⚠️' : '💡';
+    el.innerHTML = '<span>'+icon+'</span><span>'+escapeHtml(msg)+'</span>';
+    c.appendChild(el);
+    setTimeout(()=>{ if(el.parentNode) el.parentNode.removeChild(el); }, 3200);
+  }
+  function fmtTime(sec){
+    sec = Math.round(sec);
+    const m = Math.floor(sec/60), s = sec%60;
+    return (m>0? m+'m ':'') + s + 's';
+  }
+
+  /* ============================================================
+     SESSION STATE
+  ============================================================ */
+  let session = null;
+
+  function newSession(){
+    session = {
+      order: shuffle(SCENARIOS.map(s=>s.id)),
+      index: 0,
+      results: [],
+      cumulativeScore: 0,
+      cumulativeOptBonus: 0,
+      totalMoves: 0,
+      totalWrong: 0,
+      totalHints: 0,
+      totalTime: 0,
+      current: null,
+      timerHandle: null
+    };
+  }
+
+  function getScenario(id){ return SCENARIOS.find(s=>s.id===id); }
+
+  /* ============================================================
+     RENDER: ROOT
+  ============================================================ */
+  function render(){
+    const app = document.getElementById('app');
+    if(!session){ app.innerHTML = renderWelcome(); attachWelcome(); return; }
+    if(session.index >= session.order.length){ app.innerHTML = renderReport(); attachReport(); return; }
+    app.innerHTML = renderHeader() + renderProgress() + renderScenario();
+    attachScenarioHandlers();
+  }
+
+  /* ============================================================
+     WELCOME SCREEN
+  ============================================================ */
+  function renderWelcome(){
+    return `
+    <div class="app-header">
+      <div class="brand">
+        <div class="logo">🧩</div>
+        <div>
+          <h1>Prompt Puzzle</h1>
+          <div class="sub">Master AI Prompting Through Play</div>
+        </div>
+      </div>
+    </div>
+    <div class="card welcome-card">
+      <div class="emoji">📊</div>
+      <h2>Data Analysis &amp; Business Intelligence</h2>
+      <p class="lead">You've selected the Advanced difficulty. Get ready to sharpen your prompting skills across cohort analysis, statistical testing, forecasting, and root-cause diagnosis — the way senior analysts actually brief an AI.</p>
+      <div class="pills">
+        <div class="pill">Domain: <b>Data Analysis &amp; BI</b></div>
+        <div class="pill">Difficulty: <b>Advanced</b></div>
+        <div class="pill">Scenarios: <b>${SCENARIOS.length}</b></div>
+      </div>
+      <div class="types-grid">
+        <div class="type-card"><div class="ti">🧱</div><h5>Build the Prompt</h5><p>Assemble the correct role, context, task, constraints and format — in order — from a bank of blocks.</p></div>
+        <div class="type-card"><div class="ti">🧹</div><h5>Clean the Prompt</h5><p>Strip out the vague, contradictory or noisy instructions and keep only what makes the prompt work.</p></div>
+        <div class="type-card"><div class="ti">🎯</div><h5>Choose the Best Prompt</h5><p>Compare weak, optimized and over-engineered versions and pick the one that actually works best.</p></div>
+      </div>
+      <button class="btn btn-primary" id="btn-begin" style="font-size:15px; padding:14px 28px;">🚀 Begin Challenge</button>
+    </div>
+    <div class="footer-note">Your progress, moves and hints are scored live — aim for accuracy, speed and clean prompting all at once.</div>
+    `;
+  }
+  function attachWelcome(){
+    document.getElementById('btn-begin').addEventListener('click', ()=>{
+      newSession();
+      loadScenario();
+      render();
+    });
+  }
+
+  /* ============================================================
+     HEADER + PROGRESS
+  ============================================================ */
+  function renderHeader(){
+    const r = session.results;
+    const acc = r.length ? Math.round(r.reduce((a,b)=>a+b.accuracy,0)/r.length) : 0;
+    return `
+    <div class="app-header">
+      <div class="brand">
+        <div class="logo">🧩</div>
+        <div>
+          <h1>Prompt Puzzle</h1>
+          <div class="sub">Data Analysis &amp; BI · Advanced</div>
+        </div>
+      </div>
+      <div class="score-panel" id="score-panel">
+        <div class="score-item"><div class="val" id="sp-score">${session.cumulativeScore}</div><div class="lbl">Score</div></div>
+        <div class="score-item"><div class="val" id="sp-acc">${acc}%</div><div class="lbl">Accuracy</div></div>
+        <div class="score-item"><div class="val" id="sp-time">0s</div><div class="lbl">Time</div></div>
+        <div class="score-item"><div class="val" id="sp-moves">${session.totalMoves}</div><div class="lbl">Moves</div></div>
+        <div class="score-item"><div class="val" id="sp-wrong">${session.totalWrong}</div><div class="lbl">Wrong</div></div>
+        <div class="score-item"><div class="val" id="sp-hints">${session.totalHints}</div><div class="lbl">Hints</div></div>
+      </div>
+    </div>`;
+  }
+
+  function renderProgress(){
+    const total = session.order.length;
+    const pct = Math.round((session.index/total)*100);
+    let dots = '';
+    session.order.forEach((id,i)=>{
+      let cls = 'dot';
+      if(i < session.index) cls += ' done';
+      else if(i === session.index) cls += ' active';
+      dots += `<div class="${cls}"></div>`;
+    });
+    return `
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="dots">${dots}</div>
+      <div style="font-size:11px;color:var(--text-2); white-space:nowrap;">${Math.min(session.index+1,total)}/${total}</div>
+    </div>`;
+  }
+
+  /* ============================================================
+     SCENARIO STATE MACHINE
+  ============================================================ */
+  function loadScenario(){
+    const id = session.order[session.index];
+    const sc = getScenario(id);
+    const bank = shuffle(sc.correctBlocks.map((t,i)=>({id:'c'+i, text:t, correctIndex:i}))
+      .concat((sc.distractorBlocks||[]).map((t,i)=>({id:'d'+i, text:t, correctIndex:-1}))));
+
+    let choiceList = null;
+    if(sc.type === 'choose'){
+      choiceList = shuffle([
+        {kind:'weak', text: sc.weakPrompt},
+        {kind:'optimized', text: sc.optimizedPrompt},
+        {kind:'over', text: sc.overEngineeredPrompt},
+        {kind:'distractor', text: sc.distractorPrompt}
+      ]);
+    }
+
+    session.current = {
+      scenario: sc,
+      bank: bank,
+      slots: sc.type !== 'choose' ? new Array(sc.correctBlocks.length).fill(null) : null,
+      choiceList: choiceList,
+      pickedIndex: null,
+      selectedChipId: null,
+      moves: 0,
+      wrong: 0,
+      hintsUsed: 0,
+      hintRevealed: false,
+      checked: false,
+      startTime: performance.now()
+    };
+    if(session.timerHandle) clearInterval(session.timerHandle);
+    session.timerHandle = setInterval(updateTimerDisplay, 1000);
+  }
+
+  function updateTimerDisplay(){
+    const el = document.getElementById('sp-time');
+    if(!el || !session.current) return;
+    const sec = (performance.now() - session.current.startTime)/1000;
+    el.textContent = fmtTime(sec);
+  }
+
+  /* ============================================================
+     RENDER: SCENARIO
+  ============================================================ */
+  function renderScenario(){
+    const cur = session.current;
+    const sc = cur.scenario;
+    let body = '';
+
+    if(sc.type === 'choose'){
+      body = renderChooseBody(cur, sc);
+    } else {
+      body = renderBuildBody(cur, sc);
+    }
+
+    return `
+    <div class="card">
+      <span class="badge">${TYPE_LABEL[sc.type]}</span>
+      <h2 class="title">${escapeHtml(sc.title)}</h2>
+      <div class="desired"><b>Desired Output:</b> ${escapeHtml(sc.desiredOutput)}</div>
+      <div class="instructions">${escapeHtml(INSTRUCTIONS[sc.type])}</div>
+      ${body}
+      <div class="actions">
+        <button class="btn btn-ghost" id="btn-hint" ${cur.hintRevealed?'disabled':''}>💡 Hint (−8 pts)</button>
+        <button class="btn btn-primary" id="btn-check" ${cur.checked?'disabled':''}>✅ Check Answer</button>
+        <button class="btn btn-ghost" id="btn-next" style="display:${cur.checked?'inline-flex':'none'}">Next Scenario →</button>
+      </div>
+      <div id="feedback-zone"></div>
+    </div>`;
+  }
+
+  function renderBuildBody(cur, sc){
+    const slotsHtml = cur.slots.map((val, i)=>{
+      let cls = 'slot';
+      let content = `<span>Drop block #${i+1} here</span>`;
+      if(val){
+        cls += ' filled';
+        content = `<span>${escapeHtml(val.text)}</span>`;
+      }
+      if(cur.checked){
+        if(val && val.correctIndex === i) cls += ' correct';
+        else if(val) cls += ' wrong';
+        else cls += ' empty-warn';
+      }
+      return `<div class="${cls}" data-slot="${i}"><div class="num">${i+1}</div>${content}</div>`;
+    }).join('');
+
+    const bankHtml = cur.bank.filter(b => !cur.slots.some(s => s && s.id === b.id)).map(b=>{
+      return `<div class="chip" draggable="true" data-chip="${b.id}">${escapeHtml(b.text)}</div>`;
+    }).join('') || '<span style="color:var(--text-2); font-size:12px;">All blocks placed.</span>';
+
+    return `
+      <div class="zone-label">Prompt Slots (${sc.correctBlocks.length})</div>
+      <div class="slots" id="slots">${slotsHtml}</div>
+      <div class="zone-label">Block Bank</div>
+      <div class="bank" id="bank">${bankHtml}</div>
+    `;
+  }
+
+  function renderChooseBody(cur, sc){
+    const tagMap = { optimized:'tag-optimized', weak:'tag-weak', over:'tag-over', distractor:'tag-distractor' };
+    const labelMap = { optimized:'Optimized', weak:'Weak', over:'Over-Engineered', distractor:'Off-Target' };
+    const html = cur.choiceList.map((c,i)=>{
+      let cls = 'choice-card';
+      let tag = '';
+      if(cur.pickedIndex === i) cls += ' picked';
+      if(cur.checked){
+        if(c.kind === 'optimized') cls += ' correct-reveal';
+        else if(cur.pickedIndex === i) cls += ' wrong-reveal';
+        tag = `<span class="tag-reveal ${tagMap[c.kind]}">${labelMap[c.kind]}</span>`;
+      }
+      const letter = String.fromCharCode(65+i);
+      return `<div class="${cls}" data-choice="${i}">
+        <div><span class="clabel">${letter}</span>${tag}</div>
+        <div class="ctext" style="margin-top:8px;">${escapeHtml(c.text)}</div>
+      </div>`;
+    }).join('');
+    return `<div class="zone-label">Prompt Options</div><div class="choices" id="choices">${html}</div>`;
+  }
+
+  /* ============================================================
+     EVENT HANDLERS
+  ============================================================ */
+  function attachScenarioHandlers(){
+    const cur = session.current;
+    const sc = cur.scenario;
+
+    document.getElementById('btn-hint').addEventListener('click', onHint);
+    document.getElementById('btn-check').addEventListener('click', onCheck);
+    const nextBtn = document.getElementById('btn-next');
+    if(nextBtn) nextBtn.addEventListener('click', onNext);
+
+    if(sc.type === 'choose'){
+      document.querySelectorAll('#choices .choice-card').forEach(card=>{
+        card.addEventListener('click', ()=>{
+          if(cur.checked) return;
+          const idx = parseInt(card.getAttribute('data-choice'),10);
+          cur.pickedIndex = idx;
+          cur.moves++;
+          refreshLiveStats();
+          render();
+        });
+      });
+    } else {
+      // bank chips
+      document.querySelectorAll('#bank .chip').forEach(chip=>{
+        chip.addEventListener('click', ()=> onChipClick(chip.getAttribute('data-chip')));
+        chip.addEventListener('dragstart', e=>{
+          e.dataTransfer.setData('text/plain', chip.getAttribute('data-chip'));
+          chip.classList.add('dragging');
+        });
+        chip.addEventListener('dragend', ()=> chip.classList.remove('dragging'));
+      });
+      // slots
+      document.querySelectorAll('#slots .slot').forEach(slotEl=>{
+        const idx = parseInt(slotEl.getAttribute('data-slot'),10);
+        slotEl.addEventListener('click', ()=> onSlotClick(idx));
+        slotEl.addEventListener('dragover', e=>{ e.preventDefault(); slotEl.classList.add('over'); });
+        slotEl.addEventListener('dragleave', ()=> slotEl.classList.remove('over'));
+        slotEl.addEventListener('drop', e=>{
+          e.preventDefault();
+          slotEl.classList.remove('over');
+          const chipId = e.dataTransfer.getData('text/plain');
+          placeChipInSlot(chipId, idx);
+        });
+      });
+    }
+  }
+
+  function onChipClick(chipId){
+    const cur = session.current;
+    if(cur.checked) return;
+    if(cur.selectedChipId === chipId){
+      cur.selectedChipId = null;
+    } else {
+      cur.selectedChipId = chipId;
+    }
+    render();
+  }
+
+  function onSlotClick(idx){
+    const cur = session.current;
+    if(cur.checked) return;
+    if(cur.slots[idx]){
+      // remove back to bank
+      cur.slots[idx] = null;
+      cur.moves++;
+      refreshLiveStats();
+      render();
+      return;
+    }
+    if(cur.selectedChipId){
+      placeChipInSlot(cur.selectedChipId, idx);
+    } else {
+      toast('Select a block from the bank first, or drag it in.', 'info');
+    }
+  }
+
+  function placeChipInSlot(chipId, idx){
+    const cur = session.current;
+    if(cur.checked || !chipId) return;
+    const chip = cur.bank.find(b=>b.id===chipId);
+    if(!chip) return;
+    // remove chip from any other slot it currently occupies
+    cur.slots.forEach((s,i)=>{ if(s && s.id===chipId) cur.slots[i]=null; });
+    // if target slot occupied, bounce that one back to bank (no-op needed, just overwrite)
+    cur.slots[idx] = chip;
+    cur.selectedChipId = null;
+    cur.moves++;
+    refreshLiveStats();
+    render();
+  }
+
+  function onHint(){
+    const cur = session.current;
+    if(cur.hintRevealed || cur.checked) return;
+    cur.hintsUsed++;
+    cur.hintRevealed = true;
+    const sc = cur.scenario;
+    toast('Hint revealed — small score penalty applied.', 'info');
+    const zone = document.getElementById('feedback-zone');
+    if(zone){
+      zone.innerHTML = `<div class="principle">💡 <b>Guiding Principle:</b> ${escapeHtml(sc.principle)}</div>` + zone.innerHTML;
+    }
+    refreshLiveStats();
+    document.getElementById('btn-hint').setAttribute('disabled','disabled');
+  }
+
+  function refreshLiveStats(){
+    const sp = document.getElementById('sp-moves');
+    if(sp){
+      const totalMoves = session.totalMoves + session.current.moves;
+      pulse('sp-moves', totalMoves);
+      const totalHints = session.totalHints + session.current.hintsUsed;
+      pulse('sp-hints', totalHints);
+    }
+  }
+  function pulse(id, val){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = val;
+    const item = el.closest('.score-item');
+    if(item){
+      item.classList.remove('pulse'); void item.offsetWidth; item.classList.add('pulse');
+    }
+  }
+
+  function onCheck(){
+    const cur = session.current;
+    if(cur.checked) return;
+    const sc = cur.scenario;
+    const timeSec = (performance.now() - cur.startTime)/1000;
+    let result;
+
+    if(sc.type === 'choose'){
+      if(cur.pickedIndex === null){
+        toast('Pick an option before checking.', 'error');
+        return;
+      }
+      const picked = cur.choiceList[cur.pickedIndex];
+      const {score, optBonus} = computeChooseScore(picked.kind, cur.moves, cur.hintsUsed);
+      result = {
+        id: sc.id, type: sc.type, score, accuracy: picked.kind==='optimized'?100: picked.kind==='over'?55: picked.kind==='weak'?25:5,
+        moves: cur.moves, wrong: picked.kind==='optimized'?0:1, hints: cur.hintsUsed, time: timeSec, optBonus,
+        pickedKind: picked.kind
+      };
+      cur.wrong = result.wrong;
+      if(picked.kind === 'optimized') toast('Great pick! That\'s the optimized prompt.', 'success');
+      else toast('Not the strongest choice — see why below.', 'error');
+    } else {
+      let correct=0, wrong=0, missing=0;
+      cur.slots.forEach((v,i)=>{
+        if(v && v.correctIndex === i) correct++;
+        else if(v) wrong++;
+        else missing++;
+      });
+      const total = sc.correctBlocks.length;
+      const score = computeBuildScore(correct, total, wrong, cur.hintsUsed, timeSec);
+      result = {
+        id: sc.id, type: sc.type, score, accuracy: Math.round((correct/total)*100),
+        moves: cur.moves, wrong, hints: cur.hintsUsed, time: timeSec, optBonus: 0
+      };
+      cur.wrong = wrong;
+      if(correct === total && wrong === 0) toast('Perfect prompt structure!', 'success');
+      else if(correct >= Math.ceil(total*0.6)) toast('Good attempt — check the highlights.', 'info');
+      else toast('Needs work — review the comparison below.', 'error');
+    }
+
+    cur.checked = true;
+    session.results.push(result);
+    session.cumulativeScore += result.score;
+    session.cumulativeOptBonus += result.optBonus;
+    session.totalMoves += result.moves;
+    session.totalWrong += result.wrong;
+    session.totalHints += result.hints;
+    session.totalTime += result.time;
+
+    if(session.timerHandle) clearInterval(session.timerHandle);
+    render();
+    renderFeedback(result);
+    updateHeaderNumbers();
+  }
+
+  function computeBuildScore(correct,total,wrong,hints,timeSec){
+    const accuracyScore = (correct/total)*70;
+    const precisionPenalty = Math.min(wrong*4, 20);
+    const hintPenalty = Math.min(hints*8, 20);
+    const timeTarget = total*20;
+    const timeBonus = timeSec <= timeTarget ? 10 : Math.max(0, 10 - Math.floor((timeSec-timeTarget)/10));
+    const raw = accuracyScore - precisionPenalty - hintPenalty + timeBonus;
+    return clamp(Math.round(raw), 0, 100);
+  }
+  function computeChooseScore(kind, moves, hints){
+    const base = kind==='optimized'?80: kind==='over'?50: kind==='weak'?25:5;
+    const hintPenalty = Math.min(hints*8,20);
+    const movesPenalty = Math.min(Math.max(moves-1,0)*5,15);
+    const optBonus = kind==='optimized' ? (moves===1 && hints===0 ? 20 : 10) : 0;
+    const raw = base - hintPenalty - movesPenalty + optBonus;
+    return { score: clamp(Math.round(raw),0,100), optBonus };
+  }
+
+  function updateHeaderNumbers(){
+    pulse('sp-score', session.cumulativeScore);
+    const acc = session.results.length ? Math.round(session.results.reduce((a,b)=>a+b.accuracy,0)/session.results.length) : 0;
+    pulse('sp-acc', acc+'%');
+    pulse('sp-wrong', session.totalWrong);
+    pulse('sp-moves', session.totalMoves);
+    pulse('sp-hints', session.totalHints);
+    const t = document.getElementById('sp-time');
+    if(t) t.textContent = fmtTime(session.totalTime);
+  }
+
+  function renderFeedback(result){
+    const sc = session.current.scenario;
+    const zone = document.getElementById('feedback-zone');
+    if(!zone) return;
+    let extra = '';
+    if(sc.type === 'choose' && result.pickedKind !== 'optimized'){
+      extra = `<div class="principle" style="margin-bottom:14px;">The optimized option was the one that named a clear <b>role</b>, precise <b>context</b>, one bounded <b>task</b>, explicit <b>constraints</b>, and a defined <b>output format</b> — without unnecessary bloat.</div>`;
+    }
+    zone.innerHTML = `
+      <div class="feedback">
+        <div style="font-size:13px; color:var(--text-2); margin-bottom:4px;">Scenario Score: <b style="color:var(--text-0); font-size:15px;">${result.score}/100</b> &nbsp;·&nbsp; Accuracy: <b style="color:var(--text-0);">${result.accuracy}%</b></div>
+        ${extra}
+        <div class="fb-grid">
+          <div class="fb-box fb-weak">
+            <h4>⚠️ Weak Prompt → Weak Output</h4>
+            <div style="margin-bottom:8px; color:var(--text-1);"><i>"${escapeHtml(sc.weakPrompt)}"</i></div>
+            <div>${escapeHtml(sc.weakOutput)}</div>
+          </div>
+          <div class="fb-box fb-opt">
+            <h4>✨ Optimized Prompt → Optimized Output</h4>
+            <div style="margin-bottom:8px; white-space:pre-line; color:var(--text-1);">${escapeHtml(sc.optimizedPrompt || sc.correctBlocks.join(' '))}</div>
+            <div style="white-space:pre-line;">${escapeHtml(sc.optimizedOutput)}</div>
+          </div>
+        </div>
+        <div class="principle">📐 <b>Prompt Principle:</b> ${escapeHtml(sc.principle)}</div>
+      </div>
+    `;
+    document.getElementById('btn-hint').setAttribute('disabled','disabled');
+    document.getElementById('btn-check').setAttribute('disabled','disabled');
+    const nb = document.getElementById('btn-next');
+    if(nb){ nb.style.display='inline-flex'; nb.addEventListener('click', onNext); }
+  }
+
+  function onNext(){
+    session.index++;
+    if(session.index < session.order.length){
+      loadScenario();
+    } else {
+      if(session.timerHandle) clearInterval(session.timerHandle);
+    }
+    render();
+  }
+
+  /* ============================================================
+     RENDER: REPORT
+  ============================================================ */
+  function computeReport(){
+    const r = session.results;
+    const avg = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 70;
+    const promptScore = clamp(avg(r.map(x=>x.score)) + Math.round(session.cumulativeOptBonus/Math.max(r.length,1)*0.3), 0, 100);
+
+    let rating, rank;
+    if(promptScore >= 90){ rating='S'; rank='Prompt Grandmaster 🏆'; }
+    else if(promptScore >= 80){ rating='A'; rank='Prompt Architect 🧠'; }
+    else if(promptScore >= 70){ rating='B'; rank='Prompt Practitioner 📊'; }
+    else if(promptScore >= 60){ rating='C'; rank='Prompt Apprentice 🌱'; }
+    else { rating='D'; rank='Prompt Rookie 🔰'; }
+
+    const buildScores = r.filter(x=>x.type==='build').map(x=>x.score);
+    const cleanScores = r.filter(x=>x.type==='clean').map(x=>x.score);
+    const chooseScores = r.filter(x=>x.type==='choose').map(x=>x.score);
+
+    const dna = {
+      Structure: avg(buildScores),
+      Clarity: avg(cleanScores),
+      Context: avg(chooseScores),
+      Specificity: clamp(100 - session.totalWrong*7, 0, 100),
+      Efficiency: clamp(100 - (session.totalHints*8 + session.totalMoves*1.1), 0, 100)
+    };
+
+    let weakestTrait = Object.keys(dna).reduce((a,b)=> dna[a] <= dna[b] ? a : b);
+    const tips = {
+      Structure:"Focus on getting the sequence right in Build challenges — role, then context, then task, then constraints, then output format.",
+      Clarity:"In Clean challenges, be ruthless about cutting vague or contradictory instructions, not just wrong ones.",
+      Context:"In Choose challenges, look for the option that grounds the model in specific data before asking for conclusions.",
+      Specificity:"Reduce wrong placements by re-reading each block for exact fit before placing it — precision matters more than speed.",
+      Efficiency:"Try to solve each puzzle with fewer moves and without hints — plan your sequence mentally first."
+    };
+
+    return { promptScore, rating, rank, dna, weakestTrait, tip: tips[weakestTrait] };
+  }
+
+  function renderReport(){
+    if(session.timerHandle) clearInterval(session.timerHandle);
+    const rep = computeReport();
+    const r = session.results;
+    const totalTimeStr = fmtTime(session.totalTime);
+    const bestBuildOrClean = r.filter(x=>x.type!=='choose').sort((a,b)=>b.score-a.score)[0];
+    let finalPromptSc = null;
+    if(bestBuildOrClean){
+      finalPromptSc = getScenario(bestBuildOrClean.id);
+    } else {
+      finalPromptSc = getScenario(session.order[0]);
+    }
+    const finalPromptText = finalPromptSc.optimizedPrompt || finalPromptSc.correctBlocks.join('\n');
+
+    const nextMilestoneScore = rep.promptScore >= 90 ? 100 : (Math.floor(rep.promptScore/10)+1)*10;
+    const pointsAway = Math.max(nextMilestoneScore - rep.promptScore, 1);
+
+    const dnaRows = Object.entries(rep.dna).map(([k,v])=>{
+      const color = v>=80? 'var(--accent-3)' : v>=60? 'var(--accent-2)' : v>=40? 'var(--warn)' : 'var(--danger)';
+      return `<div class="dna-row">
+        <div class="dna-label">${k}</div>
+        <div class="dna-track"><div class="dna-fill" data-w="${v}" style="background:${color};"></div></div>
+        <div class="dna-val">${v}%</div>
+      </div>`;
+    }).join('');
+
+    return `
+    <div class="app-header">
+      <div class="brand">
+        <div class="logo">🧩</div>
+        <div><h1>Prompt Puzzle</h1><div class="sub">Performance Report</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="report-hero">
+        <div style="font-size:12px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.1em;">Prompt Score</div>
+        <div class="report-score">${rep.promptScore}</div>
+        <div class="report-rating">Rating: ${rep.rating}</div>
+        <div class="report-rank">${rep.rank}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-box"><div class="sv">${session.results.length}</div><div class="sl">Scenarios</div></div>
+        <div class="stat-box"><div class="sv">${session.totalMoves}</div><div class="sl">Total Moves</div></div>
+        <div class="stat-box"><div class="sv">${session.totalWrong}</div><div class="sl">Wrong Placements</div></div>
+        <div class="stat-box"><div class="sv">${session.totalHints}</div><div class="sl">Hints Used</div></div>
+        <div class="stat-box"><div class="sv">${totalTimeStr}</div><div class="sl">Total Time</div></div>
+      </div>
+
+      <div class="zone-label">🧬 Prompt DNA</div>
+      <div class="dna-wrap">${dnaRows}</div>
+
+      <div class="zone-label">Personalized Feedback</div>
+      <div class="feedback-block">
+        You finished as a <b>${rep.rank}</b> with a Prompt Score of <b>${rep.promptScore}/100</b>.
+        Your strongest trait carried you through most scenarios, but <b>${rep.weakestTrait}</b> is your biggest growth area right now.
+        ${escapeHtml(rep.tip)}
+      </div>
+
+      <div class="milestone">🎯 <b>Next Milestone:</b> You're just <b>${pointsAway} points</b> away from crossing the ${nextMilestoneScore} score threshold. Cut hint usage and double-check block order before checking your answer to get there.</div>
+
+      <div class="zone-label" style="margin-top:20px;">Your Strongest Optimized Prompt</div>
+      <div class="final-prompt">${escapeHtml(finalPromptText)}</div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-replay">🔁 Replay with New Scenarios</button>
+      </div>
+    </div>
+    <div class="footer-note">🧩 Prompt Puzzle — practice makes precise prompting.</div>
+    `;
+  }
+
+  function attachReport(){
+    document.querySelectorAll('.dna-fill').forEach(el=>{
+      const w = el.getAttribute('data-w');
+      requestAnimationFrame(()=>{ setTimeout(()=>{ el.style.width = w+'%'; }, 80); });
+    });
+    document.getElementById('btn-replay').addEventListener('click', ()=>{
+      newSession();
+      loadScenario();
+      render();
+      toast('New scenarios shuffled — good luck!', 'success');
+    });
+  }
+
+  /* ============================================================
+     INIT
+  ============================================================ */
+  render();
+
+})();
+</script>
+</body>
+</html>
