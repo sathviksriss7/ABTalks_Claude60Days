@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Descriptive Statistics Toolkit — Interactive Learning Studio</title>
+<style>
+/* ================= DESIGN TOKENS ================= */
+:root{
+  --paper:#EDF1EF;
+  --panel:#FFFFFF;
+  --panel-2:#F5F7F5;
+  --ink:#1B242B;
+  --ink-soft:#4B5A61;
+  --ink-faint:#7C8A90;
+  --line:rgba(27,36,43,0.10);
+  --line-strong:rgba(27,36,43,0.18);
+  --amber:#B8862A;
+  --amber-soft:#EAD9AF;
+  --amber-deep:#8C6318;
+  --teal:#2A7F7E;
+  --teal-soft:#CFE7E6;
+  --brick:#A8453C;
+  --brick-soft:#F1D8D5;
+  --grid: rgba(27,36,43,0.05);
+  --shadow: 0 1px 2px rgba(20,30,35,0.06), 0 8px 24px -12px rgba(20,30,35,0.18);
+  --radius: 10px;
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+[data-theme="dark"]{
+  --paper:#0D1216;
+  --panel:#141B20;
+  --panel-2:#101619;
+  --ink:#E7ECEE;
+  --ink-soft:#AAB8BD;
+  --ink-faint:#71828A;
+  --line:rgba(231,236,238,0.10);
+  --line-strong:rgba(231,236,238,0.18);
+  --amber:#D7A94B;
+  --amber-soft:#4A3C1D;
+  --amber-deep:#F0C878;
+  --teal:#59B4B0;
+  --teal-soft:#1B3A39;
+  --brick:#D97E73;
+  --brick-soft:#3D2220;
+  --grid: rgba(231,236,238,0.045);
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px -14px rgba(0,0,0,0.6);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0/32px 32px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/32px 32px,
+    var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.6;
+  transition:background-color .3s ease, color .3s ease;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+}
+h1,h2,h3,h4{font-family:var(--font-display); color:var(--ink); margin:0 0 .4em 0; font-weight:600;}
+h1{font-size:2.4rem; letter-spacing:-0.01em;}
+h2{font-size:1.7rem;}
+h3{font-size:1.25rem;}
+p{margin:0 0 1em 0; color:var(--ink-soft);}
+a{color:var(--teal);}
+.mono{font-family:var(--font-mono);}
+button{font-family:var(--font-body); cursor:pointer;}
+:focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
+
+/* ============ APP SHELL ============ */
+.app-shell{display:grid; grid-template-columns:272px 1fr; min-height:100vh;}
+.sidebar{
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  background:var(--panel); border-right:1px solid var(--line);
+  padding:22px 18px 24px; display:flex; flex-direction:column; gap:20px;
+  z-index:40;
+}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-mark{width:34px; height:34px; flex-shrink:0;}
+.brand-text{font-family:var(--font-display); font-size:1.05rem; line-height:1.15; color:var(--ink);}
+.brand-text small{display:block; font-family:var(--font-mono); font-size:.62rem; letter-spacing:.09em; color:var(--ink-faint); text-transform:uppercase; margin-top:2px;}
+
+.progress-ring-wrap{display:flex; align-items:center; gap:12px; padding:12px; background:var(--panel-2); border-radius:var(--radius); border:1px solid var(--line);}
+.progress-ring-num{font-family:var(--font-mono); font-size:1.5rem; color:var(--amber-deep);}
+.progress-ring-label{font-size:.72rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em;}
+
+.navlist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:3px;}
+.navlist a{
+  display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink-soft);
+  padding:9px 10px; border-radius:8px; font-size:.88rem; border:1px solid transparent;
+  transition:background .15s, color .15s;
+}
+.navlist a:hover{background:var(--panel-2); color:var(--ink);}
+.navlist a.active{background:var(--amber-soft); color:var(--amber-deep); border-color:var(--amber);}
+.nav-dot{width:9px; height:9px; border-radius:50%; background:var(--line-strong); flex-shrink:0; border:1px solid var(--line-strong);}
+.nav-dot.done{background:var(--teal); border-color:var(--teal);}
+.nav-dot.locked{background:transparent;}
+.navlist .lockicon{margin-left:auto; font-size:.7rem; color:var(--ink-faint);}
+.nav-section-label{font-size:.65rem; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-faint); margin:10px 4px 2px;}
+
+.badge-shelf{display:flex; flex-wrap:wrap; gap:6px;}
+.badge-chip{
+  font-size:.68rem; font-family:var(--font-mono); padding:4px 8px; border-radius:20px;
+  background:var(--panel-2); border:1px solid var(--line); color:var(--ink-faint);
+}
+.badge-chip.earned{background:var(--teal-soft); color:var(--teal); border-color:var(--teal);}
+
+.theme-toggle{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:9px 12px; background:var(--panel-2); border:1px solid var(--line); border-radius:8px; font-size:.82rem;
+}
+.switch{position:relative; width:38px; height:20px; background:var(--line-strong); border-radius:20px; border:none; flex-shrink:0;}
+.switch::after{content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--panel); transition:transform .2s;}
+[data-theme="dark"] .switch::after{transform:translateX(18px); background:var(--amber);}
+
+.main{padding:0; min-width:0;}
+.topbar{display:none;}
+.section{max-width:900px; margin:0 auto; padding:56px 32px 24px;}
+.section-narrow{max-width:760px;}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:24px 26px; box-shadow:var(--shadow); margin-bottom:20px;}
+.eyebrow{font-family:var(--font-mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--amber-deep); margin-bottom:8px; display:block;}
+.divider{height:1px; background:var(--line); margin:28px 0; border:none;}
+
+/* ============ HERO ============ */
+.hero{padding:52px 32px 20px; max-width:1000px; margin:0 auto;}
+.hero-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:28px; align-items:center;}
+.hero-title{font-size:2.5rem; line-height:1.08;}
+.hero-title em{font-style:normal; color:var(--amber-deep); border-bottom:3px solid var(--amber);}
+.hero-sub{font-size:1.05rem; max-width:46ch;}
+.meta-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
+.meta-pill{
+  display:flex; align-items:center; gap:6px; font-size:.78rem; padding:6px 11px;
+  background:var(--panel-2); border:1px solid var(--line); border-radius:20px; color:var(--ink-soft);
+}
+.meta-pill b{color:var(--ink); font-family:var(--font-mono);}
+
+.dial-card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 18px 14px; box-shadow:var(--shadow);}
+.dial-card h4{font-size:.85rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-family:var(--font-mono); margin-bottom:10px;}
+.readout-row{display:flex; gap:8px; margin-top:10px;}
+.readout{flex:1; background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:8px 6px; text-align:center;}
+.readout .rlabel{font-size:.62rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint);}
+.readout .rval{font-family:var(--font-mono); font-size:1.15rem; color:var(--amber-deep); font-variant-numeric:tabular-nums;}
+.dial-controls{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+.mini-hist{display:flex; align-items:flex-end; gap:3px; height:64px; margin-top:12px; padding:0 2px;}
+.mini-bar{flex:1; background:var(--teal); border-radius:2px 2px 0 0; min-height:2px; transition:height .25s ease;}
+.mini-bar.mode-bar{background:var(--amber);}
+
+/* ============ BUTTONS ============ */
+.btn{
+  border:1px solid var(--line-strong); background:var(--panel-2); color:var(--ink);
+  padding:9px 15px; border-radius:8px; font-size:.85rem; font-weight:600; transition:all .15s;
+}
+.btn:hover{border-color:var(--amber); color:var(--amber-deep); transform:translateY(-1px);}
+.btn-primary{background:var(--amber); border-color:var(--amber); color:#241a06;}
+.btn-primary:hover{background:var(--amber-deep); color:#fff;}
+.btn-teal{background:var(--teal); border-color:var(--teal); color:#062524;}
+.btn-sm{padding:6px 11px; font-size:.76rem;}
+.btn:disabled{opacity:.4; cursor:not-allowed; transform:none;}
+
+/* ============ MODULE HEADER ============ */
+.module-head{display:flex; align-items:baseline; gap:12px; margin-bottom:6px;}
+.module-num{font-family:var(--font-mono); font-size:.85rem; color:var(--amber-deep); background:var(--amber-soft); padding:3px 9px; border-radius:6px;}
+.module-tag{font-size:.78rem; color:var(--ink-faint); font-family:var(--font-mono);}
+
+/* ============ CONTENT BLOCKS ============ */
+.callout{border-left:3px solid var(--teal); background:var(--teal-soft); padding:14px 16px; border-radius:0 8px 8px 0; margin:16px 0;}
+.callout.warn{border-color:var(--brick); background:var(--brick-soft);}
+.callout h4{margin:0 0 4px; font-size:.85rem; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.04em;}
+.callout p{margin:0; font-size:.92rem; color:var(--ink);}
+
+.analogy-box{display:flex; gap:14px; background:var(--panel-2); border:1px dashed var(--line-strong); border-radius:10px; padding:16px; margin:16px 0; align-items:flex-start;}
+.analogy-icon{font-size:1.6rem; flex-shrink:0;}
+
+table.compare{width:100%; border-collapse:collapse; margin:16px 0; font-size:.88rem;}
+table.compare th, table.compare td{border:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top;}
+table.compare th{background:var(--panel-2); font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint);}
+table.compare td b{color:var(--amber-deep);}
+
+.formula-card{background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin:14px 0; font-family:var(--font-mono); font-size:1rem; text-align:center; color:var(--ink);}
+.formula-card .fname{display:block; font-family:var(--font-body); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin-bottom:6px;}
+
+.takeaways{background:var(--amber-soft); border-radius:10px; padding:16px 18px; margin:18px 0;}
+[data-theme="dark"] .takeaways{background:#2A2110;}
+.takeaways h4{font-family:var(--font-mono); font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--amber-deep); margin-bottom:8px;}
+.takeaways ul{margin:0; padding-left:1.1em; color:var(--ink);}
+.takeaways li{margin-bottom:5px;}
+
+.misconception{display:flex; gap:10px; align-items:flex-start; margin:10px 0; padding:10px 12px; background:var(--brick-soft); border-radius:8px;}
+.misconception .x{color:var(--brick); font-weight:700; flex-shrink:0;}
+
+details.exercise{border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:18px 0; background:var(--panel-2);}
+details.exercise > summary{cursor:pointer; font-family:var(--font-display); font-size:1.05rem; color:var(--ink); list-style:none; display:flex; align-items:center; gap:8px;}
+details.exercise > summary::marker{content:"";}
+details.exercise > summary::before{content:"▸"; color:var(--amber-deep); transition:transform .15s;}
+details.exercise[open] > summary::before{transform:rotate(90deg);}
+.exercise-body{margin-top:14px;}
+
+/* data table editor */
+.data-editor{width:100%; border-collapse:collapse; margin:12px 0; font-size:.85rem;}
+.data-editor th, .data-editor td{border:1px solid var(--line); padding:6px; text-align:center;}
+.data-editor th{background:var(--panel); font-family:var(--font-mono); font-size:.68rem; text-transform:uppercase; color:var(--ink-faint);}
+.data-editor input[type=number]{width:60px; padding:4px; border:1px solid var(--line-strong); border-radius:5px; background:var(--panel); color:var(--ink); font-family:var(--font-mono); text-align:center;}
+.stat-cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:8px; margin:14px 0;}
+.stat-card{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px; text-align:center;}
+.stat-card .slabel{font-size:.66rem; text-transform:uppercase; color:var(--ink-faint); font-family:var(--font-mono);}
+.stat-card .sval{font-family:var(--font-mono); font-size:1.2rem; color:var(--amber-deep);}
+
+/* ============ QUIZ ============ */
+.quiz-box{background:var(--panel); border:2px solid var(--amber); border-radius:12px; padding:22px 24px; margin-top:26px;}
+.quiz-box h3{display:flex; align-items:center; gap:8px;}
+.qitem{margin:18px 0; padding-bottom:16px; border-bottom:1px solid var(--line);}
+.qitem:last-of-type{border-bottom:none;}
+.qtext{font-weight:600; margin-bottom:10px;}
+.qoptions{display:flex; flex-direction:column; gap:7px;}
+.qoption{
+  display:flex; align-items:flex-start; gap:9px; padding:9px 11px; border:1px solid var(--line-strong);
+  border-radius:8px; cursor:pointer; font-size:.9rem; transition:background .12s;
+}
+.qoption:hover{background:var(--panel-2);}
+.qoption input{margin-top:3px;}
+.qoption.correct{background:var(--teal-soft); border-color:var(--teal);}
+.qoption.incorrect{background:var(--brick-soft); border-color:var(--brick);}
+.qfeedback{display:none; margin-top:8px; padding:9px 11px; border-radius:7px; font-size:.85rem; background:var(--panel-2);}
+.qfeedback.show{display:block;}
+.quiz-summary{display:none; text-align:center; padding:20px; margin-top:14px; border-radius:10px; background:var(--amber-soft);}
+[data-theme="dark"] .quiz-summary{background:#2A2110;}
+.quiz-summary.show{display:block;}
+.quiz-summary .score-big{font-family:var(--font-mono); font-size:2.2rem; color:var(--amber-deep);}
+
+/* ============ SVG DIAGRAM WRAP ============ */
+.diagram-wrap{background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:14px; margin:16px 0; text-align:center;}
+.diagram-wrap svg{max-width:100%; height:auto;}
+.diagram-cap{font-size:.76rem; color:var(--ink-faint); margin-top:6px;}
+
+/* ============ FINAL CHALLENGE ============ */
+.challenge-step{border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:14px 0; background:var(--panel-2);}
+.challenge-step.locked{opacity:.5; pointer-events:none;}
+.challenge-step .stepnum{font-family:var(--font-mono); color:var(--amber-deep); font-size:.75rem;}
+.ans-row{display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;}
+.ans-row input[type=number], .ans-row input[type=text]{padding:7px 10px; border:1px solid var(--line-strong); border-radius:7px; background:var(--panel); color:var(--ink); font-family:var(--font-mono); width:110px;}
+.feedback-inline{font-size:.82rem; padding:6px 10px; border-radius:6px;}
+.feedback-inline.ok{background:var(--teal-soft); color:var(--teal);}
+.feedback-inline.bad{background:var(--brick-soft); color:var(--brick);}
+
+/* ============ CHEAT SHEET ============ */
+.cheat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px;}
+.cheat-card{background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:13px 15px;}
+.cheat-card h4{font-size:.9rem; margin-bottom:6px; color:var(--amber-deep);}
+.cheat-card .f{font-family:var(--font-mono); font-size:.95rem; display:block; margin:4px 0;}
+
+/* ============ RESOURCES ============ */
+.resource-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin:14px 0;}
+.resource-card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:15px 17px;}
+.resource-card h4{font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-family:var(--font-mono); margin-bottom:8px;}
+.resource-card ul{margin:0; padding-left:1.1em;}
+.resource-card li{margin-bottom:6px; font-size:.88rem;}
+.keyword-chip{display:inline-block; background:var(--teal-soft); color:var(--teal); font-family:var(--font-mono); font-size:.78rem; padding:4px 10px; border-radius:16px; margin:3px 4px 0 0;}
+.prompt-card{background:var(--panel-2); border-left:3px solid var(--amber); border-radius:0 8px 8px 0; padding:10px 13px; margin:8px 0; font-size:.86rem; font-style:italic;}
+
+/* footer / certificate */
+.certificate{text-align:center; padding:34px 20px; border:2px solid var(--amber); border-radius:14px; background:var(--panel);}
+.certificate .cert-title{font-family:var(--font-display); font-size:1.6rem; color:var(--amber-deep);}
+.print-only{display:none;}
+
+/* confetti */
+#confetti-layer{position:fixed; inset:0; pointer-events:none; z-index:999; overflow:hidden;}
+.confetti-piece{position:absolute; top:-10px; width:8px; height:14px; opacity:.9; animation:confetti-fall linear forwards;}
+@keyframes confetti-fall{to{transform:translateY(105vh) rotate(540deg); opacity:0;}}
+
+/* mobile */
+.menu-btn{display:none;}
+@media (max-width: 880px){
+  .app-shell{grid-template-columns:1fr;}
+  .sidebar{position:fixed; left:0; top:0; width:78vw; max-width:300px; transform:translateX(-100%); transition:transform .25s ease; box-shadow:0 0 40px rgba(0,0,0,.3);}
+  .sidebar.open{transform:translateX(0);}
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:var(--panel); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:30;}
+  .menu-btn{display:block; background:none; border:1px solid var(--line-strong); border-radius:7px; padding:7px 10px;}
+  .hero-grid{grid-template-columns:1fr;}
+  .section{padding:36px 18px 18px;}
+  #sidebar-scrim{display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:35;}
+  #sidebar-scrim.show{display:block;}
+}
+
+@media print{
+  .sidebar, .topbar, .dial-controls, details.exercise summary, .quiz-box, .menu-btn, #confetti-layer, .no-print{display:none !important;}
+  body{background:#fff; color:#000;}
+  .app-shell{display:block;}
+  .section{max-width:100%; padding:0 10px;}
+  .panel{box-shadow:none; border:1px solid #ccc;}
+  .print-only{display:block;}
+}
+</style>
+</head>
+<body>
+<div id="confetti-layer"></div>
+<div id="sidebar-scrim" onclick="toggleSidebar(false)"></div>
+
+<div class="app-shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="var(--amber)" stroke-width="2.5"/><path d="M20 20 L20 7" stroke="var(--amber-deep)" stroke-width="2.5" stroke-linecap="round" id="brand-needle"/><circle cx="20" cy="20" r="3" fill="var(--amber-deep)"/></svg>
+      <div class="brand-text">Learning Studio<small>Descriptive Statistics</small></div>
+    </div>
+
+    <div class="progress-ring-wrap">
+      <svg width="46" height="46" viewBox="0 0 46 46">
+        <circle cx="23" cy="23" r="19" fill="none" stroke="var(--line)" stroke-width="5"/>
+        <circle id="progress-circle" cx="23" cy="23" r="19" fill="none" stroke="var(--teal)" stroke-width="5" stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4" transform="rotate(-90 23 23)"/>
+      </svg>
+      <div>
+        <div class="progress-ring-num"><span id="progress-pct">0</span>%</div>
+        <div class="progress-ring-label">Course progress</div>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-section-label">Start</div>
+      <ul class="navlist">
+        <li><a href="#intro" class="nav-link" data-target="intro"><span class="nav-dot done"></span>Introduction</a></li>
+      </ul>
+      <div class="nav-section-label">Modules</div>
+      <ul class="navlist" id="module-nav"></ul>
+      <div class="nav-section-label">Finish</div>
+      <ul class="navlist">
+        <li><a href="#final-challenge" class="nav-link" data-target="final-challenge"><span class="nav-dot" id="nav-dot-final"></span>Final Challenge<span class="lockicon" id="lock-final">🔒</span></a></li>
+        <li><a href="#cheat-sheet" class="nav-link" data-target="cheat-sheet"><span class="nav-dot done"></span>Cheat Sheet</a></li>
+        <li><a href="#continue-learning" class="nav-link" data-target="continue-learning"><span class="nav-dot done"></span>Continue Learning</a></li>
+      </ul>
+    </nav>
+
+    <div class="nav-section-label">Badges earned</div>
+    <div class="badge-shelf" id="badge-shelf"></div>
+
+    <div class="theme-toggle">
+      <span>🌗 Dark mode</span>
+      <button class="switch" id="theme-switch" onclick="toggleTheme()" aria-label="Toggle dark mode"></button>
+    </div>
+    <button class="btn btn-sm" onclick="window.print()">🖨️ Print notes &amp; cheat sheet</button>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar(true)">☰ Menu</button>
+      <div class="brand-text" style="font-size:.9rem;">Descriptive Statistics</div>
+      <div class="mono" style="font-size:.8rem; color:var(--amber-deep);"><span id="progress-pct-mobile">0</span>%</div>
+    </div>
+
+    <!-- ============ HERO / INTRO ============ -->
+    <section class="hero" id="intro">
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow">Mathematics &amp; Statistics · Interactive Tutorial</span>
+          <h1 class="hero-title">The Full Descriptive<br><em>Statistics Toolkit</em></h1>
+          <p class="hero-sub">Learn to summarize, measure, and picture any dataset — from a class's quiz scores to a food app's delivery times — using central tendency, spread, distribution shape, and visualization, all in one hands-on tutorial.</p>
+          <div class="meta-row">
+            <span class="meta-pill">⏱ <b>55–70 min</b> estimated</span>
+            <span class="meta-pill">📶 <b>None</b> required — arithmetic &amp; curiosity only</span>
+            <span class="meta-pill">🎯 <b>4 modules</b> + final challenge</span>
+            <span class="meta-pill">🏅 <b>5 badges</b> to unlock</span>
+          </div>
+        </div>
+        <div class="dial-card">
+          <h4>Live Readout — try it now</h4>
+          <svg id="hero-dial" viewBox="0 0 220 130" width="100%">
+            <path d="M 14 116 A 96 96 0 0 1 206 116" fill="none" stroke="var(--line-strong)" stroke-width="10" stroke-linecap="round"/>
+            <path id="hero-dial-mode-arc" d="" fill="none" stroke="var(--amber-soft)" stroke-width="10" stroke-linecap="round"/>
+            <g id="hero-ticks"></g>
+            <line id="hero-needle" x1="110" y1="116" x2="110" y2="34" stroke="var(--amber-deep)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="110" cy="116" r="5" fill="var(--amber-deep)"/>
+            <line id="hero-median-marker" x1="110" y1="108" x2="110" y2="124" stroke="var(--teal)" stroke-width="3"/>
+          </svg>
+          <div class="readout-row">
+            <div class="readout"><div class="rlabel">Mean</div><div class="rval" id="hero-mean">–</div></div>
+            <div class="readout"><div class="rlabel">Median</div><div class="rval" id="hero-median">–</div></div>
+            <div class="readout"><div class="rlabel">Mode</div><div class="rval" id="hero-mode">–</div></div>
+            <div class="readout"><div class="rlabel">n</div><div class="rval" id="hero-n">–</div></div>
+          </div>
+          <div class="mini-hist" id="hero-hist"></div>
+          <div class="dial-controls">
+            <button class="btn btn-sm" onclick="heroAdd(15)">+ typical score</button>
+            <button class="btn btn-sm" onclick="heroAdd(3)">+ low outlier</button>
+            <button class="btn btn-sm" onclick="heroRemove()">− remove last</button>
+            <button class="btn btn-sm" onclick="heroReset()">↺ reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:34px;">
+        <h3>What you'll learn</h3>
+        <table class="compare" style="margin-top:6px;">
+          <tr><th style="width:34%">Learning objective</th><th>By the end of this tutorial you can…</th></tr>
+          <tr><td><b>Central tendency</b></td><td>Calculate and choose between mean, median, and mode — and explain why the "average" you pick changes the story a dataset tells.</td></tr>
+          <tr><td><b>Spread &amp; dispersion</b></td><td>Compute range, variance, standard deviation, and IQR, and know which one survives an outlier.</td></tr>
+          <tr><td><b>Distribution shape</b></td><td>Read skewness, apply the empirical rule, compute z-scores, and flag outliers with the IQR method.</td></tr>
+          <tr><td><b>Visualization &amp; application</b></td><td>Pick the right chart for the right data, build a box plot from a five-number summary, and run a full descriptive analysis end-to-end.</td></tr>
+        </table>
+
+        <div class="callout" style="margin-top:18px;">
+          <h4>Prerequisites</h4>
+          <p>Comfortable with basic arithmetic (addition, division) and reading simple charts. No prior statistics knowledge needed.</p>
+        </div>
+
+        <div class="takeaways">
+          <h4>🏆 Reward system</h4>
+          <ul>
+            <li>Earn <b>10 points per correct quiz answer</b> (16 questions across 4 modules = up to 160 pts).</li>
+            <li>Unlock a <b>badge</b> after each module's quiz and after the final challenge — 5 in total.</li>
+            <li>Watch your <b>progress ring</b> in the sidebar fill up as you move through the course.</li>
+            <li>Finish the Final Practical Challenge to unlock your <b>completion certificate</b>.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 1 ============ -->
+    <section class="section" id="module-1">
+      <div class="module-head"><span class="module-num">Module 01</span><span class="module-tag">Foundational</span></div>
+      <h2>Measures of Central Tendency</h2>
+      <p>Every dataset needs a single number that answers "what's typical here?" That number is a <b>measure of central tendency</b>. There are three main candidates — mean, median, and mode — and picking the wrong one is one of the most common statistical mistakes people make.</p>
+
+      <div class="panel">
+        <h3>1.1 — The Mean (the balance point)</h3>
+        <p>The <b>mean</b> (arithmetic average) is the sum of all values divided by how many values there are. It's the point where the dataset "balances" if every value were a weight on a see-saw.</p>
+        <div class="formula-card"><span class="fname">Mean formula</span>x̄ = ( Σx ) / n</div>
+
+        <div class="analogy-box">
+          <div class="analogy-icon">⚖️</div>
+          <div><b>Analogy — the see-saw.</b> Imagine every data point as a person sitting on a number-line see-saw at their value. The mean is exactly where you'd place the fulcrum so the see-saw balances perfectly. Move one person far to the right (an outlier), and the whole fulcrum has to shift toward them — that's why the mean is <i>outlier-sensitive</i>.</div>
+        </div>
+
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 520 140" width="100%" style="max-width:520px;">
+            <line x1="30" y1="90" x2="490" y2="90" stroke="var(--ink-faint)" stroke-width="2"/>
+            <polygon points="245,90 265,90 255,70" fill="var(--amber-deep)"/>
+            <line x1="255" y1="70" x2="255" y2="20" stroke="var(--amber-deep)" stroke-width="2" stroke-dasharray="3,3"/>
+            <text x="255" y="14" text-anchor="middle" font-family="var(--font-mono)" font-size="11" fill="var(--amber-deep)">mean (fulcrum)</text>
+            <circle cx="90" cy="78" r="9" fill="var(--teal)"/><text x="90" y="112" text-anchor="middle" font-size="10" fill="var(--ink-faint)">11</text>
+            <circle cx="170" cy="78" r="9" fill="var(--teal)"/><text x="170" y="112" text-anchor="middle" font-size="10" fill="var(--ink-faint)">15</text>
+            <circle cx="230" cy="78" r="9" fill="var(--teal)"/><text x="230" y="112" text-anchor="middle" font-size="10" fill="var(--ink-faint)">15</text>
+            <circle cx="290" cy="78" r="9" fill="var(--teal)"/><text x="290" y="112" text-anchor="middle" font-size="10" fill="var(--ink-faint)">16</text>
+            <circle cx="360" cy="78" r="9" fill="var(--teal)"/><text x="360" y="112" text-anchor="middle" font-size="10" fill="var(--ink-faint)">18</text>
+            <circle cx="440" cy="78" r="9" fill="var(--brick)"/><text x="440" y="112" text-anchor="middle" font-size="10" fill="var(--ink-faint)">20</text>
+          </svg>
+          <div class="diagram-cap">Each dot is a quiz score. The fulcrum sits at the mean — the balance point of the whole see-saw.</div>
+        </div>
+
+        <h3>1.2 — The Median (the middle person in line)</h3>
+        <p>The <b>median</b> is the middle value once all data is sorted. If <span class="mono">n</span> is odd, it's the exact middle value; if <span class="mono">n</span> is even, it's the average of the two middle values.</p>
+        <div class="analogy-box">
+          <div class="analogy-icon">🚶</div>
+          <div><b>Analogy — line up by height.</b> Ask a class to physically line up from shortest to tallest. The median is whoever is standing exactly in the middle. It doesn't matter if the tallest person is 6'2" or 8'0" — the middle person doesn't move. That's why the median <i>resists</i> outliers.</div>
+        </div>
+
+        <h3>1.3 — The Mode (the crowd favorite)</h3>
+        <p>The <b>mode</b> is the value that appears most often. It's the only measure of central tendency that works on categorical (non-numeric) data, like "favorite flavor."</p>
+        <div class="analogy-box">
+          <div class="analogy-icon">🍕</div>
+          <div><b>Analogy — the pizza order.</b> If a class votes on pizza toppings, the mode is whatever topping got the most votes — you can't "average" pepperoni and mushroom, but you can say which one is most popular.</div>
+        </div>
+
+        <h3>Worked example — Ms. Rivera's quiz scores</h3>
+        <p>Fifteen students took a 20-point quiz. Scores: <span id="ex1-data" class="mono"></span></p>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="slabel">Mean</div><div class="sval" id="ex1-mean"></div></div>
+          <div class="stat-card"><div class="slabel">Median</div><div class="sval" id="ex1-median"></div></div>
+          <div class="stat-card"><div class="slabel">Mode</div><div class="sval" id="ex1-mode"></div></div>
+          <div class="stat-card"><div class="slabel">n</div><div class="sval" id="ex1-n"></div></div>
+        </div>
+        <p>Notice the mean (<span id="ex1-mean-inline" class="mono"></span>) sits slightly <i>above</i> the median (<span id="ex1-median-inline" class="mono"></span>). That's your first hint of skew — we'll return to this in Module 3.</p>
+
+        <table class="compare">
+          <tr><th>Measure</th><th>Best for</th><th>Outlier sensitivity</th><th>Works on categorical data?</th></tr>
+          <tr><td><b>Mean</b></td><td>Symmetric numeric data, further math (e.g. variance)</td><td>High</td><td>No</td></tr>
+          <tr><td><b>Median</b></td><td>Skewed data, income, house prices, anything with extremes</td><td>Low</td><td>No (needs order)</td></tr>
+          <tr><td><b>Mode</b></td><td>Categorical data, finding the most common item</td><td>None</td><td>Yes</td></tr>
+        </table>
+
+        <div class="misconception"><span class="x">✕</span><div><b>Misconception:</b> "The mean is always the best average." In reality, for skewed data (like income or home prices), the median usually tells a more honest story because a few extreme values can drag the mean far from what's "typical."</div></div>
+        <div class="misconception"><span class="x">✕</span><div><b>Misconception:</b> "Every dataset has exactly one mode." A dataset can have no mode (all values unique), one mode, or several (bimodal / multimodal).</div></div>
+        <div class="misconception"><span class="x">✕</span><div><b>Misconception:</b> "Mode only applies to numbers." Mode is actually the <i>only</i> central tendency measure that works on purely categorical data like colors or brands.</div></div>
+
+        <details class="exercise">
+          <summary>Practical Exercise — build your own dataset</summary>
+          <div class="exercise-body">
+            <p>Edit the values below (a small class's quiz scores out of 20) and watch mean, median, and mode update live. Try making one score extreme and see which measure moves the most.</p>
+            <table class="data-editor"><thead><tr id="m1-editor-head"></tr></thead><tbody><tr id="m1-editor-row"></tr></tbody></table>
+            <div style="margin:8px 0;"><button class="btn btn-sm" onclick="m1AddPoint()">+ add student</button> <button class="btn btn-sm" onclick="m1RemovePoint()">− remove student</button> <button class="btn btn-sm" onclick="m1ResetPoints()">↺ reset</button></div>
+            <div class="stat-cards">
+              <div class="stat-card"><div class="slabel">Mean</div><div class="sval" id="m1-mean"></div></div>
+              <div class="stat-card"><div class="slabel">Median</div><div class="sval" id="m1-median"></div></div>
+              <div class="stat-card"><div class="slabel">Mode</div><div class="sval" id="m1-mode"></div></div>
+              <div class="stat-card"><div class="slabel">Range</div><div class="sval" id="m1-range"></div></div>
+            </div>
+          </div>
+        </details>
+
+        <div class="takeaways">
+          <h4>Key takeaways</h4>
+          <ul>
+            <li>Mean = balance point; sensitive to outliers.</li>
+            <li>Median = the middle value; resistant to outliers, best for skewed data.</li>
+            <li>Mode = most frequent value; the only option for categorical data.</li>
+            <li>Mean &gt; Median often signals a right skew (a few unusually high values).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quiz-box" id="quiz-1">
+        <h3>📝 Module 1 Quiz</h3>
+        <p style="margin-top:-6px; font-size:.85rem;">Answer all 4 questions, then submit for instant feedback.</p>
+        <div id="quiz-1-items"></div>
+        <button class="btn btn-primary" onclick="submitQuiz(1)">Submit answers</button>
+        <div class="quiz-summary" id="quiz-1-summary"></div>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 2 ============ -->
+    <section class="section" id="module-2">
+      <div class="module-head"><span class="module-num">Module 02</span><span class="module-tag">Building up</span></div>
+      <h2>Measures of Spread (Dispersion)</h2>
+      <p>Two classes can both average 15/20 on a quiz — but in one class everyone scored 14–16, and in the other scores ranged from 3 to 20. Central tendency alone hides that difference. <b>Spread</b> tells us how tightly or loosely data clusters around the center.</p>
+
+      <div class="panel">
+        <h3>2.1 — Range</h3>
+        <p>The simplest measure: the distance between the maximum and minimum values.</p>
+        <div class="formula-card"><span class="fname">Range formula</span>Range = Max − Min</div>
+
+        <h3>2.2 — Variance &amp; Standard Deviation</h3>
+        <p>Variance measures the average squared distance of each point from the mean. Standard deviation is just its square root — brought back into the original units, which makes it far easier to interpret.</p>
+        <div class="formula-card"><span class="fname">Sample variance</span>s² = Σ(x − x̄)² / (n − 1)</div>
+        <div class="formula-card"><span class="fname">Sample standard deviation</span>s = √s²</div>
+        <div class="callout">
+          <h4>Why n − 1, not n?</h4>
+          <p>When we only have a <i>sample</i> of a bigger population, dividing by n slightly underestimates the true spread. Dividing by n − 1 (called <b>Bessel's correction</b>) corrects that bias, giving a fair estimate of the population's real variance.</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-icon">🎯</div>
+          <div><b>Analogy — darts on a dartboard.</b> The mean is the bullseye. Standard deviation is roughly "how far, on average, each dart lands from the bullseye." A tight cluster of darts near the center = low std dev. Darts scattered all over the board = high std dev.</div>
+        </div>
+
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 520 150" width="100%" style="max-width:520px;">
+            <line x1="30" y1="100" x2="490" y2="100" stroke="var(--ink-faint)" stroke-width="2"/>
+            <line x1="255" y1="30" x2="255" y2="100" stroke="var(--amber-deep)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="255" y="22" text-anchor="middle" font-size="11" fill="var(--amber-deep)" font-family="var(--font-mono)">mean = 15.47</text>
+            <g font-family="var(--font-mono)" font-size="9" fill="var(--ink-faint)">
+              <circle cx="80" cy="90" r="7" fill="var(--teal)"/><line x1="80" y1="90" x2="255" y2="90" stroke="var(--brick)" stroke-width="1"/><text x="90" y="130">11 (dev −4.47)</text>
+              <circle cx="330" cy="90" r="7" fill="var(--teal)"/><line x1="330" y1="90" x2="255" y2="90" stroke="var(--brick)" stroke-width="1"/><text x="300" y="130">18 (dev +2.53)</text>
+              <circle cx="420" cy="90" r="7" fill="var(--teal)"/><line x1="420" y1="90" x2="255" y2="90" stroke="var(--brick)" stroke-width="1"/><text x="400" y="130">20 (dev +4.53)</text>
+              <circle cx="240" cy="90" r="7" fill="var(--teal)"/>
+              <circle cx="270" cy="90" r="7" fill="var(--teal)"/>
+            </g>
+          </svg>
+          <div class="diagram-cap">Deviations (red lines) from the mean are squared, averaged, then square-rooted to get standard deviation.</div>
+        </div>
+
+        <h3>2.3 — Quartiles &amp; the Interquartile Range (IQR)</h3>
+        <p>Quartiles split sorted data into four equal chunks. Q1 (25th percentile), Q2 (the median, 50th percentile), and Q3 (75th percentile). The <b>IQR</b> is the width of the middle 50% of the data — and it barely notices outliers.</p>
+        <div class="formula-card"><span class="fname">Interquartile range</span>IQR = Q3 − Q1</div>
+
+        <h3>Worked example — same quiz scores</h3>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="slabel">Range</div><div class="sval" id="ex2-range"></div></div>
+          <div class="stat-card"><div class="slabel">Variance (s²)</div><div class="sval" id="ex2-var"></div></div>
+          <div class="stat-card"><div class="slabel">Std Dev (s)</div><div class="sval" id="ex2-std"></div></div>
+          <div class="stat-card"><div class="slabel">IQR</div><div class="sval" id="ex2-iqr"></div></div>
+        </div>
+
+        <table class="compare">
+          <tr><th>Measure</th><th>Uses</th><th>Outlier sensitivity</th></tr>
+          <tr><td><b>Range</b></td><td>Only min &amp; max — quick, crude</td><td>Extremely high (one wild value ruins it)</td></tr>
+          <tr><td><b>Variance / Std Dev</b></td><td>Every point, in "squared"/original units</td><td>High</td></tr>
+          <tr><td><b>IQR</b></td><td>Only the middle 50%</td><td>Low — the classic robust choice</td></tr>
+        </table>
+
+        <div class="misconception"><span class="x">✕</span><div><b>Misconception:</b> "Variance and standard deviation are basically the same thing." Variance is in <i>squared</i> units (e.g., "points²"), which is hard to interpret. Std dev undoes the squaring, returning to the original units — that's why it's usually reported.</div></div>
+        <div class="misconception"><span class="x">✕</span><div><b>Misconception:</b> "Range is a reliable measure of spread." Range uses only two data points — one wild outlier can double it overnight, while every other value stays put.</div></div>
+
+        <details class="exercise">
+          <summary>Practical Exercise — spread calculator</summary>
+          <div class="exercise-body">
+            <p>Reuse Module 1's dataset (edit it here too) and watch how variance, standard deviation, and IQR respond differently to an outlier than the range does.</p>
+            <table class="data-editor"><thead><tr id="m2-editor-head"></tr></thead><tbody><tr id="m2-editor-row"></tr></tbody></table>
+            <div style="margin:8px 0;"><button class="btn btn-sm" onclick="m2AddPoint()">+ add student</button> <button class="btn btn-sm" onclick="m2RemovePoint()">− remove student</button> <button class="btn btn-sm" onclick="m2AddOutlier()">+ add extreme outlier</button> <button class="btn btn-sm" onclick="m2ResetPoints()">↺ reset</button></div>
+            <div class="stat-cards">
+              <div class="stat-card"><div class="slabel">Range</div><div class="sval" id="m2-range"></div></div>
+              <div class="stat-card"><div class="slabel">Variance</div><div class="sval" id="m2-var"></div></div>
+              <div class="stat-card"><div class="slabel">Std Dev</div><div class="sval" id="m2-std"></div></div>
+              <div class="stat-card"><div class="slabel">IQR</div><div class="sval" id="m2-iqr"></div></div>
+            </div>
+          </div>
+        </details>
+
+        <div class="takeaways">
+          <h4>Key takeaways</h4>
+          <ul>
+            <li>Range is fast but fragile — only two points determine it.</li>
+            <li>Variance/std dev use every point; std dev is in original units.</li>
+            <li>Sample variance divides by n − 1 to correct for bias (Bessel's correction).</li>
+            <li>IQR ignores the extreme 25% on each end — the outlier-resistant choice.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quiz-box" id="quiz-2">
+        <h3>📝 Module 2 Quiz</h3>
+        <div id="quiz-2-items"></div>
+        <button class="btn btn-primary" onclick="submitQuiz(2)">Submit answers</button>
+        <div class="quiz-summary" id="quiz-2-summary"></div>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 3 ============ -->
+    <section class="section" id="module-3">
+      <div class="module-head"><span class="module-num">Module 03</span><span class="module-tag">Applying it</span></div>
+      <h2>Distribution Shape</h2>
+      <p>Two datasets can share the same mean and std dev, yet look completely different when plotted. <b>Shape</b> — symmetry, skew, and how "normal" the data looks — is the missing piece that turns numbers into a real picture.</p>
+
+      <div class="panel">
+        <h3>3.1 — Symmetric vs. Skewed</h3>
+        <p>A distribution is <b>symmetric</b> when the left and right halves mirror each other (mean ≈ median). It's <b>skewed</b> when a long tail stretches out to one side, dragging the mean away from the median.</p>
+
+        <div class="analogy-box">
+          <div class="analogy-icon">🐘</div>
+          <div><b>Analogy — the tail tells the direction.</b> Think of the "tail" as literally an elephant's tail: a <i>right</i>-skewed distribution has its tail pointing right (a few huge values, like millionaire incomes in a room of average earners). A <i>left</i>-skewed one has its tail pointing left (a few very low values, like a handful of students who scored near zero on an otherwise easy quiz).</div>
+        </div>
+
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 560 170" width="100%" style="max-width:560px;">
+            <text x="90" y="16" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="var(--font-mono)">LEFT-SKEWED</text>
+            <path d="M20,140 C40,60 70,20 95,20 C120,20 130,80 175,140" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
+            <line x1="80" y1="140" x2="80" y2="20" stroke="var(--brick)" stroke-dasharray="3,3"/><text x="80" y="155" text-anchor="middle" font-size="9" fill="var(--brick)">mean</text>
+            <line x1="100" y1="140" x2="100" y2="20" stroke="var(--amber-deep)" stroke-dasharray="3,3"/><text x="112" y="155" text-anchor="middle" font-size="9" fill="var(--amber-deep)">median</text>
+
+            <text x="280" y="16" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="var(--font-mono)">SYMMETRIC</text>
+            <path d="M210,140 C230,20 330,20 350,140" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
+            <line x1="280" y1="140" x2="280" y2="20" stroke="var(--amber-deep)" stroke-dasharray="3,3"/><text x="280" y="155" text-anchor="middle" font-size="9" fill="var(--amber-deep)">mean = median</text>
+
+            <text x="470" y="16" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="var(--font-mono)">RIGHT-SKEWED</text>
+            <path d="M385,140 C430,80 440,20 465,20 C490,20 520,60 540,140" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
+            <line x1="460" y1="140" x2="460" y2="20" stroke="var(--amber-deep)" stroke-dasharray="3,3"/><text x="448" y="155" text-anchor="middle" font-size="9" fill="var(--amber-deep)">median</text>
+            <line x1="480" y1="140" x2="480" y2="20" stroke="var(--brick)" stroke-dasharray="3,3"/><text x="492" y="155" text-anchor="middle" font-size="9" fill="var(--brick)">mean</text>
+          </svg>
+          <div class="diagram-cap">In right skew, the mean is pulled above the median by the long right tail — and vice versa for left skew.</div>
+        </div>
+
+        <h3>3.2 — The Normal Distribution &amp; the Empirical Rule</h3>
+        <p>Many natural datasets cluster into a symmetric "bell curve" — the <b>normal distribution</b>. The <b>empirical rule</b> (68-95-99.7 rule) describes how data spreads around the mean in a normal distribution.</p>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 520 180" width="100%" style="max-width:520px;">
+            <path d="M20,150 C80,150 90,20 260,20 C430,20 440,150 500,150" fill="none" stroke="var(--ink-faint)" stroke-width="1.5"/>
+            <rect x="185" y="20" width="150" height="130" fill="var(--teal)" opacity=".28"/>
+            <rect x="150" y="20" width="220" height="130" fill="var(--teal)" opacity=".16"/>
+            <rect x="115" y="20" width="290" height="130" fill="var(--teal)" opacity=".08"/>
+            <line x1="260" y1="150" x2="260" y2="20" stroke="var(--amber-deep)" stroke-width="1.5" stroke-dasharray="3,3"/>
+            <text x="260" y="168" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--ink-faint)">μ</text>
+            <text x="260" y="95" text-anchor="middle" font-size="11" font-family="var(--font-mono)" fill="var(--ink)">68%</text>
+            <text x="260" y="60" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--ink-soft)">±1σ → 95%</text>
+            <text x="260" y="34" text-anchor="middle" font-size="9" font-family="var(--font-mono)" fill="var(--ink-faint)">±3σ → 99.7%</text>
+          </svg>
+          <div class="diagram-cap">68% of data falls within 1 standard deviation of the mean, 95% within 2, and 99.7% within 3.</div>
+        </div>
+
+        <h3>3.3 — Z-scores</h3>
+        <p>A <b>z-score</b> tells you how many standard deviations a value sits from the mean — a universal "how unusual is this?" ruler that works across any dataset.</p>
+        <div class="formula-card"><span class="fname">Z-score</span>z = (x − x̄) / s</div>
+        <div class="analogy-box">
+          <div class="analogy-icon">📏</div>
+          <div><b>Analogy — steps from home base.</b> If the mean is "home base" and the standard deviation is the length of one stride, the z-score just counts how many strides away a value stands — and in which direction.</div>
+        </div>
+
+        <h3>3.4 — Spotting Outliers (IQR method)</h3>
+        <p>A common rule: any value more than <b>1.5 × IQR</b> below Q1 or above Q3 is flagged as a potential outlier.</p>
+        <div class="formula-card"><span class="fname">Outlier fences</span>Lower fence = Q1 − 1.5×IQR &nbsp;|&nbsp; Upper fence = Q3 + 1.5×IQR</div>
+
+        <details class="exercise">
+          <summary>Practical Exercise — shape explorer &amp; z-score calculator</summary>
+          <div class="exercise-body">
+            <p>Drag the slider to skew a synthetic delivery-time dataset, and watch the histogram, mean, and median respond.</p>
+            <input type="range" id="skew-slider" min="-10" max="10" value="0" style="width:100%;" oninput="updateSkewDemo()">
+            <div style="display:flex; justify-content:space-between; font-size:.72rem; color:var(--ink-faint); font-family:var(--font-mono);"><span>← left-skewed</span><span>symmetric</span><span>right-skewed →</span></div>
+            <div class="mini-hist" id="skew-hist" style="height:90px;"></div>
+            <div class="stat-cards">
+              <div class="stat-card"><div class="slabel">Mean</div><div class="sval" id="skew-mean"></div></div>
+              <div class="stat-card"><div class="slabel">Median</div><div class="sval" id="skew-median"></div></div>
+              <div class="stat-card"><div class="slabel">Shape</div><div class="sval" id="skew-shape" style="font-size:.85rem;"></div></div>
+            </div>
+            <hr class="divider">
+            <p><b>Z-score calculator</b> — using the delivery-time dataset above (mean &amp; std dev update automatically):</p>
+            <div class="ans-row">
+              <label>Value: <input type="number" id="zscore-input" value="30" oninput="updateZScore()"></label>
+              <span class="mono">z = <span id="zscore-output">–</span></span>
+            </div>
+          </div>
+        </details>
+
+        <div class="misconception"><span class="x">✕</span><div><b>Misconception:</b> "Skewed data always has outliers." Skew describes the overall shape; outliers are individual extreme points. You can have one without the other.</div></div>
+        <div class="misconception"><span class="x">✕</span><div><b>Misconception:</b> "Z-scores only work on normal distributions." You can calculate a z-score for any numeric dataset — it's the <i>interpretation</i> ("2 std devs = rare") that's most reliable when the data is roughly normal.</div></div>
+        <div class="misconception"><span class="x">✕</span><div><b>Misconception:</b> "Outliers should always be deleted." Sometimes an outlier is the most important data point in the set (a fraud case, a system failure). Investigate before removing.</div></div>
+
+        <div class="takeaways">
+          <h4>Key takeaways</h4>
+          <ul>
+            <li>Right skew: mean &gt; median. Left skew: mean &lt; median. Symmetric: mean ≈ median.</li>
+            <li>The empirical rule (68-95-99.7) only applies to roughly normal distributions.</li>
+            <li>Z-scores standardize values so you can compare across different datasets.</li>
+            <li>The IQR method (1.5×IQR fences) is a simple, robust way to flag outliers.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quiz-box" id="quiz-3">
+        <h3>📝 Module 3 Quiz</h3>
+        <div id="quiz-3-items"></div>
+        <button class="btn btn-primary" onclick="submitQuiz(3)">Submit answers</button>
+        <div class="quiz-summary" id="quiz-3-summary"></div>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 4 ============ -->
+    <section class="section" id="module-4">
+      <div class="module-head"><span class="module-num">Module 04</span><span class="module-tag">Mastery</span></div>
+      <h2>Visualization &amp; Putting It All Together</h2>
+      <p>Numbers describe a dataset; pictures make it click instantly. This module covers choosing the right chart and combining everything you've learned into one real analysis.</p>
+
+      <div class="panel">
+        <h3>4.1 — Choosing the Right Chart</h3>
+        <table class="compare">
+          <tr><th>Chart</th><th>Best for</th><th>Watch out for</th></tr>
+          <tr><td><b>Histogram</b></td><td>Distribution shape of continuous numeric data</td><td>Bars touch (no gaps) — it's showing continuous ranges, not categories</td></tr>
+          <tr><td><b>Bar chart</b></td><td>Comparing categorical data (categories, counts)</td><td>Bars have gaps; order is often arbitrary</td></tr>
+          <tr><td><b>Box plot</b></td><td>Comparing spread &amp; outliers across groups at a glance</td><td>Hides the actual shape of the data within each quartile</td></tr>
+        </table>
+
+        <div class="misconception"><span class="x">✕</span><div><b>Misconception:</b> "Histograms and bar charts are interchangeable." Histogram bars touch because the x-axis is a continuous number line; bar chart bars are separated because categories have no inherent numeric order.</div></div>
+
+        <h3>4.2 — Anatomy of a Box Plot</h3>
+        <p>A box plot is built directly from the five-number summary: minimum, Q1, median, Q3, maximum.</p>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 520 130" width="100%" style="max-width:520px;">
+            <line x1="40" y1="65" x2="480" y2="65" stroke="var(--line-strong)" stroke-width="1"/>
+            <line x1="60" y1="65" x2="140" y2="65" stroke="var(--ink-soft)" stroke-width="2"/>
+            <line x1="60" y1="45" x2="60" y2="85" stroke="var(--ink-soft)" stroke-width="2"/>
+            <rect x="140" y="35" width="130" height="60" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="2"/>
+            <line x1="205" y1="35" x2="205" y2="95" stroke="var(--amber-deep)" stroke-width="2.5"/>
+            <line x1="270" y1="65" x2="400" y2="65" stroke="var(--ink-soft)" stroke-width="2"/>
+            <line x1="400" y1="45" x2="400" y2="85" stroke="var(--ink-soft)" stroke-width="2"/>
+            <circle cx="450" cy="65" r="4" fill="var(--brick)"/>
+            <g font-family="var(--font-mono)" font-size="9" fill="var(--ink-faint)">
+              <text x="60" y="105" text-anchor="middle">Min</text>
+              <text x="140" y="20" text-anchor="middle">Q1</text>
+              <text x="205" y="20" text-anchor="middle">Median</text>
+              <text x="270" y="20" text-anchor="middle">Q3</text>
+              <text x="400" y="105" text-anchor="middle">Max</text>
+              <text x="450" y="105" text-anchor="middle" fill="var(--brick)">Outlier</text>
+            </g>
+          </svg>
+          <div class="diagram-cap">The box spans the IQR (Q1–Q3); whiskers reach to the furthest non-outlier points; dots mark flagged outliers.</div>
+        </div>
+
+        <h3>4.3 — Decision Framework</h3>
+        <div class="diagram-wrap">
+          <svg viewBox="0 0 560 190" width="100%" style="max-width:560px;">
+            <rect x="220" y="10" width="120" height="34" rx="6" fill="var(--panel)" stroke="var(--line-strong)"/><text x="280" y="31" text-anchor="middle" font-size="10">Is data skewed?</text>
+            <line x1="250" y1="44" x2="120" y2="80" stroke="var(--ink-faint)"/><text x="165" y="65" font-size="9" fill="var(--ink-faint)">yes</text>
+            <line x1="320" y1="44" x2="440" y2="80" stroke="var(--ink-faint)"/><text x="390" y="65" font-size="9" fill="var(--ink-faint)">no</text>
+            <rect x="40" y="80" width="170" height="44" rx="6" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="125" y="98" text-anchor="middle" font-size="10">Use Median</text><text x="125" y="114" text-anchor="middle" font-size="10">+ IQR</text>
+            <rect x="360" y="80" width="170" height="44" rx="6" fill="var(--amber-soft)" stroke="var(--amber)"/><text x="445" y="98" text-anchor="middle" font-size="10">Use Mean</text><text x="445" y="114" text-anchor="middle" font-size="10">+ Std Dev</text>
+            <text x="280" y="170" text-anchor="middle" font-size="9" fill="var(--ink-faint)" font-family="var(--font-mono)">Categorical data → always use Mode, visualized with a bar chart</text>
+          </svg>
+        </div>
+
+        <details class="exercise">
+          <summary>Practical Exercise — full mini case study</summary>
+          <div class="exercise-body">
+            <p>A café tracks minutes-to-serve for 12 orders: <span id="m4-data" class="mono"></span>. Answer the questions using everything you've learned so far.</p>
+            <div class="stat-cards">
+              <div class="stat-card"><div class="slabel">Mean</div><div class="sval" id="m4-mean"></div></div>
+              <div class="stat-card"><div class="slabel">Median</div><div class="sval" id="m4-median"></div></div>
+              <div class="stat-card"><div class="slabel">IQR</div><div class="sval" id="m4-iqr"></div></div>
+            </div>
+            <div class="ans-row">
+              <span>1. Which chart best shows this data's shape?</span>
+              <select id="m4-q1"><option value="">Choose…</option><option>Histogram</option><option>Bar chart</option><option>Pie chart</option></select>
+              <button class="btn btn-sm" onclick="checkM4(1,'Histogram')">Check</button>
+              <span id="m4-fb1" class="feedback-inline"></span>
+            </div>
+            <div class="ans-row">
+              <span>2. Given this data's shape, which pair should you report?</span>
+              <select id="m4-q2"><option value="">Choose…</option><option>Mean + Std Dev</option><option>Median + IQR</option></select>
+              <button class="btn btn-sm" onclick="checkM4(2,'Median + IQR')">Check</button>
+              <span id="m4-fb2" class="feedback-inline"></span>
+            </div>
+          </div>
+        </details>
+
+        <div class="takeaways">
+          <h4>Key takeaways</h4>
+          <ul>
+            <li>Histograms show shape; bar charts compare categories; box plots compare spread &amp; outliers across groups.</li>
+            <li>A box plot is literally the five-number summary drawn as a picture.</li>
+            <li>Skewed data → median + IQR. Symmetric data → mean + std dev. Categorical → mode + bar chart.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quiz-box" id="quiz-4">
+        <h3>📝 Module 4 Quiz</h3>
+        <div id="quiz-4-items"></div>
+        <button class="btn btn-primary" onclick="submitQuiz(4)">Submit answers</button>
+        <div class="quiz-summary" id="quiz-4-summary"></div>
+      </div>
+    </section>
+
+    <!-- ============ FINAL CHALLENGE ============ -->
+    <section class="section" id="final-challenge">
+      <div class="module-head"><span class="module-num">Final</span><span class="module-tag">Practical Challenge</span></div>
+      <h2>The Delivery Time Investigation</h2>
+      <p id="final-locked-note" class="callout warn"><b>Complete all 4 module quizzes to unlock this challenge.</b></p>
+      <div id="final-challenge-body" style="display:none;">
+        <div class="panel">
+          <p>A food delivery app recorded delivery times (minutes) for 20 orders: <span id="final-data" class="mono"></span>. Work through each step — your answers are checked instantly.</p>
+
+          <div class="challenge-step"><span class="stepnum">STEP 1</span><h4>Calculate the mean</h4>
+            <div class="ans-row"><input type="number" step="0.01" id="fc1"><button class="btn btn-sm" onclick="checkFinal(1)">Check</button><span class="feedback-inline" id="fc1-fb"></span></div>
+          </div>
+          <div class="challenge-step"><span class="stepnum">STEP 2</span><h4>Calculate the median</h4>
+            <div class="ans-row"><input type="number" step="0.01" id="fc2"><button class="btn btn-sm" onclick="checkFinal(2)">Check</button><span class="feedback-inline" id="fc2-fb"></span></div>
+          </div>
+          <div class="challenge-step"><span class="stepnum">STEP 3</span><h4>What does mean &gt; median suggest about shape?</h4>
+            <div class="ans-row"><select id="fc3"><option value="">Choose…</option><option>Right-skewed</option><option>Left-skewed</option><option>Symmetric</option></select><button class="btn btn-sm" onclick="checkFinal(3)">Check</button><span class="feedback-inline" id="fc3-fb"></span></div>
+          </div>
+          <div class="challenge-step"><span class="stepnum">STEP 4</span><h4>Using the 1.5×IQR rule, how many outliers are in this dataset?</h4>
+            <div class="ans-row"><input type="number" id="fc4"><button class="btn btn-sm" onclick="checkFinal(4)">Check</button><span class="feedback-inline" id="fc4-fb"></span></div>
+          </div>
+          <div class="challenge-step"><span class="stepnum">STEP 5</span><h4>Which measure pair should the app report to customers?</h4>
+            <div class="ans-row"><select id="fc5"><option value="">Choose…</option><option>Mean + Std Dev</option><option>Median + IQR</option></select><button class="btn btn-sm" onclick="checkFinal(5)">Check</button><span class="feedback-inline" id="fc5-fb"></span></div>
+          </div>
+          <div class="challenge-step"><span class="stepnum">STEP 6</span><h4>Best chart to show delivery-time distribution to the engineering team?</h4>
+            <div class="ans-row"><select id="fc6"><option value="">Choose…</option><option>Histogram</option><option>Bar chart</option><option>Pie chart</option></select><button class="btn btn-sm" onclick="checkFinal(6)">Check</button><span class="feedback-inline" id="fc6-fb"></span></div>
+          </div>
+
+          <button class="btn btn-primary" style="margin-top:16px;" onclick="finishFinalChallenge()">Finish challenge &amp; get certificate</button>
+          <div id="certificate-wrap" style="display:none; margin-top:20px;">
+            <div class="certificate">
+              <div style="font-size:2rem;">🏅</div>
+              <div class="cert-title">Certificate of Completion</div>
+              <p>This certifies that a dedicated learner has completed<br><b>The Full Descriptive Statistics Toolkit</b><br>Interactive Learning Studio</p>
+              <p class="mono" style="font-size:.8rem;">Final score: <span id="cert-score"></span> / 160 pts</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CHEAT SHEET ============ -->
+    <section class="section" id="cheat-sheet">
+      <div class="module-head"><span class="module-num">Reference</span></div>
+      <h2>Cheat Sheet</h2>
+      <p class="print-only" style="display:none;"><b>Descriptive Statistics — Quick Reference</b></p>
+      <div class="cheat-grid">
+        <div class="cheat-card"><h4>Mean</h4><span class="f">x̄ = Σx / n</span><p style="margin:0; font-size:.8rem;">Balance point; outlier-sensitive.</p></div>
+        <div class="cheat-card"><h4>Median</h4><span class="f">middle value (sorted)</span><p style="margin:0; font-size:.8rem;">Outlier-resistant; best for skewed data.</p></div>
+        <div class="cheat-card"><h4>Mode</h4><span class="f">most frequent value</span><p style="margin:0; font-size:.8rem;">Only option for categorical data.</p></div>
+        <div class="cheat-card"><h4>Range</h4><span class="f">Max − Min</span><p style="margin:0; font-size:.8rem;">Crude; uses only 2 points.</p></div>
+        <div class="cheat-card"><h4>Sample Variance</h4><span class="f">s² = Σ(x−x̄)² / (n−1)</span><p style="margin:0; font-size:.8rem;">Average squared deviation, bias-corrected.</p></div>
+        <div class="cheat-card"><h4>Standard Deviation</h4><span class="f">s = √s²</span><p style="margin:0; font-size:.8rem;">Spread, in original units.</p></div>
+        <div class="cheat-card"><h4>IQR</h4><span class="f">Q3 − Q1</span><p style="margin:0; font-size:.8rem;">Middle 50% spread; outlier-resistant.</p></div>
+        <div class="cheat-card"><h4>Outlier Fences</h4><span class="f">Q1−1.5·IQR, Q3+1.5·IQR</span><p style="margin:0; font-size:.8rem;">Beyond these = flagged outlier.</p></div>
+        <div class="cheat-card"><h4>Z-score</h4><span class="f">z = (x−x̄)/s</span><p style="margin:0; font-size:.8rem;">Std devs from the mean.</p></div>
+        <div class="cheat-card"><h4>Empirical Rule</h4><span class="f">68% / 95% / 99.7%</span><p style="margin:0; font-size:.8rem;">Within 1σ / 2σ / 3σ of mean (normal data).</p></div>
+      </div>
+      <div class="takeaways" style="margin-top:16px;">
+        <h4>Decision rule of thumb</h4>
+        <ul>
+          <li>Symmetric numeric data → <b>Mean + Standard Deviation</b></li>
+          <li>Skewed numeric data / outliers present → <b>Median + IQR</b></li>
+          <li>Categorical data → <b>Mode + Bar chart</b></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ SUMMARY NOTES ============ -->
+    <section class="section" id="summary-notes">
+      <h2>Summary Notes</h2>
+      <div class="panel">
+        <p><b>Module 1 — Central Tendency:</b> Mean, median, and mode each answer "what's typical" differently. Mean is precise but outlier-sensitive; median is robust; mode is the only categorical option.</p>
+        <p><b>Module 2 — Spread:</b> A single "typical" value hides how consistent or variable the data is. Range is fast but fragile; variance/std dev use every point; IQR is the robust middle-50% measure.</p>
+        <p><b>Module 3 — Shape:</b> Comparing mean and median reveals skew direction. The empirical rule and z-scores let you judge how unusual a value is, and the 1.5×IQR rule gives a repeatable way to flag outliers.</p>
+        <p><b>Module 4 — Visualization:</b> Choose histograms for shape, bar charts for categories, box plots for comparing groups — and let skew guide whether you report mean+std dev or median+IQR.</p>
+      </div>
+    </section>
+
+    <!-- ============ CONTINUE LEARNING ============ -->
+    <section class="section" id="continue-learning">
+      <h2>Continue Learning</h2>
+      <p>You've completed the toolkit — here's where to go deeper.</p>
+      <div class="resource-grid">
+        <div class="resource-card"><h4>📚 Books</h4><ul>
+          <li><i>Naked Statistics</i> — Charles Wheelan</li>
+          <li><i>The Art of Statistics</i> — David Spiegelhalter</li>
+          <li><i>Practical Statistics for Data Scientists</i> — Bruce, Bruce &amp; Gedeck</li>
+          <li><i>How to Lie with Statistics</i> — Darrell Huff</li>
+        </ul></div>
+        <div class="resource-card"><h4>📖 Documentation</h4><ul>
+          <li>NIST/SEMATECH e-Handbook of Statistical Methods</li>
+          <li>Khan Academy — Statistics &amp; Probability course</li>
+          <li>StatQuest (video reference library)</li>
+        </ul></div>
+        <div class="resource-card"><h4>🧪 Foundational Papers</h4><ul>
+          <li>John Tukey, <i>Exploratory Data Analysis</i> (1977) — origin of the box plot</li>
+          <li>Bessel, correction for sample variance (classical statistics literature)</li>
+        </ul></div>
+        <div class="resource-card"><h4>👥 Communities</h4><ul>
+          <li>Cross Validated (stats.stackexchange.com)</li>
+          <li>r/statistics</li>
+          <li>Kaggle discussion forums</li>
+        </ul></div>
+        <div class="resource-card"><h4>💻 Practice Platforms</h4><ul>
+          <li>Khan Academy exercises</li>
+          <li>Kaggle Learn — Intro to Statistics</li>
+          <li>DataCamp — Statistics fundamentals tracks</li>
+        </ul></div>
+        <div class="resource-card"><h4>🔎 Search Keywords</h4>
+          <div><span class="keyword-chip">robust statistics</span><span class="keyword-chip">skewness &amp; kurtosis</span><span class="keyword-chip">Tukey box plot</span><span class="keyword-chip">Bessel's correction</span><span class="keyword-chip">z-score standardization</span><span class="keyword-chip">exploratory data analysis</span></div>
+        </div>
+      </div>
+      <h3 style="margin-top:26px;">Additional AI prompts for further learning</h3>
+      <div class="prompt-card">"Give me 5 real-world datasets and ask me to decide whether to use mean+std dev or median+IQR for each, then check my reasoning."</div>
+      <div class="prompt-card">"Quiz me on the difference between population and sample variance with 10 rapid-fire questions."</div>
+      <div class="prompt-card">"Walk me through calculating skewness numerically (Pearson's coefficient) using a dataset I give you."</div>
+      <div class="prompt-card">"Explain how box plots, histograms, and violin plots each reveal different things about the same dataset."</div>
+    </section>
+
+    <footer style="text-align:center; padding:40px 20px; color:var(--ink-faint); font-size:.8rem;">Interactive Learning Studio · Built for hands-on mastery of descriptive statistics</footer>
+  </main>
+</div>
+
+<script>
+/* ================= STATS HELPERS ================= */
+function mean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length;}
+function median(arr){const s=[...arr].sort((a,b)=>a-b); const n=s.length; const mid=Math.floor(n/2); return n%2 ? s[mid] : (s[mid-1]+s[mid])/2;}
+function modeArr(arr){
+  const freq={}; arr.forEach(v=>freq[v]=(freq[v]||0)+1);
+  const max=Math.max(...Object.values(freq));
+  const modes=Object.keys(freq).filter(k=>freq[k]===max).map(Number);
+  if(modes.length===Object.keys(freq).length) return [];
+  return modes.sort((a,b)=>a-b);
+}
+function rangeOf(arr){return Math.max(...arr)-Math.min(...arr);}
+function variance(arr, sample){
+  if(sample===undefined) sample=true;
+  const m=mean(arr); const sumSq=arr.reduce((a,b)=>a+Math.pow(b-m,2),0);
+  return sumSq/(arr.length-(sample?1:0));
+}
+function stdDev(arr, sample){return Math.sqrt(variance(arr, sample));}
+function quartiles(arr){
+  const s=[...arr].sort((a,b)=>a-b); const n=s.length; const med=median(s);
+  const lowerHalf = n%2===0 ? s.slice(0, n/2) : s.slice(0, (n-1)/2);
+  const upperHalf = n%2===0 ? s.slice(n/2) : s.slice((n+1)/2);
+  return {q1: median(lowerHalf), q2: med, q3: median(upperHalf)};
+}
+function iqrOf(arr){const q=quartiles(arr); return q.q3-q.q1;}
+function outlierFences(arr){const q=quartiles(arr); const iq=q.q3-q.q1; return {lower:q.q1-1.5*iq, upper:q.q3+1.5*iq};}
+function outliersOf(arr){const f=outlierFences(arr); return arr.filter(v=>v<f.lower||v>f.upper);}
+function fmt(n, d){ if(d===undefined) d=2; if(!isFinite(n)) return '–'; return (Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toString(); }
+function fmtList(arr){return arr.length? arr.join(', ') : '— none —';}
+
+/* ================= THEME ================= */
+function toggleTheme(){
+  const html=document.documentElement;
+  const cur = html.getAttribute('data-theme');
+  const next = cur==='dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('stats-studio-theme', next);
+}
+(function initTheme(){
+  const saved = localStorage.getItem('stats-studio-theme');
+  if(saved) document.documentElement.setAttribute('data-theme', saved);
+  else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-theme','dark');
+})();
+
+/* ================= SIDEBAR MOBILE ================= */
+function toggleSidebar(open){
+  document.getElementById('sidebar').classList.toggle('open', open);
+  document.getElementById('sidebar-scrim').classList.toggle('show', open);
+}
+document.querySelectorAll('.nav-link').forEach(a=>a.addEventListener('click',()=>toggleSidebar(false)));
+
+/* ================= MODULE NAV BUILD ================= */
+const moduleMeta = [
+  {id:1, title:'Central Tendency'},
+  {id:2, title:'Measures of Spread'},
+  {id:3, title:'Distribution Shape'},
+  {id:4, title:'Visualization & Mastery'}
+];
+const navUl = document.getElementById('module-nav');
+moduleMeta.forEach(m=>{
+  const li=document.createElement('li');
+  li.innerHTML = `<a href="#module-${m.id}" class="nav-link" data-target="module-${m.id}"><span class="nav-dot" id="nav-dot-${m.id}"></span>Module ${m.id} · ${m.title}</a>`;
+  navUl.appendChild(li);
+});
+document.querySelectorAll('.nav-link').forEach(a=>a.addEventListener('click',(e)=>{
+  document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));
+  a.classList.add('active');
+  toggleSidebar(false);
+}));
+
+/* ================= PROGRESS / BADGES ================= */
+const STORAGE_KEY='stats-studio-progress-v1';
+let progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"quizzes":{},"final":false,"score":0}');
+const badgeDefs = [
+  {id:'m1', label:'Central Tendency Champion'},
+  {id:'m2', label:'Spread Specialist'},
+  {id:'m3', label:'Shape Shifter'},
+  {id:'m4', label:'Visualization Virtuoso'},
+  {id:'final', label:'Master Analyst'}
+];
+function renderBadges(){
+  const shelf = document.getElementById('badge-shelf');
+  shelf.innerHTML='';
+  badgeDefs.forEach(b=>{
+    const earned = b.id==='final' ? progress.final : !!progress.quizzes[b.id];
+    const span=document.createElement('span');
+    span.className='badge-chip'+(earned?' earned':'');
+    span.textContent = (earned?'✓ ':'') + b.label;
+    shelf.appendChild(span);
+  });
+}
+function updateProgressRing(){
+  const totalUnits = 5; // 4 quizzes + final
+  let done = Object.keys(progress.quizzes).length + (progress.final?1:0);
+  const pct = Math.round((done/totalUnits)*100);
+  const circumference = 119.4;
+  const circle = document.getElementById('progress-circle');
+  circle.setAttribute('stroke-dashoffset', circumference - (circumference*pct/100));
+  document.getElementById('progress-pct').textContent = pct;
+  document.getElementById('progress-pct-mobile').textContent = pct;
+}
+function updateLocksAndDots(){
+  moduleMeta.forEach(m=>{
+    const dot = document.getElementById('nav-dot-'+m.id);
+    if(progress.quizzes['m'+m.id]) dot.classList.add('done');
+  });
+  const allDone = moduleMeta.every(m=>progress.quizzes['m'+m.id]);
+  const finalNote = document.getElementById('final-locked-note');
+  const finalBody = document.getElementById('final-challenge-body');
+  const lockFinal = document.getElementById('lock-final');
+  const navDotFinal = document.getElementById('nav-dot-final');
+  if(allDone){
+    finalNote.style.display='none';
+    finalBody.style.display='block';
+    lockFinal.style.display='none';
+  }
+  if(progress.final) navDotFinal.classList.add('done');
+  renderBadges();
+  updateProgressRing();
+}
+
+/* ================= CONFETTI ================= */
+function launchConfetti(){
+  const colors = ['#B8862A','#2A7F7E','#A8453C','#D7A94B'];
+  const layer = document.getElementById('confetti-layer');
+  for(let i=0;i<60;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    p.style.left = Math.random()*100+'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2+Math.random()*1.5)+'s';
+    p.style.animationDelay = (Math.random()*0.4)+'s';
+    layer.appendChild(p);
+    setTimeout(()=>p.remove(), 4000);
+  }
+}
+
+/* ================= HERO DIAL ================= */
+let heroData = [14,16,15,18,12,17,15,19,13,16,15,20,11,16,15];
+const HERO_MAX = 20;
+function heroAdd(v){ heroData.push(Math.max(0,Math.min(HERO_MAX,v))); renderHero(); }
+function heroRemove(){ if(heroData.length>1) heroData.pop(); renderHero(); }
+function heroReset(){ heroData=[14,16,15,18,12,17,15,19,13,16,15,20,11,16,15]; renderHero(); }
+function renderHero(){
+  const m = mean(heroData), med = median(heroData), mo = modeArr(heroData);
+  document.getElementById('hero-mean').textContent = fmt(m,1);
+  document.getElementById('hero-median').textContent = fmt(med,1);
+  document.getElementById('hero-mode').textContent = mo.length? mo.join(', ') : '—';
+  document.getElementById('hero-n').textContent = heroData.length;
+  // needle: gauge spans 0..HERO_MAX across 180deg (from angle 180 to 0)
+  const frac = Math.max(0, Math.min(1, m/HERO_MAX));
+  const angle = 180 - frac*180; // degrees, 180=left,0=right
+  const rad = angle*Math.PI/180;
+  const cx=110, cy=116, len=82;
+  const nx = cx + len*Math.cos(rad);
+  const ny = cy - len*Math.sin(rad);
+  const needle = document.getElementById('hero-needle');
+  needle.setAttribute('x2', nx); needle.setAttribute('y2', ny);
+  // median marker position along arc
+  const mfrac = Math.max(0, Math.min(1, med/HERO_MAX));
+  const mangle = 180 - mfrac*180; const mrad = mangle*Math.PI/180;
+  const mx1 = cx + 90*Math.cos(mrad), my1 = cy - 90*Math.sin(mrad);
+  const mx2 = cx + 102*Math.cos(mrad), my2 = cy - 102*Math.sin(mrad);
+  const marker = document.getElementById('hero-median-marker');
+  marker.setAttribute('x1',mx1); marker.setAttribute('y1',my1); marker.setAttribute('x2',mx2); marker.setAttribute('y2',my2);
+  // mini histogram (bucket into 0-4,5-9,10-14,15-19,20)
+  const buckets = [0,0,0,0,0];
+  heroData.forEach(v=>{ const idx=Math.min(4, Math.floor(v/5)); buckets[idx]++; });
+  const maxB = Math.max(...buckets,1);
+  const hist = document.getElementById('hero-hist');
+  hist.innerHTML='';
+  buckets.forEach(b=>{
+    const bar=document.createElement('div');
+    bar.className='mini-bar';
+    bar.style.height = (6 + (b/maxB)*54)+'px';
+    hist.appendChild(bar);
+  });
+  // brand needle mini icon follows same angle scaled
+  const bn = document.getElementById('brand-needle');
+  const bang = angle; const brad=bang*Math.PI/180;
+  bn.setAttribute('x2', 20 + 13*Math.cos(brad));
+  bn.setAttribute('y2', 20 - 13*Math.sin(brad));
+}
+// tick marks for hero dial
+(function drawHeroTicks(){
+  const g = document.getElementById('hero-ticks');
+  for(let i=0;i<=4;i++){
+    const frac=i/4; const angle=180-frac*180; const rad=angle*Math.PI/180;
+    const cx=110, cy=116;
+    const x1=cx+86*Math.cos(rad), y1=cy-86*Math.sin(rad);
+    const x2=cx+96*Math.cos(rad), y2=cy-96*Math.sin(rad);
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1);line.setAttribute('y1',y1);line.setAttribute('x2',x2);line.setAttribute('y2',y2);
+    line.setAttribute('stroke','var(--ink-faint)'); line.setAttribute('stroke-width','1.5');
+    g.appendChild(line);
+  }
+})();
+
+/* ================= MODULE 1 EXAMPLE + EDITOR ================= */
+const ex1Data = [14,16,15,18,12,17,15,19,13,16,15,20,11,16,15];
+function renderExample1(){
+  document.getElementById('ex1-data').textContent = ex1Data.join(', ');
+  document.getElementById('ex1-mean').textContent = fmt(mean(ex1Data),2);
+  document.getElementById('ex1-median').textContent = fmt(median(ex1Data),2);
+  document.getElementById('ex1-mode').textContent = fmtList(modeArr(ex1Data));
+  document.getElementById('ex1-n').textContent = ex1Data.length;
+  document.getElementById('ex1-mean-inline').textContent = fmt(mean(ex1Data),2);
+  document.getElementById('ex1-median-inline').textContent = fmt(median(ex1Data),2);
+}
+
+let m1Data = [14,16,15,18,12,17,15,19,13,16,15,20,11,16,15];
+function buildM1Editor(){
+  const head = document.getElementById('m1-editor-head');
+  const row = document.getElementById('m1-editor-row');
+  head.innerHTML=''; row.innerHTML='';
+  m1Data.forEach((v,i)=>{
+    const th=document.createElement('th'); th.textContent='S'+(i+1); head.appendChild(th);
+    const td=document.createElement('td');
+    const inp=document.createElement('input'); inp.type='number'; inp.min=0; inp.max=20; inp.value=v;
+    inp.oninput=()=>{ m1Data[i]=Number(inp.value)||0; renderM1(); };
+    td.appendChild(inp); row.appendChild(td);
+  });
+}
+function m1AddPoint(){ m1Data.push(15); buildM1Editor(); renderM1(); }
+function m1RemovePoint(){ if(m1Data.length>1){ m1Data.pop(); buildM1Editor(); renderM1(); } }
+function m1ResetPoints(){ m1Data=[14,16,15,18,12,17,15,19,13,16,15,20,11,16,15]; buildM1Editor(); renderM1(); }
+function renderM1(){
+  document.getElementById('m1-mean').textContent = fmt(mean(m1Data),2);
+  document.getElementById('m1-median').textContent = fmt(median(m1Data),2);
+  document.getElementById('m1-mode').textContent = fmtList(modeArr(m1Data));
+  document.getElementById('m1-range').textContent = fmt(rangeOf(m1Data),1);
+}
+
+/* ================= MODULE 2 EXAMPLE + EDITOR ================= */
+const ex2Data = [14,16,15,18,12,17,15,19,13,16,15,20,11,16,15];
+function renderExample2(){
+  document.getElementById('ex2-range').textContent = fmt(rangeOf(ex2Data),1);
+  document.getElementById('ex2-var').textContent = fmt(variance(ex2Data),2);
+  document.getElementById('ex2-std').textContent = fmt(stdDev(ex2Data),2);
+  document.getElementById('ex2-iqr').textContent = fmt(iqrOf(ex2Data),2);
+}
+let m2Data = [14,16,15,18,12,17,15,19,13,16,15,20,11,16,15];
+function buildM2Editor(){
+  const head = document.getElementById('m2-editor-head');
+  const row = document.getElementById('m2-editor-row');
+  head.innerHTML=''; row.innerHTML='';
+  m2Data.forEach((v,i)=>{
+    const th=document.createElement('th'); th.textContent='S'+(i+1); head.appendChild(th);
+    const td=document.createElement('td');
+    const inp=document.createElement('input'); inp.type='number'; inp.value=v;
+    inp.oninput=()=>{ m2Data[i]=Number(inp.value)||0; renderM2(); };
+    td.appendChild(inp); row.appendChild(td);
+  });
+}
+function m2AddPoint(){ m2Data.push(15); buildM2Editor(); renderM2(); }
+function m2RemovePoint(){ if(m2Data.length>2){ m2Data.pop(); buildM2Editor(); renderM2(); } }
+function m2AddOutlier(){ m2Data.push(45); buildM2Editor(); renderM2(); }
+function m2ResetPoints(){ m2Data=[14,16,15,18,12,17,15,19,13,16,15,20,11,16,15]; buildM2Editor(); renderM2(); }
+function renderM2(){
+  document.getElementById('m2-range').textContent = fmt(rangeOf(m2Data),1);
+  document.getElementById('m2-var').textContent = fmt(variance(m2Data),2);
+  document.getElementById('m2-std').textContent = fmt(stdDev(m2Data),2);
+  document.getElementById('m2-iqr').textContent = fmt(iqrOf(m2Data),2);
+}
+
+/* ================= MODULE 3 SKEW DEMO ================= */
+function generateSkewData(skewVal){
+  // skewVal from -10 (left skew) to 10 (right skew); base symmetric cluster around 20 minutes
+  const base = [18,19,20,21,22,19,20,21,20,19,20,21,18,22,20,19,21,20,19,20];
+  const data = base.slice();
+  const extra = Math.abs(skewVal);
+  for(let i=0;i<extra;i++){
+    if(skewVal>0) data.push(20 + 8 + i*4); // right tail high values
+    else if(skewVal<0) data.push(20 - 8 - i*4); // left tail low values
+  }
+  return data.map(v=>Math.max(1,v));
+}
+function updateSkewDemo(){
+  const slider = document.getElementById('skew-slider');
+  const val = Number(slider.value);
+  const data = generateSkewData(val);
+  window.__skewData = data;
+  const m = mean(data), med = median(data);
+  document.getElementById('skew-mean').textContent = fmt(m,2);
+  document.getElementById('skew-median').textContent = fmt(med,2);
+  let shape = 'Roughly symmetric';
+  if(m - med > 0.6) shape='Right-skewed (mean > median)';
+  else if(med - m > 0.6) shape='Left-skewed (median > mean)';
+  document.getElementById('skew-shape').textContent = shape;
+  // histogram buckets
+  const min = Math.min(...data), max = Math.max(...data);
+  const bucketCount = 10;
+  const width = Math.max(1,(max-min)/bucketCount);
+  const buckets = new Array(bucketCount).fill(0);
+  data.forEach(v=>{ let idx=Math.floor((v-min)/width); if(idx>=bucketCount) idx=bucketCount-1; if(idx<0) idx=0; buckets[idx]++; });
+  const maxB = Math.max(...buckets,1);
+  const hist = document.getElementById('skew-hist');
+  hist.innerHTML='';
+  buckets.forEach(b=>{
+    const bar=document.createElement('div'); bar.className='mini-bar';
+    bar.style.height=(4+(b/maxB)*80)+'px';
+    hist.appendChild(bar);
+  });
+  updateZScore();
+}
+function updateZScore(){
+  const data = window.__skewData || generateSkewData(0);
+  const x = Number(document.getElementById('zscore-input').value);
+  const z = (x - mean(data)) / stdDev(data);
+  document.getElementById('zscore-output').textContent = isFinite(z) ? fmt(z,2) : '–';
+}
+
+/* ================= MODULE 4 CASE STUDY ================= */
+const m4Data = [8,9,7,10,9,8,11,9,8,25,9,8];
+function renderM4(){
+  document.getElementById('m4-data').textContent = m4Data.join(', ');
+  document.getElementById('m4-mean').textContent = fmt(mean(m4Data),2);
+  document.getElementById('m4-median').textContent = fmt(median(m4Data),2);
+  document.getElementById('m4-iqr').textContent = fmt(iqrOf(m4Data),2);
+}
+function checkM4(n, correct){
+  const sel = document.getElementById('m4-q'+n).value;
+  const fb = document.getElementById('m4-fb'+n);
+  if(sel===correct){ fb.textContent='✓ Correct'; fb.className='feedback-inline ok'; }
+  else{ fb.textContent='✕ Try again — hint: think about the outlier (25).'; fb.className='feedback-inline bad'; }
+}
+
+/* ================= QUIZZES ================= */
+const quizzes = {
+  1: [
+    {q:"A dataset of household incomes has one billionaire in it. Which measure of central tendency best represents the 'typical' household?", options:["Mean","Median","Mode","Range"], correct:1, explain:"The median resists the pull of the billionaire outlier, while the mean would be dragged far above what's typical for most households."},
+    {q:"A shoe store wants to know which size to restock the most of. Which measure should they use?", options:["Mean","Median","Mode","Standard deviation"], correct:2, explain:"Mode identifies the most frequently sold size — exactly the 'most in demand' figure a restocking decision needs."},
+    {q:"In Ms. Rivera's quiz scores, the mean (≈15.47) is slightly higher than the median (15). What does this suggest?", options:["The data is perfectly symmetric","There's a slight right skew — a few unusually high scores pull the mean up","The mode is incorrect","There's no relationship between mean and median"], correct:1, explain:"When mean > median, a long right tail (a few high values) is usually pulling the mean upward — an early sign of right skew."},
+    {q:"For a survey asking people's favorite fruit (categorical data), which measure of central tendency can you calculate?", options:["Mean only","Median only","Mode only","Mean and median"], correct:2, explain:"You can't average or order 'apple' and 'banana' — mode (the most common answer) is the only central tendency measure that works on categorical data."}
+  ],
+  2: [
+    {q:"Why do we divide by (n − 1) instead of n when calculating sample variance?", options:["It's just a tradition with no real reason","To correct for bias — a sample tends to underestimate the true population variance (Bessel's correction)","Because n is always an odd number","To make the formula match the mean formula"], correct:1, explain:"Dividing by n−1 (Bessel's correction) corrects the natural tendency of a sample to underestimate the true population variance."},
+    {q:"Which measure of spread is most resistant to outliers?", options:["Range","Variance","IQR","Standard deviation"], correct:2, explain:"IQR only looks at the middle 50% of the data, so extreme values at either end barely affect it."},
+    {q:"If a dataset has a very small standard deviation, what does that tell you?", options:["The data points are far from the mean","The data points are tightly clustered close to the mean","The dataset has many outliers","The mean is incorrect"], correct:1, explain:"A small standard deviation means most values sit close to the mean — low variability."},
+    {q:"The range of a dataset is calculated using how many data points?", options:["All of them","Just the mean and median","Only 2 — the minimum and maximum","Only the mode"], correct:2, explain:"Range = Max − Min, so it's determined entirely by just two values, ignoring everything in between."}
+  ],
+  3: [
+    {q:"In a right-skewed distribution, how do the mean and median typically compare?", options:["Mean is less than median","Mean is greater than median","Mean equals median exactly","They can't be compared"], correct:1, explain:"A long right tail pulls the mean above the median in a right-skewed distribution."},
+    {q:"According to the empirical rule, roughly what percentage of data falls within 1 standard deviation of the mean in a normal distribution?", options:["50%","68%","95%","99.7%"], correct:1, explain:"The empirical rule states about 68% of data falls within ±1 standard deviation of the mean in a normal distribution."},
+    {q:"A data point has a z-score of −2. What does this mean?", options:["It is 2 units above the median","It is 2 standard deviations below the mean","It is the mode of the dataset","It is an error in the data"], correct:1, explain:"A z-score of −2 means the value sits exactly 2 standard deviations below the mean."},
+    {q:"True or False: Z-scores can only be mathematically calculated for perfectly normal distributions.", options:["True — normality is required to compute a z-score","False — z-scores can be calculated for any numeric dataset, though their 'how unusual' interpretation is most reliable for roughly normal data"], correct:1, explain:"The z-score formula works on any numeric dataset; normality just makes the resulting interpretation ('2 std devs = rare') more meaningful."}
+  ],
+  4: [
+    {q:"You have a large continuous numeric dataset and want to see its overall distribution shape. Which chart fits best?", options:["Histogram","Bar chart","Pie chart","Line chart of raw order"], correct:0, explain:"Histograms bucket continuous numeric data into ranges, revealing the shape (skew, peaks, spread) at a glance."},
+    {q:"In a box plot, what does the box itself (not the whiskers) represent?", options:["The full range of the data","The interquartile range (Q1 to Q3)","Just the mean","Only the outliers"], correct:1, explain:"The box spans from Q1 to Q3 — the interquartile range, i.e. the middle 50% of the data."},
+    {q:"For skewed data with outliers, which combination is generally the more honest choice to report?", options:["Mean + Standard deviation","Median + IQR","Mode + Range","Mean + Range"], correct:1, explain:"Median and IQR both resist the pull of outliers and skew, giving a more representative summary than mean + std dev in this case."},
+    {q:"What's a common mistake when treating a bar chart like a histogram?", options:["Forgetting that bar chart categories usually have gaps between bars and no inherent numeric order, unlike histogram bins", "Making the bars too colorful","Using a title","Including a legend"], correct:0, explain:"Histograms represent a continuous number line (bars touch), while bar charts represent separate categories (bars have gaps and arbitrary order) — mixing up the two misrepresents the data."}
+  ]
+};
+
+function renderQuizzes(){
+  Object.keys(quizzes).forEach(mNum=>{
+    const container = document.getElementById('quiz-'+mNum+'-items');
+    container.innerHTML='';
+    quizzes[mNum].forEach((item, qi)=>{
+      const div = document.createElement('div');
+      div.className='qitem';
+      let optsHtml='';
+      item.options.forEach((opt,oi)=>{
+        optsHtml += `<label class="qoption" data-qi="${qi}" data-oi="${oi}">
+          <input type="radio" name="q${mNum}-${qi}" value="${oi}">
+          <span>${opt}</span>
+        </label>`;
+      });
+      div.innerHTML = `<div class="qtext">${qi+1}. ${item.q}</div><div class="qoptions">${optsHtml}</div><div class="qfeedback" id="fb-${mNum}-${qi}"></div>`;
+      container.appendChild(div);
+    });
+  });
+}
+function submitQuiz(mNum){
+  const items = quizzes[mNum];
+  let score = 0;
+  let answeredAll = true;
+  items.forEach((item, qi)=>{
+    const selected = document.querySelector(`input[name="q${mNum}-${qi}"]:checked`);
+    const fb = document.getElementById(`fb-${mNum}-${qi}`);
+    const optionEls = document.querySelectorAll(`.qoption[data-qi="${qi}"]`);
+    // reset
+    optionEls.forEach(el=>{ el.classList.remove('correct','incorrect'); });
+    if(!selected){ answeredAll=false; return; }
+    const chosen = Number(selected.value);
+    const correctEl = document.querySelector(`.qoption[data-qi="${qi}"][data-oi="${item.correct}"]`);
+    correctEl.classList.add('correct');
+    if(chosen === item.correct){
+      score += 10;
+    } else {
+      const chosenEl = document.querySelector(`.qoption[data-qi="${qi}"][data-oi="${chosen}"]`);
+      chosenEl.classList.add('incorrect');
+    }
+    fb.innerHTML = (chosen===item.correct? '✓ Correct. ' : '✕ Not quite. ') + item.explain;
+    fb.classList.add('show');
+  });
+  if(!answeredAll){
+    alert('Please answer all questions before submitting.');
+    return;
+  }
+  progress.quizzes['m'+mNum] = score;
+  progress.score = Object.values(progress.quizzes).reduce((a,b)=>a+b,0);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  const summary = document.getElementById('quiz-'+mNum+'-summary');
+  const pctScore = Math.round(score/(items.length*10)*100);
+  summary.innerHTML = `<div class="score-big">${score}/${items.length*10}</div><p>You scored ${pctScore}% on this module. ${pctScore===100? '🎉 Perfect score!' : 'Nice work — review the explanations above if any felt shaky.'}</p><p style="font-size:.82rem;">Badge earned: <b>${badgeDefs[mNum-1].label}</b> ✓ Next module unlocked below.</p>`;
+  summary.classList.add('show');
+  if(pctScore===100) launchConfetti();
+  updateLocksAndDots();
+}
+
+/* ================= FINAL CHALLENGE ================= */
+const finalData = [22,25,20,23,60,21,24,22,26,23,21,24,22,20,45,23,22,21,24,22];
+let finalCorrectCount = 0;
+function renderFinal(){
+  document.getElementById('final-data').textContent = finalData.join(', ');
+}
+function checkFinal(step){
+  const fb = document.getElementById('fc'+step+'-fb');
+  let ok=false;
+  if(step===1){
+    const v = Number(document.getElementById('fc1').value);
+    ok = Math.abs(v - mean(finalData)) < 0.3;
+    fb.textContent = ok? '✓ Correct — mean ≈ '+fmt(mean(finalData),2) : '✕ Try again (hint: sum ÷ n).';
+  } else if(step===2){
+    const v = Number(document.getElementById('fc2').value);
+    ok = Math.abs(v - median(finalData)) < 0.3;
+    fb.textContent = ok? '✓ Correct — median = '+fmt(median(finalData),2) : '✕ Try again (hint: sort, find the middle).';
+  } else if(step===3){
+    ok = document.getElementById('fc3').value === 'Right-skewed';
+    fb.textContent = ok? '✓ Correct — right-skewed, since mean > median.' : '✕ Compare your mean and median from steps 1–2.';
+  } else if(step===4){
+    const v = Number(document.getElementById('fc4').value);
+    ok = v === outliersOf(finalData).length;
+    fb.textContent = ok? '✓ Correct — '+outliersOf(finalData).length+' outlier(s) using the 1.5×IQR rule.' : '✕ Try the 1.5×IQR fence rule from Module 3.';
+  } else if(step===5){
+    ok = document.getElementById('fc5').value === 'Median + IQR';
+    fb.textContent = ok? '✓ Correct — with outliers present, Median + IQR is the honest choice.' : '✕ Think about what you found in steps 3–4.';
+  } else if(step===6){
+    ok = document.getElementById('fc6').value === 'Histogram';
+    fb.textContent = ok? "✓ Correct — a histogram best reveals this continuous data's shape." : '✕ Which chart is built for continuous numeric distributions?';
+  }
+  fb.className = 'feedback-inline ' + (ok?'ok':'bad');
+  if(ok) finalCorrectCount++;
+}
+function finishFinalChallenge(){
+  progress.final = true;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  document.getElementById('certificate-wrap').style.display='block';
+  document.getElementById('cert-score').textContent = progress.score;
+  launchConfetti();
+  updateLocksAndDots();
+}
+
+/* ================= INIT ================= */
+function restoreQuizStateUI(){
+  Object.keys(progress.quizzes).forEach(key=>{
+    const mNum = key.replace('m','');
+    const score = progress.quizzes[key];
+    const items = quizzes[mNum];
+    if(!items) return;
+    const summary = document.getElementById('quiz-'+mNum+'-summary');
+    const pctScore = Math.round(score/(items.length*10)*100);
+    summary.innerHTML = `<div class="score-big">${score}/${items.length*10}</div><p>Previously completed — you scored ${pctScore}% on this module.</p>`;
+    summary.classList.add('show');
+  });
+  if(progress.final){
+    document.getElementById('certificate-wrap').style.display='block';
+    document.getElementById('cert-score').textContent = progress.score;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  renderExample1();
+  renderExample2();
+  buildM1Editor(); renderM1();
+  buildM2Editor(); renderM2();
+  renderM4();
+  renderFinal();
+  renderQuizzes();
+  updateSkewDemo();
+  renderHero();
+  updateLocksAndDots();
+  restoreQuizStateUI();
+
+  // scrollspy
+  const sections = document.querySelectorAll('.section, .hero');
+  const spy = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const id = entry.target.id;
+        document.querySelectorAll('.nav-link').forEach(a=>{
+          a.classList.toggle('active', a.dataset.target===id);
+        });
+      }
+    });
+  }, {rootMargin:'-40% 0px -50% 0px'});
+  sections.forEach(s=>spy.observe(s));
+});
+</script>
+</body>
+</html>
