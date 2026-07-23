@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Filing Dossier — ITR-2 Workflow for Salaried + Capital Gains</title>
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --ink-900:#0d1526;
+  --ink-800:#131f36;
+  --ink-700:#1b2a4a;
+  --ink-600:#28395e;
+  --paper:#f7f3e9;
+  --paper-dim:#eee7d6;
+  --gold:#c9932e;
+  --gold-bright:#e2ac47;
+  --seal-red:#a5432f;
+  --ledger-green:#3c7a5c;
+  --text-hi:#f3ede0;
+  --text-mid:#c7c0ac;
+  --text-dim:#8b8570;
+  --line:rgba(201,147,46,0.25);
+  --font-display:'Source Serif 4', 'Iowan Old Style', 'Georgia', serif;
+  --font-body:'IBM Plex Sans', -apple-system, sans-serif;
+  --font-mono:'IBM Plex Mono', 'SFMono-Regular', monospace;
+  --radius:3px;
+  --shadow-lift: 0 12px 32px rgba(0,0,0,0.35);
+}
+[data-theme="light"]{
+  --ink-900:#f7f3e9;
+  --ink-800:#f0ead9;
+  --ink-700:#e5ddc6;
+  --ink-600:#d9cfb0;
+  --text-hi:#1b2439;
+  --text-mid:#4a4534;
+  --text-dim:#7a7457;
+  --line:rgba(120,80,20,0.22);
+  --shadow-lift: 0 12px 32px rgba(80,60,20,0.15);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(201,147,46,0.08), transparent 45%),
+    var(--ink-900);
+  color:var(--text-hi);
+  font-family:var(--font-body);
+  line-height:1.55;
+  transition:background 0.4s ease, color 0.4s ease;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+}
+a{color:inherit;}
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:600; margin:0; letter-spacing:0.2px;}
+p{margin:0 0 0.8em;}
+.mono{font-family:var(--font-mono);}
+button{font-family:var(--font-body); cursor:pointer;}
+
+/* ============ LAYOUT SHELL ============ */
+.shell{
+  display:grid;
+  grid-template-columns:280px 1fr;
+  min-height:100vh;
+}
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;}
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar{
+  border-right:1px solid var(--line);
+  padding:22px 16px 40px;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  background:linear-gradient(180deg, var(--ink-800), var(--ink-900));
+}
+@media (max-width:900px){
+  .sidebar{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--line);}
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  padding:6px 8px 20px;
+  border-bottom:1px dashed var(--line);
+  margin-bottom:16px;
+}
+.brand-seal{
+  width:38px;height:38px;border-radius:50%;
+  border:2px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--gold);
+  flex-shrink:0;
+}
+.brand-text .kicker{font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim);}
+.brand-text .name{font-size:15px; font-weight:600;}
+
+.stamp-progress{
+  margin:0 6px 22px; padding:14px; border:1px solid var(--line); border-radius:var(--radius);
+  background:rgba(201,147,46,0.05);
+}
+.stamp-progress .label{font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px;}
+.stamp-ring-wrap{display:flex; align-items:center; gap:12px;}
+.stamp-ring-wrap svg{flex-shrink:0;}
+.stamp-pct{font-family:var(--font-mono); font-size:22px; color:var(--gold-bright);}
+.stamp-sub{font-size:11px; color:var(--text-dim);}
+
+nav.stagenav{display:flex; flex-direction:column; gap:2px; margin-bottom:20px;}
+.navlabel{font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); margin:14px 8px 6px;}
+.navitem{
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:var(--radius);
+  font-size:13.5px; color:var(--text-mid);
+  border:1px solid transparent;
+  transition:background 0.2s, color 0.2s, border-color 0.2s;
+}
+.navitem:hover{background:rgba(201,147,46,0.08); color:var(--text-hi);}
+.navitem.active{background:rgba(201,147,46,0.14); color:var(--text-hi); border-color:var(--line);}
+.navitem .tab-no{
+  font-family:var(--font-mono); font-size:11px; color:var(--gold);
+  width:20px; text-align:center; flex-shrink:0;
+}
+.navitem .navcheck{
+  margin-left:auto; width:14px; height:14px; border-radius:50%;
+  border:1.5px solid var(--text-dim); flex-shrink:0;
+}
+.navitem .navcheck.done{background:var(--ledger-green); border-color:var(--ledger-green);}
+.navitem .bookmark-dot{width:6px;height:6px;border-radius:50%; background:var(--seal-red); flex-shrink:0;}
+
+.sidebar-controls{display:flex; gap:8px; padding:0 6px;}
+.icon-btn{
+  flex:1; padding:9px 6px; font-size:11px; border-radius:var(--radius);
+  border:1px solid var(--line); background:transparent; color:var(--text-mid);
+  transition:all 0.2s;
+}
+.icon-btn:hover{color:var(--text-hi); border-color:var(--gold);}
+
+/* ============ MAIN ============ */
+main{padding:0; overflow-x:hidden;}
+.topbar{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 32px; border-bottom:1px solid var(--line);
+  position:sticky; top:0; z-index:5;
+  background:rgba(13,21,38,0.85); backdrop-filter:blur(8px);
+}
+[data-theme="light"] .topbar{background:rgba(247,243,233,0.88);}
+.topbar .crumb{font-size:12px; color:var(--text-dim); letter-spacing:0.5px;}
+.topbar .crumb strong{color:var(--text-hi); font-weight:600;}
+
+/* ============ COVER / HERO ============ */
+.cover{
+  padding:70px 48px 60px;
+  position:relative;
+  border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+.cover::before{
+  content:'';
+  position:absolute; inset:0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 27px, var(--line) 28px);
+  opacity:0.35; pointer-events:none;
+}
+.cover-eyebrow{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--gold); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+}
+.cover-eyebrow::before{content:''; width:26px; height:1px; background:var(--gold);}
+.cover h1{font-size:clamp(32px,4.5vw,54px); line-height:1.08; max-width:820px;}
+.cover h1 em{font-style:italic; color:var(--gold-bright);}
+.cover .sub{max-width:620px; margin-top:18px; color:var(--text-mid); font-size:16px;}
+.cover-meta{display:flex; gap:28px; margin-top:34px; flex-wrap:wrap;}
+.cover-meta .item{border-left:2px solid var(--gold); padding-left:12px;}
+.cover-meta .item .k{font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase;}
+.cover-meta .item .v{font-size:14px; margin-top:3px; font-weight:600;}
+
+.cover-actions{display:flex; gap:12px; margin-top:36px; flex-wrap:wrap;}
+.btn{
+  padding:11px 20px; border-radius:var(--radius); font-size:13px; font-weight:600;
+  border:1px solid var(--gold); letter-spacing:0.3px;
+  transition:all 0.2s;
+}
+.btn-primary{background:var(--gold); color:var(--ink-900);}
+.btn-primary:hover{background:var(--gold-bright);}
+.btn-ghost{background:transparent; color:var(--text-hi);}
+.btn-ghost:hover{background:rgba(201,147,46,0.1);}
+
+/* ============ CONTENT WRAP ============ */
+.content{padding:48px; max-width:1100px;}
+section.panel{display:none; animation:fadein 0.4s ease;}
+section.panel.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+/* Section headings */
+.sec-head{margin-bottom:28px;}
+.sec-head .eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--gold); margin-bottom:10px;}
+.sec-head h2{font-size:30px;}
+.sec-head .desc{color:var(--text-mid); max-width:680px; margin-top:10px; font-size:14.5px;}
+
+/* ============ FLOW DIAGRAM (overview) ============ */
+.flowdiagram{
+  display:flex; flex-wrap:wrap; gap:0; margin:30px 0 40px;
+  border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+}
+.flownode{
+  flex:1; min-width:130px; padding:16px 14px; border-right:1px solid var(--line);
+  background:var(--ink-800); position:relative; transition:background 0.2s;
+}
+.flownode:last-child{border-right:none;}
+.flownode:hover{background:rgba(201,147,46,0.1); cursor:pointer;}
+.flownode .fn-no{font-family:var(--font-mono); font-size:11px; color:var(--gold);}
+.flownode .fn-title{font-size:13px; font-weight:600; margin-top:6px; line-height:1.3;}
+.flownode .fn-time{font-size:11px; color:var(--text-dim); margin-top:6px;}
+.flownode::after{
+  content:'→'; position:absolute; right:-9px; top:50%; transform:translateY(-50%);
+  color:var(--gold); font-size:14px; z-index:2;
+}
+.flownode:last-child::after{content:'';}
+@media (max-width:900px){
+  .flownode{border-right:none; border-bottom:1px solid var(--line);}
+  .flownode::after{content:'↓'; right:auto; left:14px; top:auto; bottom:-9px; transform:none;}
+}
+
+/* ============ DECISION TREE ============ */
+.dtree{border:1px solid var(--line); border-radius:var(--radius); padding:24px; background:var(--ink-800); margin:24px 0;}
+.dq{font-size:14.5px; font-weight:600; margin-bottom:14px;}
+.dopts{display:flex; gap:10px; flex-wrap:wrap;}
+.dopt{
+  padding:10px 16px; border:1px solid var(--line); border-radius:var(--radius);
+  font-size:13px; background:transparent; color:var(--text-hi);
+  transition:all 0.2s;
+}
+.dopt:hover{border-color:var(--gold); background:rgba(201,147,46,0.08);}
+.dresult{
+  margin-top:18px; padding:16px; border-left:3px solid var(--gold); background:rgba(201,147,46,0.06);
+  font-size:13.5px; display:none;
+}
+.dresult.show{display:block; animation:fadein 0.3s ease;}
+.dresult .form-tag{
+  display:inline-block; font-family:var(--font-mono); font-size:12px; padding:3px 9px;
+  background:var(--gold); color:var(--ink-900); border-radius:2px; margin-bottom:8px; font-weight:700;
+}
+.dtree-reset{margin-top:14px; font-size:12px; color:var(--gold); text-decoration:underline; display:none; background:none; border:none; padding:0;}
+.dtree-reset.show{display:inline-block;}
+
+/* ============ STAGE PANELS ============ */
+.stage-header{
+  display:flex; align-items:flex-start; gap:20px; margin-bottom:8px;
+}
+.stage-seal{
+  width:56px; height:56px; border-radius:50%; border:2px solid var(--gold);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-family:var(--font-mono); font-size:20px; color:var(--gold); font-weight:700;
+}
+.stage-tags{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+.tag{font-size:10.5px; letter-spacing:1px; text-transform:uppercase; padding:4px 9px; border:1px solid var(--line); border-radius:20px; color:var(--text-dim);}
+
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:26px 0;}
+@media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+
+.card{border:1px solid var(--line); border-radius:var(--radius); padding:20px; background:var(--ink-800);}
+.card h4{font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:12px;}
+.card ul{margin:0; padding-left:18px;}
+.card li{margin-bottom:7px; font-size:13.5px; color:var(--text-mid);}
+
+.tasklist{list-style:none; margin:0; padding:0;}
+.tasklist li{
+  display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-bottom:1px solid var(--line);
+  font-size:13.5px; color:var(--text-mid);
+}
+.tasklist li:last-child{border-bottom:none;}
+.tasklist input[type=checkbox]{margin-top:3px; accent-color:var(--gold); width:15px; height:15px; flex-shrink:0;}
+.tasklist li.checked-task{color:var(--text-dim); text-decoration:line-through;}
+
+table.toolstable{width:100%; border-collapse:collapse; margin:16px 0 8px; font-size:13px;}
+table.toolstable th{
+  text-align:left; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--gold);
+  padding:8px 10px; border-bottom:1px solid var(--line);
+}
+table.toolstable td{padding:11px 10px; border-bottom:1px solid var(--line); color:var(--text-mid); vertical-align:top;}
+table.toolstable tr:last-child td{border-bottom:none;}
+table.toolstable td.toolname{color:var(--text-hi); font-weight:600; white-space:nowrap;}
+.pill{font-size:10px; padding:2px 7px; border-radius:10px; background:rgba(60,122,92,0.18); color:var(--ledger-green); font-weight:600;}
+
+.prompt-block{
+  background:var(--ink-700); border:1px solid var(--line); border-left:3px solid var(--gold);
+  border-radius:var(--radius); padding:16px 18px; margin:10px 0; position:relative;
+}
+.prompt-block .plabel{font-family:var(--font-mono); font-size:10px; color:var(--gold); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px;}
+.prompt-block p{font-size:13.5px; color:var(--text-hi); font-family:var(--font-mono); line-height:1.6; margin:0;}
+.copy-btn{
+  position:absolute; top:12px; right:12px; font-size:10.5px; padding:4px 10px;
+  border:1px solid var(--line); border-radius:20px; background:transparent; color:var(--text-dim);
+}
+.copy-btn:hover{border-color:var(--gold); color:var(--gold);}
+
+.mistake-row{display:flex; gap:10px; font-size:13.5px; color:var(--text-mid); margin-bottom:9px; align-items:flex-start;}
+.mistake-row .x{color:var(--seal-red); flex-shrink:0; font-weight:700;}
+.good-row{display:flex; gap:10px; font-size:13.5px; color:var(--text-mid); margin-bottom:9px; align-items:flex-start;}
+.good-row .ck{color:var(--ledger-green); flex-shrink:0; font-weight:700;}
+
+.meta-strip{display:flex; gap:24px; flex-wrap:wrap; margin:22px 0; padding:16px 18px; border:1px dashed var(--line); border-radius:var(--radius); background:rgba(201,147,46,0.04);}
+.meta-strip .m-item .mk{font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim);}
+.meta-strip .m-item .mv{font-size:14px; font-weight:600; margin-top:3px; color:var(--gold-bright);}
+
+.notes-area{margin-top:34px; border-top:1px dashed var(--line); padding-top:22px;}
+.notes-area textarea{
+  width:100%; min-height:90px; background:var(--ink-800); border:1px solid var(--line); border-radius:var(--radius);
+  color:var(--text-hi); font-family:var(--font-body); font-size:13.5px; padding:12px; resize:vertical;
+}
+.notes-area textarea:focus{outline:none; border-color:var(--gold);}
+.bookmark-toggle{
+  display:inline-flex; align-items:center; gap:7px; margin-top:12px; font-size:12.5px; color:var(--text-dim);
+  border:1px solid var(--line); padding:7px 13px; border-radius:20px;
+}
+.bookmark-toggle.active{color:var(--seal-red); border-color:var(--seal-red);}
+
+/* ============ CG LEDGER CALCULATOR (signature widget) ============ */
+.ledger{
+  border:1px solid var(--gold); border-radius:var(--radius); margin:28px 0;
+  background:
+    linear-gradient(var(--ink-800), var(--ink-800)) padding-box,
+    repeating-linear-gradient(180deg, transparent, transparent 30px, var(--line) 31px) border-box;
+  padding:26px 28px;
+}
+.ledger-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px; flex-wrap:wrap; gap:8px;}
+.ledger-head h4{font-size:16px; font-family:var(--font-display);}
+.ledger-head span{font-size:11px; color:var(--text-dim); font-family:var(--font-mono);}
+.ledger-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+@media (max-width:700px){.ledger-grid{grid-template-columns:1fr;}}
+.ledger-field label{display:block; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;}
+.ledger-field input{
+  width:100%; padding:9px 10px; background:var(--ink-900); border:1px solid var(--line); border-radius:var(--radius);
+  color:var(--text-hi); font-family:var(--font-mono); font-size:14px;
+}
+.ledger-field input:focus{outline:none; border-color:var(--gold);}
+.ledger-out{margin-top:22px; border-top:1px dashed var(--line); padding-top:18px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+@media (max-width:700px){.ledger-out{grid-template-columns:1fr 1fr;}}
+.ledger-out .lo-item .lk{font-size:10.5px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim);}
+.ledger-out .lo-item .lv{font-family:var(--font-mono); font-size:18px; color:var(--gold-bright); margin-top:4px;}
+.ledger-note{margin-top:14px; font-size:11.5px; color:var(--text-dim); line-height:1.5;}
+
+/* ============ STAGE NAV FOOTER ============ */
+.stage-footer-nav{display:flex; justify-content:space-between; margin-top:44px; padding-top:22px; border-top:1px solid var(--line);}
+.sfn-btn{font-size:12.5px; color:var(--text-mid); border:1px solid var(--line); padding:10px 16px; border-radius:var(--radius);}
+.sfn-btn:hover{border-color:var(--gold); color:var(--text-hi);}
+.sfn-btn:disabled{opacity:0.3; pointer-events:none;}
+
+/* ============ SUMMARY / CLOSING SECTIONS ============ */
+.stack-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px; margin:20px 0 30px;}
+.stack-card{border:1px solid var(--line); border-radius:var(--radius); padding:18px; background:var(--ink-800);}
+.stack-card .role{font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold);}
+.stack-card .name{font-family:var(--font-display); font-size:17px; margin:8px 0 6px;}
+.stack-card p{font-size:12.5px; color:var(--text-mid); margin:0;}
+
+.chiplist{display:flex; flex-wrap:wrap; gap:9px; margin:14px 0;}
+.chip{font-size:12.5px; padding:6px 13px; border:1px solid var(--line); border-radius:20px; color:var(--text-mid);}
+
+.resource-list{list-style:none; margin:0; padding:0;}
+.resource-list li{padding:11px 0; border-bottom:1px solid var(--line); font-size:13.5px; display:flex; justify-content:space-between; gap:14px; color:var(--text-mid);}
+.resource-list li strong{color:var(--text-hi); font-weight:600;}
+.resource-list li span.res-desc{color:var(--text-dim); font-size:12px;}
+
+footer.appfoot{padding:36px 48px 60px; border-top:1px solid var(--line); color:var(--text-dim); font-size:12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+
+/* ============ PRINT ============ */
+@media print{
+  .sidebar, .topbar, .cover-actions, .icon-btn, .copy-btn, .bookmark-toggle, .stage-footer-nav, .notes-area textarea{display:none !important;}
+  body{background:#fff; color:#111;}
+  section.panel{display:block !important; page-break-after:always;}
+  .shell{display:block;}
+  .card, .ledger, table.toolstable{border-color:#999 !important;}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-seal">₹</div>
+      <div class="brand-text">
+        <div class="kicker">AI Workflow Architect</div>
+        <div class="name">The Filing Dossier</div>
+      </div>
+    </div>
+
+    <div class="stamp-progress">
+      <div class="label">Dossier completion</div>
+      <div class="stamp-ring-wrap">
+        <svg width="46" height="46" viewBox="0 0 46 46">
+          <circle cx="23" cy="23" r="19" fill="none" stroke="var(--line)" stroke-width="4"></circle>
+          <circle id="ringProgress" cx="23" cy="23" r="19" fill="none" stroke="var(--gold)" stroke-width="4"
+            stroke-dasharray="119.4" stroke-dashoffset="119.4" stroke-linecap="round" transform="rotate(-90 23 23)"></circle>
+        </svg>
+        <div>
+          <div class="stamp-pct" id="pctText">0%</div>
+          <div class="stamp-sub" id="taskCountText">0 / 0 tasks</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navlabel">Overview</div>
+    <nav class="stagenav" id="navOverview"></nav>
+
+    <div class="navlabel">Workflow Stages</div>
+    <nav class="stagenav" id="navStages"></nav>
+
+    <div class="navlabel">Dossier Close</div>
+    <nav class="stagenav" id="navClose"></nav>
+
+    <div class="sidebar-controls">
+      <button class="icon-btn" id="themeToggle">☾ Theme</button>
+      <button class="icon-btn" id="printBtn">⎙ Print</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+    <div class="topbar">
+      <div class="crumb">Finance / Personal Tax → <strong id="crumbLabel">Overview</strong></div>
+      <div class="crumb" id="fyLabel">FY 2025–26 · AY 2026–27</div>
+    </div>
+
+    <!-- ===== COVER ===== -->
+    <div class="cover" id="coverBlock">
+      <div class="cover-eyebrow">Individual · Salaried + Capital Gains · India</div>
+      <h1>Your ITR-2 filing, run like a <em>closed case file</em>, not a scramble.</h1>
+      <p class="sub">A start-to-finish workflow for salaried professionals with equity, mutual fund and crypto capital gains — from document collection to e-verified acknowledgment, with the AI tools, prompts and checkpoints for each stage.</p>
+      <div class="cover-meta">
+        <div class="item"><div class="k">Applicable form</div><div class="v">ITR-2</div></div>
+        <div class="item"><div class="k">Income heads</div><div class="v">Salary · Capital Gains · VDA · Other Sources</div></div>
+        <div class="item"><div class="k">Filing window</div><div class="v">Apr 1 – Jul 31</div></div>
+        <div class="item"><div class="k">Est. total time</div><div class="v">9–15 hrs</div></div>
+      </div>
+      <div class="cover-actions">
+        <button class="btn btn-primary" data-goto="stage-1">Begin the dossier →</button>
+        <button class="btn btn-ghost" data-goto="overview-diagram">See full workflow</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ================= OVERVIEW / DIAGRAM ================= -->
+      <section class="panel active" id="overview-diagram">
+        <div class="sec-head">
+          <div class="eyebrow">Case Map</div>
+          <h2>The seven-stage filing workflow</h2>
+          <p class="desc">Each stage below is clickable. Order matters here — reconciliation before computation, computation before form-filling — because each stage's output is the next stage's source document.</p>
+        </div>
+        <div class="flowdiagram" id="flowDiagram"></div>
+
+        <div class="sec-head" style="margin-top:44px;">
+          <div class="eyebrow">First, Know Your Form</div>
+          <h2>Which ITR form do you actually need?</h2>
+          <p class="desc">Answer honestly — filing the wrong form is the single most common reason returns get marked defective under Section 139(9).</p>
+        </div>
+        <div class="dtree" id="decisionTree"></div>
+      </section>
+
+      <!-- ================= STAGE PANELS (rendered by JS) ================= -->
+      <div id="stagePanelsRoot"></div>
+
+      <!-- ================= COMPARISON ================= -->
+      <section class="panel" id="tool-comparison">
+        <div class="sec-head">
+          <div class="eyebrow">Case Map</div>
+          <h2>Filing engines, compared</h2>
+          <p class="desc">Where you actually submit the return: the official portal versus AI-assisted guided filing platforms.</p>
+        </div>
+        <table class="toolstable" id="comparisonTable"></table>
+      </section>
+
+      <!-- ================= SUMMARY ================= -->
+      <section class="panel" id="summary">
+        <div class="sec-head">
+          <div class="eyebrow">Dossier Close</div>
+          <h2>Workflow summary</h2>
+          <p class="desc">The whole case, in one page.</p>
+        </div>
+        <div class="card">
+          <h4>End-to-end path</h4>
+          <p style="font-size:14px; color:var(--text-mid);">Collect documents (Form 16, AIS/TIS, broker CAS, VDA statements) → reconcile against AIS/26AS → compute STCG, LTCG and VDA gains separately → pick ITR-2 and populate every schedule → run an independent regime and arithmetic check → file and e-verify within 30 days → track the 143(1) intimation and carry forward any capital losses. The whole loop, done carefully, runs 9–15 hours spread across 2–3 weeks — most of it front-loaded in document collection and reconciliation, not the final submission.</p>
+        </div>
+      </section>
+
+      <section class="panel" id="ai-stack">
+        <div class="sec-head">
+          <div class="eyebrow">Dossier Close</div>
+          <h2>Recommended AI stack</h2>
+          <p class="desc">Four tools cover nearly the whole workflow — you don't need more than this.</p>
+        </div>
+        <div class="stack-grid" id="stackGrid"></div>
+      </section>
+
+      <section class="panel" id="resources">
+        <div class="sec-head">
+          <div class="eyebrow">Dossier Close</div>
+          <h2>Learning resources &amp; communities</h2>
+        </div>
+        <div class="grid2">
+          <div class="card">
+            <h4>Learning resources</h4>
+            <ul class="resource-list" id="learningList"></ul>
+          </div>
+          <div class="card">
+            <h4>Communities</h4>
+            <ul class="resource-list" id="communityList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="keywords-prompts">
+        <div class="sec-head">
+          <div class="eyebrow">Dossier Close</div>
+          <h2>Search keywords &amp; extra prompts</h2>
+        </div>
+        <div class="card" style="margin-bottom:20px;">
+          <h4>Search keywords worth bookmarking</h4>
+          <div class="chiplist" id="keywordChips"></div>
+        </div>
+        <div class="card">
+          <h4>Additional AI prompts for edge cases</h4>
+          <div id="extraPrompts"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="future-automation">
+        <div class="sec-head">
+          <div class="eyebrow">Dossier Close</div>
+          <h2>Future automation opportunities</h2>
+          <p class="desc">Once this year's filing is done, these are the pieces worth automating before next filing season.</p>
+        </div>
+        <ul class="tasklist" id="futureList" style="border:1px solid var(--line); border-radius:var(--radius); padding:6px 16px; background:var(--ink-800);"></ul>
+      </section>
+
+    </div>
+
+    <footer class="appfoot">
+      <span>The Filing Dossier — built with AI Workflow Architect. Not tax advice; verify current-year rates and thresholds before filing.</span>
+      <span id="progressFooter">0 of 0 tasks logged</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================================================
+   DATA
+====================================================== */
+const stages = [
+{
+  id:"stage-1", no:1, title:"Planning & Document Collection",
+  tags:["Foundational","Week 1"],
+  objectives:[
+    "Establish which financial year and assessment year this filing covers, and confirm every income source you had.",
+    "Assemble a complete, cross-checked document set before touching any form."
+  ],
+  tasks:[
+    "Download Form 16 (Part A & B) from your employer portal",
+    "Download Form 26AS and AIS/TIS from the e-filing portal",
+    "Request a consolidated CAS (Capital gains statement) from CDSL or NSDL covering all brokers/demat accounts",
+    "Export the Tax P&L report from each trading platform (e.g. Console, Kite, Groww)",
+    "Download transaction/gains statements from every crypto exchange used during the year",
+    "Collect bank interest certificates (savings + FD) from all banks",
+    "Gather deduction proofs: 80C (ELSS, PPF, life insurance), 80D (health insurance), home loan interest certificate",
+    "Pull last year's ITR-V and computation sheet for carried-forward losses",
+    "Note your pre-validated bank account for refund"
+  ],
+  tools:[
+    {name:"Claude", why:"Reads multiple uploaded PDFs at once and builds a single completeness checklist against your actual income sources, rather than a generic list.", alt:"ChatGPT with file upload", tag:"Doc review"},
+    {name:"Perplexity", why:"Surfaces the current-year CBDT due-date notifications and any late extensions, which change most years.", alt:"Direct incometax.gov.in circulars page", tag:"Research"},
+    {name:"NotebookLM", why:"Turns your uploaded documents into a source-grounded notebook you can question later ('what was my FD interest at HDFC?') instead of re-opening PDFs.", alt:"Google Drive + Gemini", tag:"Repository"}
+  ],
+  prompts:[
+    "I'm a salaried employee in India with equity, mutual fund and crypto capital gains for FY2025-26. List every document I need to file ITR-2, grouped by income head, and flag anything commonly forgotten.",
+    "Here is my Form 16 [paste/attach]. Summarize gross salary, exemptions claimed, and TDS deducted in a table I can cross-check against my payslips."
+  ],
+  best:[
+    "Pull AIS/TIS, not just 26AS — AIS additionally reports dividends, mutual fund transactions and off-market transfers that 26AS omits.",
+    "Get one consolidated CAS from the depository instead of chasing each broker separately — it's faster and less error-prone.",
+    "Verify PAN, name spelling and address match exactly across every document before you start entering data."
+  ],
+  mistakes:[
+    "Relying only on Form 16 and missing bank interest or dividend income reported elsewhere.",
+    "Forgetting crypto exchange statements entirely because there's no Form 16-equivalent for VDA income.",
+    "Not carrying forward last year's capital losses because the previous year's ITR-V was never filed away."
+  ],
+  output:"A single organised folder (digital or physical) containing every source document, checked off against a completeness list.",
+  time:"2–4 hours, spread across a week while documents arrive",
+  efficiency:"Set portal alerts for AIS updates — TDS entries from your employer/bank can take weeks to reflect after each quarter.",
+  meta:{docs:"9 document types", risk:"Low", dependency:"None — start here"}
+},
+{
+  id:"stage-2", no:2, title:"Data Reconciliation (26AS / AIS / TIS)",
+  tags:["Verification","Week 1–2"],
+  objectives:[
+    "Match every TDS, interest, dividend and securities entry reported by third parties against your own records.",
+    "Correct any mismatches on the AIS portal before they turn into a mismatch notice later."
+  ],
+  tasks:[
+    "Export AIS in PDF and JSON/CSV form from the compliance portal",
+    "Line up 26AS TDS entries against Form 16 and bank TDS certificates",
+    "Cross-check AIS dividend and mutual fund transaction entries against your own broker statements",
+    "Flag any entry that doesn't match your records",
+    "Submit AIS feedback ('information is incorrect / duplicate / not relating to you') for genuine mismatches",
+    "Save a snapshot of the AIS before and after feedback for your records"
+  ],
+  tools:[
+    {name:"Claude", why:"Pastes of AIS tables and your own ledger can be compared line-by-line, catching numeric mismatches faster than manual scanning across dozens of rows.", alt:"Excel/Sheets with VLOOKUP formulas", tag:"Reconciliation"},
+    {name:"Quicko", why:"Auto-imports AIS/26AS data directly via the portal integration, reducing manual transcription errors.", alt:"ClearTax auto-reconciliation", tag:"Auto-import"},
+    {name:"Google Sheets", why:"A simple three-column ledger (source, my record, AIS record) makes discrepancies visually obvious once populated.", alt:"Airtable", tag:"Ledger"}
+  ],
+  prompts:[
+    "Here is my AIS summary and my own income log for FY2025-26 [paste as a table]. Identify any mismatches in dividend income, bank interest or TDS entries, and tell me which ones are worth raising as AIS feedback.",
+    "Explain the difference between Form 26AS and AIS/TIS, and which one is authoritative if they disagree for FY2025-26."
+  ],
+  best:[
+    "Reconcile AIS before you reconcile 26AS — AIS is the more complete source and will catch things 26AS misses.",
+    "Raise AIS feedback as early as possible; corrections typically take one to two weeks to reflect.",
+    "Keep a screenshot of every feedback you submit, in case of a future scrutiny query."
+  ],
+  mistakes:[
+    "Filing purely off Form 16 and ignoring AIS-only entries like dividend income or savings interest.",
+    "Ignoring small TDS mismatches — even ₹500 unreconciled can trigger a processing delay or notice.",
+    "Waiting until the last week of July to start reconciliation, when AIS feedback corrections won't process in time."
+  ],
+  output:"A reconciled income and TDS statement where every entry ties back to a document, and every AIS mismatch has been addressed.",
+  time:"1–2 hours",
+  efficiency:"Do this the same week you gather documents — you'll still remember what each entry refers to.",
+  meta:{docs:"AIS + 26AS + TIS", risk:"Medium — root of most notices", dependency:"Stage 1 complete"}
+},
+{
+  id:"stage-3", no:3, title:"Capital Gains Computation",
+  tags:["Core Computation","Week 2"],
+  objectives:[
+    "Classify every disposal correctly as STCG or LTCG, under the right section, at the right rate.",
+    "Compute VDA (crypto) gains separately under the flat 30% regime with no loss set-off."
+  ],
+  tasks:[
+    "Pull the broker's Tax P&L report (FIFO-based, scrip-wise) for listed equity and mutual funds",
+    "Separate STCG under Section 111A (equity, STT paid, held ≤12 months) from LTCG under Section 112A (held >12 months)",
+    "Apply the grandfathering clause for shares/units acquired before 31 Jan 2018, where relevant",
+    "Compute crypto/VDA gains at a flat 30% rate per transaction; confirm no losses can be set off against any other income",
+    "Check for the 1% TDS credit under Section 194S on VDA transfers reflected in 26AS",
+    "Aggregate scrip-wise LTCG detail into the Schedule 112A format required by the portal",
+    "Net STCG and LTCG separately — do not net one against the other incorrectly",
+    "Bring forward any unabsorbed capital losses from prior years that can offset this year's gains"
+  ],
+  tools:[
+    {name:"Zerodha Console / Kite Tax P&L", why:"Broker platforms already run FIFO cost-basis calculations across corporate actions (splits, bonuses, buybacks) that are painful to reproduce manually.", alt:"Groww / Upstox tax reports", tag:"Broker native"},
+    {name:"Claude", why:"Explains edge cases — bonus shares, buybacks, rights issues, ESOP-linked sales — and how each should be classified before you trust the broker's auto-report.", alt:"ChatGPT", tag:"Edge-case logic"},
+    {name:"Quicko Capital Gains", why:"Pulls broker data via API and auto-classifies STCG/LTCG with an AI-assisted review layer, then exports directly in Schedule 112A JSON format.", alt:"TaxSpanner", tag:"Auto-classify"}
+  ],
+  prompts:[
+    "I sold Reliance shares held for 14 months at a gain and Infosys shares held for 8 months at a loss, both listed equity with STT paid. Explain how each is classified and taxed for FY2025-26, and whether the loss can offset other gains.",
+    "I received bonus shares in March 2024 and sold them in FY2025-26. Walk me through how the acquisition date and cost are treated for capital gains purposes.",
+    "I have ₹40,000 in crypto trading losses and ₹60,000 in crypto gains this year, plus ₹20,000 in equity LTCG. Explain how each is taxed and whether any of these can offset each other."
+  ],
+  best:[
+    "Use the CAS-to-Schedule-112A converter utility on the e-filing portal instead of hand-entering scrip-wise LTCG rows.",
+    "Double check indexation only applies where the current-year rules still allow it — this changed significantly after Budget 2024.",
+    "Keep the broker's raw Tax P&L PDF attached as backup evidence for every figure you enter."
+  ],
+  mistakes:[
+    "Netting STCG losses against LTCG gains, or vice versa, when the sections require separate treatment.",
+    "Assuming crypto losses can offset stock market gains — they cannot, under any circumstance.",
+    "Missing the 1.25 lakh LTCG exemption threshold under Section 112A, either by omitting it or double-counting it.",
+    "Forgetting the 1% TDS credit on VDA transfers, resulting in an understated refund claim."
+  ],
+  output:"A finalized capital gains worksheet with STCG, LTCG (grandfathered and non-grandfathered) and VDA gains segregated, each tied to a tax rate and TDS credit.",
+  time:"2–5 hours, depending on transaction volume",
+  efficiency:"If you traded through more than one broker, reconcile via the depository's single CAS rather than merging multiple broker exports by hand.",
+  meta:{docs:"Broker CAS + VDA statements", risk:"High — most complex stage", dependency:"Stage 2 reconciled"},
+  ledger:true
+},
+{
+  id:"stage-4", no:4, title:"Form Selection & Filling (ITR-2)",
+  tags:["Data Entry","Week 2–3"],
+  objectives:[
+    "Confirm ITR-2 is the correct form and populate every relevant schedule accurately.",
+    "Use portal pre-fill to reduce manual transcription errors."
+  ],
+  tasks:[
+    "Confirm eligibility: salary + capital gains + no business/professional income → ITR-2",
+    "Use the e-filing portal's pre-fill option to auto-populate salary, TDS and bank details",
+    "Complete Schedule Salary with exemptions and standard deduction",
+    "Complete Schedule Capital Gains with STCG, LTCG and grandfathering detail from Stage 3",
+    "Complete Schedule VDA for every crypto disposal",
+    "Complete Schedule OS for interest, dividend and other income",
+    "Claim deductions under Schedule 80C/80D and any home loan interest under Section 24",
+    "Complete Schedule TDS to ensure every credit from 26AS is claimed",
+    "Save the return as a draft before final validation"
+  ],
+  tools:[
+    {name:"Income Tax e-filing portal", why:"The only place your return can actually be legally submitted; pre-fill reduces re-entry of salary and TDS data.", alt:"Offline JSON utility (for complex/bulk entries)", tag:"Official"},
+    {name:"Claude", why:"Acts as a second reviewer — walk it through each completed schedule against your Stage 1–3 source figures to catch omissions before submission.", alt:"ChatGPT", tag:"Cross-check"},
+    {name:"ClearTax / Quicko guided filing", why:"Converts a plain-language Q&A flow into correctly populated schedules, which reduces manual form errors for less form-fluent filers.", alt:"myITreturn, TaxBuddy", tag:"Guided entry"}
+  ],
+  prompts:[
+    "Here are my finalized numbers for Schedule Salary, Schedule Capital Gains and Schedule VDA [paste]. Walk through the ITR-2 schedules line by line and tell me if anything looks inconsistent or missing before I submit.",
+    "What's the difference between old and new tax regime treatment for standard deduction and Section 80C in ITR-2 for FY2025-26?"
+  ],
+  best:[
+    "Pre-validate your refund bank account and link Aadhaar-PAN before you start — an unlinked account blocks submission at the last step.",
+    "Save a draft periodically; the portal session can time out on long entry sessions.",
+    "Cross-check the return's auto-computed 'Total Income' figure against your own manual sum before proceeding."
+  ],
+  mistakes:[
+    "Choosing ITR-1 by habit — it does not permit capital gains reporting at all.",
+    "Skipping Schedule VDA because crypto disposals don't feel like conventional 'capital gains'.",
+    "Entering a bank account for refund that isn't pre-validated or isn't nominated for refund credit."
+  ],
+  output:"A fully completed but unsubmitted ITR-2, with every schedule populated and cross-checked against source documents.",
+  time:"2–3 hours",
+  efficiency:"Do Schedule Capital Gains in one uninterrupted sitting — switching context mid-schedule is where scrip-wise entry errors creep in.",
+  meta:{docs:"All Stage 1–3 outputs", risk:"Medium", dependency:"Stage 3 complete"}
+},
+{
+  id:"stage-5", no:5, title:"Review & Validation",
+  tags:["Quality Check","Week 3"],
+  objectives:[
+    "Catch arithmetic or classification errors before submission.",
+    "Confirm the old vs new tax regime choice is actually the better one for your numbers."
+  ],
+  tasks:[
+    "Run the portal's built-in error validation on the draft return",
+    "Independently re-derive your total tax liability as a sanity check",
+    "Compare old regime vs new regime outcomes given your actual deductions",
+    "Verify every TDS/advance tax challan appears correctly in the return",
+    "Check for interest liability under Sections 234B/234C if advance tax was underpaid"
+  ],
+  tools:[
+    {name:"Claude", why:"Re-derives expected tax under both regimes independently from your final numbers, functioning as a cross-check against the portal's own computation.", alt:"Manual calculation sheet", tag:"Sanity check"},
+    {name:"Portal's validation engine", why:"Flags structural errors (missing mandatory fields, inconsistent schedule totals) that a human read-through easily misses.", alt:"Offline utility validator", tag:"Structural check"},
+    {name:"Quicko regime comparator", why:"Quantifies the exact rupee difference between old and new regime given your specific deduction profile.", alt:"ClearTax tax calculator", tag:"Regime comparison"}
+  ],
+  prompts:[
+    "Given this final income breakup — salary ₹X, STCG ₹Y, LTCG ₹Z, VDA gains ₹A, deductions ₹B — estimate my total tax liability under both the old and new regime for FY2025-26, including cess, and tell me which is better.",
+    "Check this computation for arithmetic consistency [paste final numbers] and flag anything that looks off before I submit."
+  ],
+  best:[
+    "Always include the 4% health and education cess in any manual cross-check — it's the most commonly forgotten line item.",
+    "Keep your independent computation sheet as a permanent audit trail alongside the filed return.",
+    "If advance tax was underpaid during the year, confirm the interest calculation matches the portal's figure exactly."
+  ],
+  mistakes:[
+    "Assuming the new regime is always cheaper without checking large 80C, 80D or home loan interest deductions.",
+    "Forgetting cess in a manual estimate and being surprised by the portal's higher computed liability.",
+    "Skipping this stage entirely because 'the portal validates it anyway' — the portal validates structure, not judgment calls like classification."
+  ],
+  output:"A validated computation summary confirming the return's figures are internally consistent and the regime choice is optimal.",
+  time:"~1 hour",
+  efficiency:"Run this check the same day you finish Stage 4, while the numbers are still fresh in your head.",
+  meta:{docs:"Completed draft return", risk:"Low if reconciliation was thorough", dependency:"Stage 4 complete"}
+},
+{
+  id:"stage-6", no:6, title:"Filing & E-verification",
+  tags:["Submission","Deadline: Jul 31"],
+  objectives:[
+    "Submit the return and complete verification within the statutory 30-day window.",
+    "Archive proof of filing immediately."
+  ],
+  tasks:[
+    "Submit the finalized ITR-2 on the e-filing portal",
+    "E-verify via Aadhaar OTP, net banking, bank/demat EVC, or DSC",
+    "Download the ITR-V acknowledgment PDF",
+    "Store the acknowledgment in at least two locations (cloud + local)"
+  ],
+  tools:[
+    {name:"Income Tax e-filing portal", why:"The only channel through which submission and e-verification are legally recognised.", alt:"DigiLocker-based Aadhaar route", tag:"Official"},
+    {name:"Claude", why:"If a defective-return notice or portal processing error appears, it can translate the dense notice text into plain language and outline the required response.", alt:"CA consultation for complex notices", tag:"Notice interpretation"}
+  ],
+  prompts:[
+    "I received this message from the Income Tax portal after submission [paste text]. Explain what it means in plain language and whether I need to take any further action."
+  ],
+  best:[
+    "E-verify immediately after submission — an unverified return is treated in law as though it was never filed.",
+    "Use Aadhaar OTP verification if your mobile is linked; it completes instantly, unlike posting a physical ITR-V.",
+    "Save the acknowledgment number somewhere separate from the PDF itself, in case the file is misplaced."
+  ],
+  mistakes:[
+    "Submitting the return and closing the tab without completing e-verification.",
+    "Missing the 30-day e-verification window, which invalidates the entire filing and can trigger late-filing consequences.",
+    "Trying to use a bank account for EVC that was never pre-validated on the portal."
+  ],
+  output:"A submitted and e-verified ITR-2 with a valid acknowledgment number, archived safely.",
+  time:"15–30 minutes",
+  efficiency:"Keep your Aadhaar-linked mobile number active and reachable during filing week specifically for OTP verification.",
+  meta:{docs:"Validated draft return", risk:"Low — mostly procedural", dependency:"Stage 5 complete"}
+},
+{
+  id:"stage-7", no:7, title:"Post-Filing: Processing, Refund & Records",
+  tags:["Ongoing","After submission"],
+  objectives:[
+    "Track processing status and resolve any notices promptly.",
+    "Preserve carry-forward losses and records for future years."
+  ],
+  tasks:[
+    "Monitor the Section 143(1) intimation once it arrives",
+    "Track refund status on the portal or via NSDL refund tracking",
+    "Respond promptly to any AIS discrepancy or scrutiny notice",
+    "Record any carried-forward capital losses for use in future assessment years",
+    "Archive all supporting documents for a minimum of six years"
+  ],
+  tools:[
+    {name:"Claude", why:"Line-by-line comparison of the dense 143(1) intimation against your originally filed figures confirms whether the department accepted the return as filed or adjusted it.", alt:"CA review of the intimation", tag:"Intimation review"},
+    {name:"Perplexity", why:"Tracks the latest CBDT updates on refund processing timelines or any circular affecting your case.", alt:"Portal grievance module", tag:"Status research"}
+  ],
+  prompts:[
+    "Compare this Section 143(1) intimation [paste] against my originally filed figures and flag any differences in computed tax, interest or refund amount.",
+    "I have a short-term capital loss of ₹15,000 this year that I couldn't set off. Explain how carry-forward works and what I need to do to use it next year."
+  ],
+  best:[
+    "Note carried-forward losses in a simple standalone sheet — they're valid for eight assessment years, but only if this year's return was filed on time.",
+    "Keep every document for at least six years from the end of the relevant assessment year.",
+    "Set a recurring reminder to check refund status every two weeks until it's credited."
+  ],
+  mistakes:[
+    "Losing track of carry-forward losses, forfeiting the ability to offset future gains against them.",
+    "Ignoring a small outstanding demand notice, which quietly accrues interest over time.",
+    "Discarding source documents right after refund is received, then struggling to respond if a notice arrives years later."
+  ],
+  output:"A confirmed, processed return — refund received or demand resolved — with a complete document archive for future reference.",
+  time:"Ongoing; check every 2 weeks until processed",
+  efficiency:"File early in the window (not on July 31) — early filers are typically processed and refunded faster.",
+  meta:{docs:"Filed acknowledgment", risk:"Low", dependency:"Stage 6 complete"}
+}
+];
+
+const overviewItems = [
+  {id:"overview-diagram", label:"Case Map & Decision Tree"},
+];
+const closeItems = [
+  {id:"tool-comparison", label:"Filing Engines Compared"},
+  {id:"summary", label:"Workflow Summary"},
+  {id:"ai-stack", label:"Recommended AI Stack"},
+  {id:"resources", label:"Resources & Communities"},
+  {id:"keywords-prompts", label:"Keywords & Extra Prompts"},
+  {id:"future-automation", label:"Future Automation"}
+];
+
+const decisionTreeData = {
+  q: "Do you have any income from a business or profession (freelancing, consultancy, proprietorship)?",
+  options:[
+    {label:"No — only salary, capital gains, or interest/dividend income", next:"q2"},
+    {label:"Yes — I have business or professional income", result:{form:"ITR-3", text:"You need ITR-3. Salaried individuals with business or professional income (including presumptive freelance income beyond certain thresholds) cannot use ITR-1 or ITR-2, regardless of capital gains."}}
+  ]
+};
+const decisionTreeQ2 = {
+  q: "Do you have any capital gains (equity, mutual funds, property, crypto/VDA) this year?",
+  options:[
+    {label:"No capital gains at all", next:"q3"},
+    {label:"Yes, I have capital gains", result:{form:"ITR-2", text:"You need ITR-2 — this matches your profile. It covers salary income plus capital gains from equity, mutual funds, property and virtual digital assets, with no business income involved."}}
+  ]
+};
+const decisionTreeQ3 = {
+  q: "Is your total income above ₹50 lakh, or do you hold foreign assets / have more than one house property?",
+  options:[
+    {label:"No to all of the above", result:{form:"ITR-1", text:"You likely qualify for ITR-1 (Sahaj) — the simplest form, for salary and limited other-source income under ₹50 lakh with no capital gains."}},
+    {label:"Yes to at least one", result:{form:"ITR-2", text:"You need ITR-2. Foreign assets, income above ₹50 lakh, or multiple house properties all take you out of ITR-1 eligibility even without capital gains."}}
+  ]
+};
+const dtreeMap = {q1:decisionTreeData, q2:decisionTreeQ2, q3:decisionTreeQ3};
+
+const comparisonRows = [
+  {name:"Income Tax e-filing Portal", best:"Direct, official submission — required regardless of what else you use", pricing:"Free", ai:"Basic validation only", note:"Always the final submission point"},
+  {name:"ClearTax", best:"Guided Q&A filing with auto-import from Form 16/26AS", pricing:"Free–₹1,499 depending on complexity", ai:"AI-assisted classification & suggestions", note:"Strong for capital gains + salary combo"},
+  {name:"Quicko", best:"API-based broker capital gains import, especially for high transaction volume traders", pricing:"Free–₹999+", ai:"Auto-classification, regime comparator", note:"Best for frequent traders"},
+  {name:"myITreturn", best:"Simple guided filing for salaried + moderate capital gains", pricing:"Free–₹999", ai:"Rule-based guidance", note:"Good budget option"},
+  {name:"CA / TaxBuddy-style assisted filing", best:"Complex cases — foreign assets, large VDA volume, notices", pricing:"₹1,500+", ai:"Human + AI hybrid review", note:"Worth it above a certain complexity threshold"}
+];
+
+const stackData = [
+  {role:"Document Analysis", name:"Claude", desc:"Reads Form 16, AIS and broker statements together, reconciles them, and reviews each schedule before submission."},
+  {role:"Regulatory Research", name:"Perplexity", desc:"Surfaces the latest CBDT due-date extensions, rate changes and circulars with current sources."},
+  {role:"Document Repository", name:"NotebookLM", desc:"Keeps every source document searchable and question-answerable across the whole filing season."},
+  {role:"Guided Filing Engine", name:"ClearTax / Quicko", desc:"Converts your reconciled numbers into correctly populated ITR-2 schedules with auto-classification."}
+];
+
+const learningResources = [
+  {name:"Income Tax e-filing portal tutorials", desc:"Official step-by-step guides for every schedule"},
+  {name:"Zerodha Varsity — Taxation module", desc:"Plain-language explainer on capital gains taxation for Indian investors"},
+  {name:"ClearTax Learning Center", desc:"Guides on Schedule 112A, VDA taxation and regime comparison"},
+  {name:"CBDT circulars & notifications", desc:"Primary source for rate and deadline changes each year"}
+];
+const communities = [
+  {name:"r/IndiaTax", desc:"Active discussion on filing edge cases and notices"},
+  {name:"r/personalfinanceindia", desc:"Broader tax-adjacent personal finance discussion"},
+  {name:"CAclubindia forums", desc:"Practitioner-level detail on classification questions"},
+  {name:"ClearTax community", desc:"Platform-specific filing troubleshooting"}
+];
+
+const keywords = ["ITR-2 capital gains FY2025-26","Schedule 112A LTCG grandfathering","AIS TIS reconciliation","crypto VDA tax India","Section 111A STCG rate","Section 139(9) defective return","advance tax 234B 234C interest","capital loss carry forward India"];
+
+const extraPromptsList = [
+  "I switched jobs mid-year and have two Form 16s. Explain how to consolidate them correctly for ITR-2.",
+  "I received ESOPs from my employer and sold some shares this year. Walk me through the perquisite tax at exercise versus capital gains tax at sale.",
+  "I have a small foreign brokerage account with US stocks. Explain the additional schedules (Schedule FA) I need beyond capital gains reporting.",
+  "Explain what happens if I miss the July 31 deadline — what's a belated return, and what does it cost me?"
+];
+
+const futureAutomation = [
+  "Set up a quarterly personal script (or Claude project) that pulls broker CAS and reconciles it against a running capital gains ledger, instead of doing it all in one sitting before the deadline.",
+  "Build a standing NotebookLM notebook that persists year to year, so each filing season starts from an organized base instead of a blank folder.",
+  "Automate a quarterly advance-tax estimate using the same regime-comparison logic from Stage 5, to avoid Section 234B/234C interest.",
+  "Create a recurring Perplexity search alert for CBDT due-date and rate-change notifications each March–April."
+];
+
+/* ======================================================
+   STATE
+====================================================== */
+const state = {
+  active: "overview-diagram",
+  checked: JSON.parse(localStorage.getItem("itr_checked") || "{}"),
+  notes: JSON.parse(localStorage.getItem("itr_notes") || "{}"),
+  bookmarks: JSON.parse(localStorage.getItem("itr_bookmarks") || "{}"),
+  theme: localStorage.getItem("itr_theme") || "dark",
+  dtreeStep: "q1"
+};
+
+/* ======================================================
+   RENDER: SIDEBAR NAV
+====================================================== */
+function renderNav(){
+  const navOverview = document.getElementById("navOverview");
+  const navStages = document.getElementById("navStages");
+  const navClose = document.getElementById("navClose");
+  navOverview.innerHTML = "";
+  navStages.innerHTML = "";
+  navClose.innerHTML = "";
+
+  overviewItems.forEach(item=>{
+    navOverview.appendChild(makeNavItem(item.id, item.label, null));
+  });
+
+  stages.forEach(s=>{
+    const done = stageComplete(s.id);
+    navStages.appendChild(makeNavItem(s.id, s.title, s.no, done, state.bookmarks[s.id]));
+  });
+
+  closeItems.forEach(item=>{
+    navClose.appendChild(makeNavItem(item.id, item.label, null));
+  });
+}
+
+function makeNavItem(id, label, no, done, bookmarked){
+  const el = document.createElement("div");
+  el.className = "navitem" + (state.active === id ? " active" : "");
+  el.dataset.target = id;
+  let inner = "";
+  if(no) inner += `<span class="tab-no">${String(no).padStart(2,"0")}</span>`;
+  inner += `<span>${label}</span>`;
+  if(bookmarked) inner += `<span class="bookmark-dot" title="Bookmarked"></span>`;
+  if(no) inner += `<span class="navcheck ${done ? "done":""}"></span>`;
+  el.innerHTML = inner;
+  el.addEventListener("click", ()=> goTo(id));
+  return el;
+}
+
+function stageComplete(stageId){
+  const stage = stages.find(s=>s.id===stageId);
+  if(!stage) return false;
+  const keys = stage.tasks.map((_,i)=> stageId+"_"+i);
+  return keys.every(k=> state.checked[k]);
+}
+
+/* ======================================================
+   RENDER: FLOW DIAGRAM
+====================================================== */
+function renderFlow(){
+  const wrap = document.getElementById("flowDiagram");
+  wrap.innerHTML = "";
+  stages.forEach(s=>{
+    const node = document.createElement("div");
+    node.className = "flownode";
+    node.innerHTML = `<div class="fn-no">${String(s.no).padStart(2,"0")}</div><div class="fn-title">${s.title}</div><div class="fn-time">${s.time.split(",")[0]}</div>`;
+    node.addEventListener("click", ()=> goTo(s.id));
+    wrap.appendChild(node);
+  });
+}
+
+/* ======================================================
+   RENDER: DECISION TREE
+====================================================== */
+function renderDecisionTree(){
+  const wrap = document.getElementById("decisionTree");
+  const node = dtreeMap[state.dtreeStep];
+  if(!node){ return; }
+  let html = `<div class="dq">${node.q}</div><div class="dopts">`;
+  node.options.forEach((opt,i)=>{
+    html += `<button class="dopt" data-idx="${i}">${opt.label}</button>`;
+  });
+  html += `</div><div class="dresult" id="dresultBox"></div><button class="dtree-reset" id="dtreeReset">↺ Start over</button>`;
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll(".dopt").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const opt = node.options[parseInt(btn.dataset.idx,10)];
+      const resultBox = document.getElementById("dresultBox");
+      const resetBtn = document.getElementById("dtreeReset");
+      if(opt.result){
+        resultBox.innerHTML = `<span class="form-tag">${opt.result.form}</span><p style="margin:0;">${opt.result.text}</p>`;
+        resultBox.classList.add("show");
+        resetBtn.classList.add("show");
+      } else if(opt.next){
+        state.dtreeStep = opt.next;
+        renderDecisionTree();
+      }
+    });
+  });
+  const resetBtn = document.getElementById("dtreeReset");
+  if(resetBtn){
+    resetBtn.addEventListener("click", ()=>{
+      state.dtreeStep = "q1";
+      renderDecisionTree();
+    });
+  }
+}
+
+/* ======================================================
+   RENDER: STAGE PANELS
+====================================================== */
+function renderStages(){
+  const root = document.getElementById("stagePanelsRoot");
+  root.innerHTML = "";
+  stages.forEach((s, idx)=>{
+    const section = document.createElement("section");
+    section.className = "panel";
+    section.id = s.id;
+
+    const tagsHtml = s.tags.map(t=>`<span class="tag">${t}</span>`).join("");
+    const objectivesHtml = s.objectives.map(o=>`<li>${o}</li>`).join("");
+    const tasksHtml = s.tasks.map((t,i)=>{
+      const key = s.id+"_"+i;
+      const checked = !!state.checked[key];
+      return `<li class="${checked?'checked-task':''}"><input type="checkbox" data-key="${key}" ${checked?"checked":""}><span>${t}</span></li>`;
+    }).join("");
+
+    const toolsHtml = s.tools.map(t=>`
+      <tr>
+        <td class="toolname">${t.name}<br><span class="pill">${t.tag}</span></td>
+        <td>${t.why}</td>
+        <td>${t.alt}</td>
+      </tr>`).join("");
+
+    const promptsHtml = s.prompts.map((p,i)=>`
+      <div class="prompt-block">
+        <div class="plabel">Prompt ${i+1}</div>
+        <p>${p}</p>
+        <button class="copy-btn" data-copy="${encodeURIComponent(p)}">Copy</button>
+      </div>`).join("");
+
+    const mistakesHtml = s.mistakes.map(m=>`<div class="mistake-row"><span class="x">✕</span><span>${m}</span></div>`).join("");
+    const bestHtml = s.best.map(b=>`<div class="good-row"><span class="ck">✓</span><span>${b}</span></div>`).join("");
+
+    let ledgerHtml = "";
+    if(s.ledger){
+      ledgerHtml = `
+      <div class="ledger">
+        <div class="ledger-head">
+          <h4>Capital Gains Ledger — quick estimate</h4>
+          <span>Illustrative only, not a filing computation</span>
+        </div>
+        <div class="ledger-grid">
+          <div class="ledger-field"><label>Equity STCG (₹)</label><input type="number" id="cgStcg" placeholder="0" min="0"></div>
+          <div class="ledger-field"><label>Equity LTCG (₹)</label><input type="number" id="cgLtcg" placeholder="0" min="0"></div>
+          <div class="ledger-field"><label>Crypto / VDA gains (₹)</label><input type="number" id="cgVda" placeholder="0" min="0"></div>
+        </div>
+        <div class="ledger-out">
+          <div class="lo-item"><div class="lk">STCG tax @20%</div><div class="lv" id="outStcg">₹0</div></div>
+          <div class="lo-item"><div class="lk">LTCG tax @12.5%*</div><div class="lv" id="outLtcg">₹0</div></div>
+          <div class="lo-item"><div class="lk">VDA tax @30%</div><div class="lv" id="outVda">₹0</div></div>
+          <div class="lo-item"><div class="lk">Total estimated tax</div><div class="lv" id="outTotal">₹0</div></div>
+        </div>
+        <div class="ledger-note">*LTCG estimate applies the ₹1.25 lakh annual exemption under Section 112A before the 12.5% rate. Excludes cess, surcharge, and STCG/LTCG under other sections. Confirm final figures against current-year Schedule CG rules before filing.</div>
+      </div>`;
+    }
+
+    section.innerHTML = `
+      <div class="stage-header">
+        <div class="stage-seal">${String(s.no).padStart(2,"0")}</div>
+        <div>
+          <h2>${s.title}</h2>
+          <div class="stage-tags">${tagsHtml}</div>
+        </div>
+      </div>
+
+      <div class="meta-strip">
+        <div class="m-item"><div class="mk">Key documents</div><div class="mv">${s.meta.docs}</div></div>
+        <div class="m-item"><div class="mk">Risk level</div><div class="mv">${s.meta.risk}</div></div>
+        <div class="m-item"><div class="mk">Depends on</div><div class="mv">${s.meta.dependency}</div></div>
+        <div class="m-item"><div class="mk">Time estimate</div><div class="mv">${s.time}</div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Objectives</h4>
+          <ul>${objectivesHtml}</ul>
+        </div>
+        <div class="card">
+          <h4>Tasks — check off as you go</h4>
+          <ul class="tasklist">${tasksHtml}</ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:24px;">
+        <h4>Best AI tools for this stage</h4>
+        <table class="toolstable">
+          <thead><tr><th>Tool</th><th>Why it's recommended</th><th>Alternative</th></tr></thead>
+          <tbody>${toolsHtml}</tbody>
+        </table>
+      </div>
+
+      ${ledgerHtml}
+
+      <div class="card" style="margin-bottom:24px;">
+        <h4>Prompt examples</h4>
+        ${promptsHtml}
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Best practices</h4>
+          ${bestHtml}
+        </div>
+        <div class="card">
+          <h4>Common mistakes</h4>
+          ${mistakesHtml}
+        </div>
+      </div>
+
+      <div class="card" style="margin:24px 0;">
+        <h4>Expected output & efficiency tip</h4>
+        <p style="font-size:13.5px; color:var(--text-mid); margin-bottom:10px;"><strong style="color:var(--text-hi);">Output:</strong> ${s.output}</p>
+        <p style="font-size:13.5px; color:var(--text-mid); margin:0;"><strong style="color:var(--text-hi);">Efficiency tip:</strong> ${s.efficiency}</p>
+      </div>
+
+      <div class="notes-area">
+        <h4 style="font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:10px;">Your notes for this stage</h4>
+        <textarea data-notekey="${s.id}" placeholder="Jot anything specific to your filing here — it's saved automatically.">${state.notes[s.id] || ""}</textarea>
+        <button class="bookmark-toggle ${state.bookmarks[s.id] ? 'active':''}" data-bookmark="${s.id}">${state.bookmarks[s.id] ? "★ Bookmarked" : "☆ Bookmark this stage"}</button>
+      </div>
+
+      <div class="stage-footer-nav">
+        <button class="sfn-btn" data-nav-prev ${idx===0 ? "disabled":""}>← Previous stage</button>
+        <button class="sfn-btn" data-nav-next ${idx===stages.length-1 ? "disabled":""}>Next stage →</button>
+      </div>
+    `;
+    root.appendChild(section);
+
+    // wire checkboxes
+    section.querySelectorAll('input[type=checkbox][data-key]').forEach(cb=>{
+      cb.addEventListener("change", ()=>{
+        state.checked[cb.dataset.key] = cb.checked;
+        cb.closest("li").classList.toggle("checked-task", cb.checked);
+        persist("itr_checked", state.checked);
+        updateProgress();
+        renderNav();
+        // reattach active state after nav rebuild
+        highlightActive();
+      });
+    });
+
+    // wire copy buttons
+    section.querySelectorAll(".copy-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const text = decodeURIComponent(btn.dataset.copy);
+        navigator.clipboard && navigator.clipboard.writeText(text).catch(()=>{});
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        setTimeout(()=> btn.textContent = original, 1400);
+      });
+    });
+
+    // wire notes
+    const noteArea = section.querySelector("textarea[data-notekey]");
+    noteArea.addEventListener("input", ()=>{
+      state.notes[s.id] = noteArea.value;
+      persist("itr_notes", state.notes);
+    });
+
+    // wire bookmark
+    const bmBtn = section.querySelector("[data-bookmark]");
+    bmBtn.addEventListener("click", ()=>{
+      state.bookmarks[s.id] = !state.bookmarks[s.id];
+      persist("itr_bookmarks", state.bookmarks);
+      bmBtn.classList.toggle("active", state.bookmarks[s.id]);
+      bmBtn.textContent = state.bookmarks[s.id] ? "★ Bookmarked" : "☆ Bookmark this stage";
+      renderNav();
+      highlightActive();
+    });
+
+    // wire stage nav
+    const prevBtn = section.querySelector("[data-nav-prev]");
+    const nextBtn = section.querySelector("[data-nav-next]");
+    if(prevBtn) prevBtn.addEventListener("click", ()=> goTo(stages[idx-1].id));
+    if(nextBtn) nextBtn.addEventListener("click", ()=> goTo(stages[idx+1].id));
+
+    // wire ledger calc
+    if(s.ledger){
+      const stcgEl = section.querySelector("#cgStcg");
+      const ltcgEl = section.querySelector("#cgLtcg");
+      const vdaEl = section.querySelector("#cgVda");
+      const recalc = ()=>{
+        const stcg = parseFloat(stcgEl.value)||0;
+        const ltcg = parseFloat(ltcgEl.value)||0;
+        const vda = parseFloat(vdaEl.value)||0;
+        const stcgTax = stcg * 0.20;
+        const ltcgTaxable = Math.max(0, ltcg - 125000);
+        const ltcgTax = ltcgTaxable * 0.125;
+        const vdaTax = vda * 0.30;
+        const total = stcgTax + ltcgTax + vdaTax;
+        section.querySelector("#outStcg").textContent = formatINR(stcgTax);
+        section.querySelector("#outLtcg").textContent = formatINR(ltcgTax);
+        section.querySelector("#outVda").textContent = formatINR(vdaTax);
+        section.querySelector("#outTotal").textContent = formatINR(total);
+      };
+      [stcgEl,ltcgEl,vdaEl].forEach(el=> el.addEventListener("input", recalc));
+      recalc();
+    }
+  });
+}
+
+function formatINR(n){
+  return "₹" + Math.round(n).toLocaleString("en-IN");
+}
+
+/* ======================================================
+   RENDER: COMPARISON / SUMMARY / STACK / RESOURCES
+====================================================== */
+function renderComparison(){
+  const table = document.getElementById("comparisonTable");
+  let html = `<thead><tr><th>Platform</th><th>Best for</th><th>Pricing</th><th>AI features</th><th>Note</th></tr></thead><tbody>`;
+  comparisonRows.forEach(r=>{
+    html += `<tr><td class="toolname">${r.name}</td><td>${r.best}</td><td>${r.pricing}</td><td>${r.ai}</td><td>${r.note}</td></tr>`;
+  });
+  html += `</tbody>`;
+  table.innerHTML = html;
+}
+
+function renderStack(){
+  const grid = document.getElementById("stackGrid");
+  grid.innerHTML = stackData.map(t=>`
+    <div class="stack-card">
+      <div class="role">${t.role}</div>
+      <div class="name">${t.name}</div>
+      <p>${t.desc}</p>
+    </div>`).join("");
+}
+
+function renderResources(){
+  document.getElementById("learningList").innerHTML = learningResources.map(r=>
+    `<li><span><strong>${r.name}</strong><br><span class="res-desc">${r.desc}</span></span></li>`).join("");
+  document.getElementById("communityList").innerHTML = communities.map(r=>
+    `<li><span><strong>${r.name}</strong><br><span class="res-desc">${r.desc}</span></span></li>`).join("");
+}
+
+function renderKeywordsAndPrompts(){
+  document.getElementById("keywordChips").innerHTML = keywords.map(k=>`<span class="chip">${k}</span>`).join("");
+  document.getElementById("extraPrompts").innerHTML = extraPromptsList.map((p,i)=>`
+    <div class="prompt-block">
+      <div class="plabel">Prompt ${i+1}</div>
+      <p>${p}</p>
+      <button class="copy-btn" data-copy="${encodeURIComponent(p)}">Copy</button>
+    </div>`).join("");
+  document.getElementById("extraPrompts").querySelectorAll(".copy-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const text = decodeURIComponent(btn.dataset.copy);
+      navigator.clipboard && navigator.clipboard.writeText(text).catch(()=>{});
+      const original = btn.textContent;
+      btn.textContent = "Copied";
+      setTimeout(()=> btn.textContent = original, 1400);
+    });
+  });
+}
+
+function renderFuture(){
+  document.getElementById("futureList").innerHTML = futureAutomation.map(f=>
+    `<li style="border-bottom:1px solid var(--line); padding:12px 0; font-size:13.5px; color:var(--text-mid); list-style:none;">→ ${f}</li>`).join("");
+}
+
+/* ======================================================
+   NAVIGATION
+====================================================== */
+function goTo(id){
+  state.active = id;
+  highlightActive();
+  const target = document.getElementById(id);
+  if(target){
+    document.querySelector(".content").scrollIntoView({behavior:"smooth", block:"start"});
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  updateCrumb(id);
+}
+
+function highlightActive(){
+  document.querySelectorAll("section.panel").forEach(p=> p.classList.toggle("active", p.id === state.active));
+  document.querySelectorAll(".navitem").forEach(n=> n.classList.toggle("active", n.dataset.target === state.active));
+}
+
+function updateCrumb(id){
+  const stage = stages.find(s=>s.id===id);
+  let label = "Overview";
+  if(stage) label = stage.title;
+  else {
+    const found = [...overviewItems, ...closeItems].find(x=>x.id===id);
+    if(found) label = found.label;
+  }
+  document.getElementById("crumbLabel").textContent = label;
+}
+
+/* ======================================================
+   PROGRESS
+====================================================== */
+function updateProgress(){
+  let total = 0, done = 0;
+  stages.forEach(s=>{
+    s.tasks.forEach((_,i)=>{
+      total++;
+      if(state.checked[s.id+"_"+i]) done++;
+    });
+  });
+  const pct = total ? Math.round((done/total)*100) : 0;
+  const circumference = 119.4;
+  const offset = circumference - (circumference * pct/100);
+  document.getElementById("ringProgress").style.strokeDashoffset = offset;
+  document.getElementById("pctText").textContent = pct + "%";
+  document.getElementById("taskCountText").textContent = `${done} / ${total} tasks`;
+  document.getElementById("progressFooter").textContent = `${done} of ${total} tasks logged`;
+}
+
+/* ======================================================
+   PERSISTENCE
+====================================================== */
+function persist(key, obj){
+  try{ localStorage.setItem(key, JSON.stringify(obj)); }catch(e){}
+}
+
+/* ======================================================
+   THEME
+====================================================== */
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", state.theme);
+  document.getElementById("themeToggle").textContent = state.theme === "dark" ? "☾ Theme" : "☀ Theme";
+}
+document.getElementById("themeToggle").addEventListener("click", ()=>{
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  localStorage.setItem("itr_theme", state.theme);
+  applyTheme();
+});
+document.getElementById("printBtn").addEventListener("click", ()=> window.print());
+
+/* ======================================================
+   INIT
+====================================================== */
+document.querySelectorAll("[data-goto]").forEach(btn=>{
+  btn.addEventListener("click", ()=> goTo(btn.dataset.goto));
+});
+
+applyTheme();
+renderNav();
+renderFlow();
+renderDecisionTree();
+renderStages();
+renderComparison();
+renderStack();
+renderResources();
+renderKeywordsAndPrompts();
+renderFuture();
+updateProgress();
+highlightActive();
+updateCrumb(state.active);
+
+})();
+</script>
+</body>
+</html>
