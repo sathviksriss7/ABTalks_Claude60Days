@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Report — Stay vs Explore</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-main:#0f0f14;
+    --bg-card:#1a1a24;
+    --bg-card-alt:#1e1e2e;
+    --text-primary:#f0f0f5;
+    --text-secondary:#8888a0;
+    --accent-green:#34d399;
+    --accent-red:#f87171;
+    --accent-blue:#60a5fa;
+    --accent-gold:#fbbf24;
+    --accent-purple:#a78bfa;
+    --border-subtle:rgba(255,255,255,0.06);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg-main);
+    color:var(--text-primary);
+    font-family:'Inter','Segoe UI',system-ui,sans-serif;
+    padding:0 16px 40px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  header.banner{
+    padding:40px 0 20px;
+    text-align:center;
+  }
+  header.banner h1{
+    font-size:28px;
+    font-weight:800;
+    letter-spacing:0.5px;
+    margin:0 0 8px;
+  }
+  header.banner .subtitle{
+    font-size:16px;
+    color:var(--text-secondary);
+    margin:0 0 6px;
+    line-height:1.5;
+  }
+  header.banner .date{
+    font-size:12px;
+    color:var(--text-secondary);
+  }
+  .gradient-line{
+    height:2px;
+    margin-top:20px;
+    background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple),var(--accent-gold));
+    border-radius:2px;
+  }
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--border-subtle);
+    border-radius:16px;
+    padding:28px;
+    margin-top:28px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.3);
+    border-left:4px solid var(--accent-blue);
+    transition:transform 0.2s ease;
+  }
+  .card:hover{transform:translateY(-2px);}
+  .section-title{
+    font-size:20px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin:0 0 16px;
+  }
+  .card p, .card li{
+    font-size:15px;
+    line-height:1.7;
+    color:var(--text-primary);
+  }
+  .label{
+    font-size:12px;
+    font-weight:500;
+    color:var(--text-secondary);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+
+  /* Section-specific accents */
+  #s1{border-left-color:var(--accent-blue);}
+  #s1 .section-title{color:var(--accent-blue);}
+
+  #s2{border-left-color:var(--accent-green);}
+  #s2 .section-title{color:var(--accent-green);}
+  .option-card{
+    background:var(--bg-card-alt);
+    border-radius:12px;
+    padding:20px;
+    margin-top:16px;
+  }
+  .option-card h3{margin:0 0 10px;font-size:17px;font-weight:700;}
+  .option-card .tag{
+    display:inline-block;
+    margin-top:10px;
+    font-size:12px;
+    color:var(--text-secondary);
+    background:rgba(255,255,255,0.04);
+    padding:4px 10px;
+    border-radius:20px;
+  }
+  .pro{color:var(--accent-green);font-weight:600;}
+  .con{color:var(--accent-red);font-weight:600;}
+  .hidden{color:var(--accent-blue);font-weight:600;}
+
+  #s3{border-left-color:var(--accent-purple);}
+  #s3 .section-title{color:var(--accent-purple);}
+  #s3 h4{color:var(--accent-purple);font-size:14px;text-transform:uppercase;letter-spacing:0.5px;margin:18px 0 8px;}
+  #s3 h4:first-of-type{margin-top:0;}
+
+  #s4{border-left-color:var(--accent-blue);}
+  #s4 .section-title{color:var(--accent-blue);}
+  .matrix-row{margin-bottom:14px;}
+  .matrix-label-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:var(--text-secondary);
+    margin-bottom:6px;
+  }
+  .bar-group{display:flex;flex-direction:column;gap:6px;}
+  .bar-container{
+    height:28px;
+    background:rgba(255,255,255,0.05);
+    border-radius:8px;
+    overflow:hidden;
+    position:relative;
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    padding-right:10px;
+    color:white;
+    font-weight:700;
+    font-size:13px;
+    width:0%;
+    animation:growBar 0.8s ease-out forwards;
+  }
+  .bar-fill.optA{background:linear-gradient(90deg,#60a5fa,#3b82f6);}
+  .bar-fill.optB{background:linear-gradient(90deg,#34d399,#10b981);}
+  @keyframes growBar{
+    from{width:0%;}
+  }
+  .matrix-total{
+    margin-top:20px;
+    padding:16px;
+    background:rgba(255,255,255,0.04);
+    border-radius:10px;
+    font-weight:700;
+    font-size:16px;
+    display:flex;
+    justify-content:space-between;
+  }
+  .winner-highlight{color:var(--accent-gold);}
+
+  #s5{border-left-color:var(--accent-red);}
+  #s5 .section-title{color:var(--accent-red);}
+  #s5 .option-card h3{color:var(--accent-red);}
+
+  #s6{border-left-color:var(--accent-green);}
+  #s6 .section-title{color:var(--accent-green);}
+  .day-row{
+    display:flex;
+    gap:14px;
+    padding:10px 0;
+    border-bottom:1px solid var(--border-subtle);
+  }
+  .day-row:last-child{border-bottom:none;}
+  .day-tag{
+    min-width:64px;
+    font-size:12px;
+    font-weight:700;
+    color:var(--accent-green);
+  }
+
+  #s7{
+    border-left-color:var(--accent-gold);
+    background:var(--bg-card-alt);
+    padding:34px;
+    box-shadow:0 0 20px rgba(251,191,36,0.15), 0 4px 24px rgba(0,0,0,0.3);
+  }
+  #s7 .section-title{color:var(--accent-gold);}
+  .verdict-name{
+    font-size:30px;
+    font-weight:800;
+    color:var(--accent-gold);
+    margin:4px 0 14px;
+  }
+  .hard-truth{
+    font-style:italic;
+    color:var(--text-secondary);
+    margin-top:16px;
+    border-top:1px solid var(--border-subtle);
+    padding-top:16px;
+  }
+
+  #s8{border-left-color:var(--accent-gold);}
+  #s8 .section-title{color:var(--accent-gold);}
+  .mini-cards{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-top:16px;
+  }
+  .mini-card{
+    flex:1 1 200px;
+    background:var(--bg-card-alt);
+    padding:16px;
+    border-radius:12px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    min-height:180px;
+  }
+  .mini-card h4{
+    margin:0 0 10px;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    color:var(--text-secondary);
+  }
+  .mini-card .big{font-size:15px;font-weight:700;line-height:1.5;}
+  .mini-card .score-line{font-size:13px;color:var(--text-secondary);margin-top:6px;}
+  .watermark{
+    margin-top:auto;
+    padding-top:12px;
+    font-size:10px;
+    color:var(--text-secondary);
+    opacity:0.6;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--text-secondary);
+    font-size:12px;
+    margin-top:40px;
+  }
+
+  @media (max-width:600px){
+    .card{padding:16px;}
+    header.banner h1{font-size:24px;}
+    .verdict-name{font-size:26px;}
+    .matrix-label-row{flex-direction:column;gap:2px;}
+    .mini-cards{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="banner">
+    <h1>DECISION REPORT</h1>
+    <p class="subtitle">Stay on L1 at current org &amp; wait for a US move — or explore outside opportunities now</p>
+    <p class="date">Generated July 25, 2026</p>
+    <div class="gradient-line"></div>
+  </header>
+
+  <!-- SECTION 1 -->
+  <div class="card" id="s1">
+    <div class="section-title">The Real Decision</div>
+    <p>You're an Agile PM on an L1 visa (issued Oct 2025), waiting for your org to place you in a US role, while quietly weighing whether to look outside instead.</p>
+    <p>The real trade-off isn't "stay vs. leave" — it's a possible, employer-controlled path to the US vs. a self-directed path to broader roles and better pay that you'd have to build yourself.</p>
+    <p>It's hard because as sole earner for a family of three, a wrong call here isn't abstract — it's felt in the household budget and in whether you ever get the US shot at all.</p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="card" id="s2">
+    <div class="section-title">The Case For Each Option</div>
+
+    <div class="option-card">
+      <h3>Option A — Stay &amp; Wait</h3>
+      <p><span class="pro">Strongest case:</span> Your L1 is live and tied to your employer — it's the only concrete (if slow) mechanism you currently have toward the US. Staying keeps that door open without you having to do anything extra.</p>
+      <p><span class="hidden">Hidden upside:</span> Continued tenure and delivery credibility inside the org may put you first in line if a US seat opens suddenly.</p>
+      <p><span class="con">Biggest weakness:</span> You've already waited 9 months since the L1 was issued with no confirmed move — the "wait and see" window you set yourself has already passed.</p>
+      <p class="tag">Best if you value: stability &amp; optionality on the US path</p>
+    </div>
+
+    <div class="option-card">
+      <h3>Option B — Explore Outside</h3>
+      <p><span class="pro">Strongest case:</span> It matches your actual goal — expanding beyond pure PM delivery and improving your financial position — and it's the option your gut already picked.</p>
+      <p><span class="hidden">Hidden upside:</span> Interviewing itself generates real market data on whether your skills are "well rewarded," replacing a guess with evidence.</p>
+      <p><span class="con">Biggest weakness:</span> Leaving likely means giving up this specific employer-sponsored L1 path — by your own account, that piece may not be reversible.</p>
+      <p class="tag">Best if you value: growth, compensation, and control over your own timeline</p>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="card" id="s3">
+    <div class="section-title">Assumption Buster</div>
+
+    <h4>3 Assumptions You May Be Making</h4>
+    <p>1. That staying "preserves" the US option indefinitely — but 9 months with no movement is itself information, not neutral waiting.</p>
+    <p>2. That the outside market will undervalue you — untested, since you haven't actually gone out and gathered offers or feedback.</p>
+    <p>3. That leaving your org closes the US door forever — it closes this specific sponsorship path, not necessarily every future one.</p>
+
+    <h4>2 Biases At Play</h4>
+    <p><span style="color:var(--accent-purple);font-weight:600;">Status quo bias:</span> continuing to wait because waiting is what you've already been doing, not because new evidence supports it.</p>
+    <p><span style="color:var(--accent-purple);font-weight:600;">Loss aversion:</span> the fear of losing a hypothetical, uncertain US move looms larger than the known, ongoing cost of stagnant growth and pay.</p>
+
+    <h4>1 Thing You're Definitely Ignoring</h4>
+    <p>The opportunity cost of the last 9 months — as sole earner, every month spent waiting on an unconfirmed US move is a month not spent testing or capturing better-paying roles elsewhere.</p>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="card" id="s4">
+    <div class="section-title">Decision Matrix</div>
+    <div class="bar-group" id="matrix"></div>
+    <div class="matrix-total">
+      <span>Stay &amp; Wait: <strong>37</strong>/70</span>
+      <span class="winner-highlight">Explore Outside: <strong>41</strong>/70</span>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="card" id="s5">
+    <div class="section-title">Premortem — 12 Months From Now, It Failed</div>
+
+    <div class="option-card">
+      <h3>If you Stayed &amp; Waited</h3>
+      <p>1. The US role never materialized — hiring freeze, restructuring, or simply no seat ever opened.</p>
+      <p>2. Financial pressure kept building as sole earner while your title and comp stayed flat.</p>
+      <p>3. Your skills narrowed further into pure delivery PM work, making a later pivot harder, not easier.</p>
+      <p><span class="label">Early warning sign:</span> another full quarter passes with no concrete update on a US seat.</p>
+      <p><span class="label">Prevention action:</span> get a direct, dated answer from your manager on US timeline — not a vague "we're working on it."</p>
+    </div>
+
+    <div class="option-card">
+      <h3>If you Explored Outside</h3>
+      <p>1. Market conditions were tougher than expected, and the search dragged on for months.</p>
+      <p>2. You had to accept a lower package just to keep income flowing.</p>
+      <p>3. Leaving cost you the relationship and goodwill that might have helped a future US sponsorship.</p>
+      <p><span class="label">Early warning sign:</span> low response rate or rejections across your first focused round of applications.</p>
+      <p><span class="label">Prevention action:</span> keep the search quiet and parallel — don't resign until you have a signed offer in hand.</p>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="card" id="s6">
+    <div class="section-title">7-Day Test Plan</div>
+    <div class="day-row"><span class="day-tag">Day 1-2</span><span>Research current market rates and open roles for your Healthcare AI PM / BizOps profile.</span></div>
+    <div class="day-row"><span class="day-tag">Day 3-4</span><span>Run one small experiment — quietly apply to 3-5 roles that match your target track.</span></div>
+    <div class="day-row"><span class="day-tag">Day 5-6</span><span>Have one direct conversation with your manager about a concrete, dated US timeline.</span></div>
+    <div class="day-row"><span class="day-tag">Day 7</span><span>Decide: no concrete US date + decent market response → move toward exploring; firm US date → hold and wait.</span></div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="card" id="s7">
+    <div class="section-title">The Verdict</div>
+    <div class="verdict-name">Explore Outside</div>
+    <p>It wins because it's the option that actually matches your stated goal — broader scope and better pay as sole earner — and it turns an untested fear ("my skills won't be rewarded") into real data.</p>
+    <p>What could flip it: if your manager gives you a specific, credible US timeline within the next 7 days, staying becomes the stronger call again.</p>
+    <p class="hard-truth">The hard truth: you already gave yourself a 3-6 month window back in October, and you're now nine months in — "waiting a bit longer" has quietly become the default, not a decision.</p>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="card" id="s8">
+    <div class="section-title">Shareable Cards</div>
+    <div class="mini-cards">
+      <div class="mini-card">
+        <h4>Matrix Summary</h4>
+        <div class="big">Stay &amp; Wait: 37/70<br>Explore Outside: 41/70</div>
+        <div class="score-line">Winner: Explore Outside</div>
+        <div class="watermark">Built with Claude AI</div>
+      </div>
+      <div class="mini-card">
+        <h4>Verdict</h4>
+        <div class="big" style="color:var(--accent-gold);">Explore Outside</div>
+        <div class="score-line">9 months of waiting is data, not patience.</div>
+        <div class="watermark">Built with Claude AI</div>
+      </div>
+      <div class="mini-card">
+        <h4>LinkedIn Hook</h4>
+        <div class="big">"I gave myself 6 months to wait for a visa move. I just hit month 9."</div>
+        <div class="score-line">Waiting isn't neutral — it's a choice with a cost.<br>What's the decision you keep postponing?<br>Ask yourself the 4 questions before you answer.</div>
+        <div class="watermark">Built with Claude AI</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Built with Claude AI | ABTalks 60-Day Challenge</footer>
+</div>
+
+<script>
+  const dimensions = [
+    "Life/Career Upside","Financial Safety","Growth & Learning",
+    "Stress Level","Reversibility","Long-term Alignment","Regret Risk"
+  ];
+  const scoresA = [5,6,4,5,8,4,5];   // Stay & Wait
+  const scoresB = [8,5,8,4,3,7,6];   // Explore Outside
+
+  const container = document.getElementById('matrix');
+  let delay = 0;
+  dimensions.forEach((dim, i) => {
+    const row = document.createElement('div');
+    row.className = 'matrix-row';
+    row.innerHTML = `
+      <div class="matrix-label-row"><span>${dim}</span></div>
+      <div class="bar-container" style="margin-bottom:4px;">
+        <div class="bar-fill optA" style="animation-delay:${delay}s; width:${scoresA[i]*10}%;">${scoresA[i]}</div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-fill optB" style="animation-delay:${delay+0.05}s; width:${scoresB[i]*10}%;">${scoresB[i]}</div>
+      </div>
+    `;
+    container.appendChild(row);
+    delay += 0.1;
+  });
+</script>
+
+</body>
+</html>
