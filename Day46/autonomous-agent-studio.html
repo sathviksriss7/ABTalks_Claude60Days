@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autonomous Agent Studio — Strategy Memo Pipeline</title>
+<style>
+  :root{
+    --bg:#10141b;
+    --bg-elev:#161c26;
+    --bg-elev-2:#1d2530;
+    --bg-elev-3:#232c39;
+    --border:#2a3341;
+    --border-soft:#232b37;
+    --text:#e7e4db;
+    --text-dim:#9aa3b2;
+    --text-faint:#5c6576;
+    --brass:#c79a4b;
+    --brass-soft:#e0be82;
+    --brass-dim:#8a6d38;
+    --teal:#5aa39c;
+    --teal-dim:#2f4d4a;
+    --red:#c1554a;
+    --red-dim:#4a2b28;
+    --green:#6fa97e;
+    --green-dim:#28402f;
+    --radius:10px;
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"SF Mono","Cascadia Code",Consolas,"Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 1200px 600px at 15% -10%, rgba(199,154,75,0.07), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 100% 0%, rgba(90,163,156,0.06), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    line-height:1.5;
+  }
+  ::selection{background:var(--brass-dim);color:#fff;}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--text-faint);}
+  a{color:var(--brass-soft);}
+  :focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+
+  .wrap{max-width:1400px;margin:0 auto;padding:28px 24px 80px;}
+
+  /* ---------- Header ---------- */
+  header.top{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:20px;flex-wrap:wrap;
+    border-bottom:1px solid var(--border-soft);
+    padding-bottom:20px;margin-bottom:28px;
+  }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand-mark{
+    width:42px;height:42px;border-radius:9px;
+    background:linear-gradient(155deg,var(--brass) 0%, var(--brass-dim) 100%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:700;color:#171008;font-size:19px;
+    flex-shrink:0;
+    box-shadow:0 4px 14px rgba(199,154,75,0.25);
+  }
+  h1{
+    font-family:var(--serif);font-weight:600;font-size:26px;margin:0;
+    letter-spacing:0.2px;
+  }
+  .brand-sub{color:var(--text-dim);font-size:13px;margin-top:3px;letter-spacing:.02em;}
+  .top-right{display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--text-dim);}
+  .pill{
+    border:1px solid var(--border);background:var(--bg-elev);
+    padding:5px 11px;border-radius:100px;display:flex;align-items:center;gap:6px;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--text-faint);}
+  .dot.live{background:var(--green);box-shadow:0 0 0 3px var(--green-dim);animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+
+  section{margin-bottom:26px;}
+  .card{
+    background:var(--bg-elev);border:1px solid var(--border);
+    border-radius:var(--radius);padding:22px;
+  }
+  .card h2{font-family:var(--serif);font-size:18px;margin:0 0 4px;font-weight:600;}
+  .card .hint{color:var(--text-dim);font-size:13px;margin:0 0 18px;}
+
+  /* ---------- Setup form ---------- */
+  #setup .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  #setup .grid .full{grid-column:1/-1;}
+  label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:7px;letter-spacing:.02em;text-transform:uppercase;font-weight:600;}
+  textarea,input[type=text]{
+    width:100%;background:var(--bg-elev-2);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);padding:11px 12px;font-family:var(--sans);
+    font-size:14.5px;resize:vertical;transition:border-color .15s;
+  }
+  textarea:focus,input[type=text]:focus{border-color:var(--brass-dim);}
+  textarea{min-height:96px;}
+  .field-row{display:flex;align-items:center;gap:14px;}
+  input[type=range]{flex:1;accent-color:var(--brass);}
+  .range-val{font-family:var(--mono);font-size:13.5px;color:var(--brass-soft);min-width:48px;text-align:right;}
+  select{
+    background:var(--bg-elev-2);border:1px solid var(--border);color:var(--text);
+    padding:10px 12px;border-radius:8px;font-family:var(--sans);font-size:14.5px;width:100%;
+  }
+
+  .agent-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .chip{
+    border:1px solid var(--border);background:var(--bg-elev-2);
+    padding:7px 12px;border-radius:8px;font-size:12.5px;display:flex;align-items:center;gap:7px;
+  }
+  .chip .n{width:6px;height:6px;border-radius:50%;background:var(--teal);}
+
+  .btn{
+    background:linear-gradient(155deg,var(--brass-soft),var(--brass) 60%, var(--brass-dim));
+    color:#181109;border:none;border-radius:8px;padding:13px 22px;
+    font-size:14.5px;font-weight:700;cursor:pointer;letter-spacing:.02em;
+    transition:transform .12s, box-shadow .12s;font-family:var(--sans);
+  }
+  .btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(199,154,75,.28);}
+  .btn:active{transform:translateY(0);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+  .btn.secondary{
+    background:var(--bg-elev-2);color:var(--text);border:1px solid var(--border);
+  }
+  .btn.secondary:hover{box-shadow:none;border-color:var(--text-faint);}
+  .btn.small{padding:8px 14px;font-size:13px;}
+
+  #setup .actions{display:flex;justify-content:flex-end;margin-top:22px;gap:12px;align-items:center;}
+  .err-banner{
+    background:var(--red-dim);border:1px solid #6b332c;color:#f2b7ae;
+    padding:10px 14px;border-radius:8px;font-size:13px;margin-top:14px;display:none;
+  }
+
+  /* ---------- Dashboard layout ---------- */
+  #dashboard{display:none;}
+  .dash-grid{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start;}
+  @media (max-width:980px){.dash-grid{grid-template-columns:1fr;}}
+
+  /* ---- pipeline viz ---- */
+  .pipeline-card{position:sticky;top:20px;}
+  #loopSvg{width:100%;height:auto;display:block;}
+  .agent-node{transition:filter .25s;}
+  .agent-node .node-bg{fill:var(--bg-elev-2);stroke:var(--border);stroke-width:1.5;transition:stroke .25s, fill .25s;}
+  .agent-node.active .node-bg{stroke:var(--brass);fill:var(--bg-elev-3);}
+  .agent-node.done .node-bg{stroke:var(--teal);}
+  .agent-node .node-label{fill:var(--text);font-family:var(--sans);font-size:11px;font-weight:600;}
+  .agent-node .node-sub{fill:var(--text-faint);font-family:var(--sans);font-size:8.5px;}
+  .agent-node.active .node-label{fill:var(--brass-soft);}
+  .loop-path{fill:none;stroke:var(--border);stroke-width:2;}
+  .loop-path.flowing{stroke:var(--teal);stroke-dasharray:6 6;animation:dash 1.1s linear infinite;}
+  .branch-path{fill:none;stroke:var(--border);stroke-width:2;stroke-dasharray:4 5;}
+  .branch-path.flowing{stroke:var(--brass);animation:dash 1s linear infinite;}
+  @keyframes dash{to{stroke-dashoffset:-24;}}
+  .pulse-ring{fill:none;stroke:var(--brass);stroke-width:2;opacity:0;}
+  .agent-node.active .pulse-ring{animation:ring 1.6s ease-out infinite;}
+  @keyframes ring{0%{opacity:.7;r:26;}100%{opacity:0;r:40;}}
+
+  .legend{margin-top:16px;display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--text-dim);}
+  .legend .row{display:flex;align-items:center;gap:8px;}
+  .legend .sw{width:10px;height:10px;border-radius:3px;}
+
+  .round-indicator{
+    margin-top:18px;padding:14px;border-radius:8px;background:var(--bg-elev-2);
+    border:1px solid var(--border);
+  }
+  .round-indicator .rlabel{font-family:var(--serif);font-size:16px;color:var(--brass-soft);}
+  .round-indicator .rsub{font-size:12px;color:var(--text-dim);margin-top:4px;}
+  .stat-mini{display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);margin-top:6px;}
+  .stat-mini b{color:var(--text);font-family:var(--mono);font-weight:600;}
+
+  /* ---- tabs ---- */
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border-soft);margin-bottom:18px;flex-wrap:wrap;}
+  .tab-btn{
+    background:none;border:none;color:var(--text-dim);padding:10px 14px;font-size:13.5px;
+    cursor:pointer;border-bottom:2px solid transparent;font-family:var(--sans);font-weight:600;
+    display:flex;align-items:center;gap:7px;
+  }
+  .tab-btn.active{color:var(--brass-soft);border-bottom-color:var(--brass);}
+  .tab-btn .badge{background:var(--bg-elev-3);color:var(--text-dim);font-size:10.5px;padding:1px 6px;border-radius:100px;font-family:var(--mono);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .agent-tag{
+    display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:100px;
+    border:1px solid var(--border);color:var(--text-dim);
+  }
+  .agent-tag.planner{color:#9cb7e0;border-color:#2c3f5c;}
+  .agent-tag.executor{color:#8fc79a;border-color:#2c4a34;}
+  .agent-tag.evaluator{color:#e0b982;border-color:#5c4a2c;}
+  .agent-tag.critic{color:#e08f8f;border-color:#5c2c2c;}
+  .agent-tag.improver{color:#c79ae0;border-color:#4a2c5c;}
+  .agent-tag.memory{color:#82d4e0;border-color:#2c5259;}
+  .agent-tag.reviewer{color:var(--brass-soft);border-color:var(--brass-dim);}
+  .agent-tag.system{color:var(--text-faint);}
+
+  /* ---- log ---- */
+  #logFeed{display:flex;flex-direction:column;gap:10px;max-height:560px;overflow-y:auto;padding-right:4px;}
+  .log-item{
+    border-left:2px solid var(--border);padding:8px 0 8px 14px;font-size:13.5px;
+    animation:slidein .3s ease;
+  }
+  @keyframes slidein{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+  .log-item .lhead{display:flex;align-items:center;gap:9px;margin-bottom:4px;}
+  .log-item .ltime{font-family:var(--mono);color:var(--text-faint);font-size:11px;}
+  .log-item .lmsg{color:var(--text-dim);}
+  .log-item.err{border-left-color:var(--red);}
+  .log-item.ok{border-left-color:var(--green);}
+
+  /* ---- draft / evaluation blocks ---- */
+  .draft-box{
+    background:var(--bg-elev-2);border:1px solid var(--border);border-radius:8px;
+    padding:20px 22px;font-family:var(--serif);font-size:15.5px;line-height:1.7;
+    white-space:pre-wrap;max-height:600px;overflow-y:auto;
+  }
+  .empty-state{
+    color:var(--text-faint);font-size:13.5px;padding:30px 10px;text-align:center;
+    border:1px dashed var(--border);border-radius:8px;
+  }
+  .score-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+  .score-badge{
+    font-family:var(--serif);font-size:30px;font-weight:700;color:var(--brass-soft);
+    background:var(--bg-elev-2);border:1px solid var(--border);border-radius:10px;
+    padding:8px 18px;line-height:1;
+  }
+  .score-badge small{font-size:14px;color:var(--text-dim);font-weight:400;}
+  .delta-tag{font-family:var(--mono);font-size:13px;padding:4px 9px;border-radius:6px;}
+  .delta-tag.up{color:var(--green);background:var(--green-dim);}
+  .delta-tag.down{color:var(--red);background:var(--red-dim);}
+  .delta-tag.flat{color:var(--text-dim);background:var(--bg-elev-3);}
+  .eval-block{margin-bottom:14px;}
+  .eval-block h4{margin:0 0 6px;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-dim);}
+  .eval-block p{margin:0;font-size:14px;color:var(--text);line-height:1.6;}
+
+  /* ---- history ---- */
+  .history-row{
+    display:grid;grid-template-columns:70px 1fr 90px 90px;gap:14px;align-items:center;
+    padding:12px 10px;border-bottom:1px solid var(--border-soft);font-size:13.5px;
+  }
+  .history-row:last-child{border-bottom:none;}
+  .history-row .rnum{font-family:var(--serif);font-size:17px;color:var(--brass-soft);}
+  .history-row .bar-wrap{background:var(--bg-elev-2);border-radius:5px;height:8px;overflow:hidden;}
+  .history-row .bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--brass));border-radius:5px;transition:width .5s ease;}
+  .history-row .sc{font-family:var(--mono);text-align:right;}
+  .history-head{display:grid;grid-template-columns:70px 1fr 90px 90px;gap:14px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);padding:0 10px 8px;}
+
+  .memory-box{
+    background:var(--bg-elev-2);border:1px solid var(--border);border-radius:8px;
+    padding:16px 18px;font-size:13.5px;color:var(--text-dim);white-space:pre-wrap;
+    font-family:var(--mono);line-height:1.65;
+  }
+
+  .loading-line{display:flex;align-items:center;gap:10px;color:var(--text-dim);font-size:13.5px;padding:14px 0;}
+  .spinner{
+    width:14px;height:14px;border-radius:50%;border:2px solid var(--border);
+    border-top-color:var(--brass);animation:spin .7s linear infinite;flex-shrink:0;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---- final summary ---- */
+  #finalSummary{display:none;}
+  .stop-banner{
+    display:flex;align-items:center;gap:14px;padding:18px 22px;border-radius:10px;
+    background:var(--green-dim);border:1px solid #33543c;margin-bottom:24px;
+  }
+  .stop-banner.cap{background:var(--red-dim);border-color:#6b332c;}
+  .stop-banner .icon{font-size:26px;}
+  .stop-banner h3{margin:0 0 3px;font-family:var(--serif);font-size:17px;}
+  .stop-banner p{margin:0;font-size:13.5px;color:var(--text-dim);}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0;}
+  @media (max-width:760px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+  .stat-card{background:var(--bg-elev-2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;}
+  .stat-card .v{font-family:var(--serif);font-size:24px;color:var(--brass-soft);}
+  .stat-card .l{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);margin-top:5px;}
+
+  .perf-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px;}
+  .perf-table th{text-align:left;color:var(--text-faint);font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--border);}
+  .perf-table td{padding:10px 10px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);}
+  .perf-table tr:last-child td{border-bottom:none;}
+
+  .extend-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;}
+  @media (max-width:760px){.extend-grid{grid-template-columns:1fr;}}
+  .extend-card{background:var(--bg-elev-2);border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13.5px;color:var(--text-dim);}
+  .extend-card b{color:var(--text);display:block;margin-bottom:5px;font-family:var(--serif);font-size:14.5px;}
+
+  .prompt-list{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+  .prompt-item{
+    background:var(--bg-elev-2);border:1px solid var(--border);border-radius:8px;
+    padding:12px 14px;font-family:var(--mono);font-size:12.5px;color:var(--text-dim);
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .copy-btn{background:none;border:1px solid var(--border);color:var(--text-dim);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;flex-shrink:0;}
+  .copy-btn:hover{border-color:var(--brass-dim);color:var(--brass-soft);}
+
+  footer.explain{margin-top:36px;font-size:13px;color:var(--text-faint);border-top:1px solid var(--border-soft);padding-top:20px;}
+  .agent-explain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:14px;}
+  .agent-explain{background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;padding:14px;}
+  .agent-explain b{color:var(--text);font-family:var(--serif);font-size:14px;}
+  .agent-explain p{margin:6px 0 0;font-size:12.5px;color:var(--text-dim);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark">AS</div>
+      <div>
+        <h1>Autonomous Agent Studio</h1>
+        <div class="brand-sub">Multi-agent orchestration — executive strategy memo pipeline</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="pill"><span class="dot" id="liveDot"></span><span id="liveLabel">Idle</span></div>
+      <div class="pill">Model: claude-sonnet-4-6</div>
+    </div>
+  </header>
+
+  <!-- ============ SETUP ============ -->
+  <section id="setup">
+    <div class="card">
+      <h2>1. Define the brief</h2>
+      <p class="hint">The pipeline plans, drafts, evaluates, critiques, improves and remembers — on a live loop — until your stop condition fires.</p>
+      <div class="grid">
+        <div class="full">
+          <label for="brief">Topic / brief</label>
+          <textarea id="brief" placeholder="e.g. Recommend whether we should build our AI PM platform in-house or acquire a smaller vendor, given budget constraints and a 9-month runway.">Recommend whether our mid-size healthcare IT services firm should invest in building an in-house agentic AI delivery practice versus partnering with an existing AI vendor, given a 12-month runway and constrained engineering headcount.</textarea>
+        </div>
+        <div>
+          <label for="audience">Audience</label>
+          <input type="text" id="audience" value="CEO and executive leadership team">
+        </div>
+        <div>
+          <label for="objective">Objective</label>
+          <input type="text" id="objective" value="Secure executive approval and budget for the recommended path within one board cycle">
+        </div>
+        <div>
+          <label for="targetScore">Target rigor score (threshold stop)</label>
+          <div class="field-row">
+            <input type="range" id="targetScore" min="6" max="9.5" step="0.5" value="8.5">
+            <span class="range-val" id="targetScoreVal">8.5 / 10</span>
+          </div>
+        </div>
+        <div>
+          <label for="maxRounds">Hard iteration cap (safety fallback)</label>
+          <div class="field-row">
+            <input type="range" id="maxRounds" min="3" max="10" step="1" value="7">
+            <span class="range-val" id="maxRoundsVal">7 rounds</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:22px;">
+        <label>Auto-designed pipeline for this workflow</label>
+        <div class="agent-chips">
+          <div class="chip"><span class="n"></span>Planner</div>
+          <div class="chip"><span class="n"></span>Executor</div>
+          <div class="chip"><span class="n"></span>Evaluator</div>
+          <div class="chip"><span class="n"></span>Critic</div>
+          <div class="chip"><span class="n"></span>Improver</div>
+          <div class="chip"><span class="n"></span>Memory Manager</div>
+          <div class="chip"><span class="n"></span>Final Reviewer</div>
+        </div>
+      </div>
+
+      <div class="err-banner" id="setupErr"></div>
+      <div class="actions">
+        <span style="font-size:12.5px;color:var(--text-faint);">Stop = threshold crossed OR plateau, whichever comes first</span>
+        <button class="btn" id="startBtn">Start pipeline →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="dashboard">
+    <div class="dash-grid">
+      <!-- LEFT: pipeline viz -->
+      <div class="card pipeline-card">
+        <h2>Workflow</h2>
+        <p class="hint">Live agent cycle</p>
+        <svg id="loopSvg" viewBox="0 0 320 380" xmlns="http://www.w3.org/2000/svg">
+          <!-- static connectors drawn by JS -->
+        </svg>
+        <div class="legend">
+          <div class="row"><span class="sw" style="background:var(--bg-elev-2);border:1px solid var(--border);"></span>Idle</div>
+          <div class="row"><span class="sw" style="background:var(--bg-elev-3);border:1px solid var(--brass);"></span>Active now</div>
+          <div class="row"><span class="sw" style="background:var(--bg-elev-2);border:1px solid var(--teal);"></span>Completed this round</div>
+        </div>
+        <div class="round-indicator">
+          <div class="rlabel" id="roundLabel">Preparing…</div>
+          <div class="rsub" id="roundSub">Planner is building the strategic outline.</div>
+          <div class="stat-mini"><span>Elapsed</span><b id="statElapsed">0s</b></div>
+          <div class="stat-mini"><span>API calls</span><b id="statCalls">0</b></div>
+          <div class="stat-mini"><span>Retries</span><b id="statRetries">0</b></div>
+          <div class="stat-mini"><span>Best score</span><b id="statBest">—</b></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: tabs -->
+      <div>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="activity">Live activity</button>
+          <button class="tab-btn" data-tab="draft">Current draft</button>
+          <button class="tab-btn" data-tab="eval">Evaluation <span class="badge" id="evalBadge">0</span></button>
+          <button class="tab-btn" data-tab="history">History <span class="badge" id="histBadge">0</span></button>
+          <button class="tab-btn" data-tab="memory">Memory</button>
+        </div>
+
+        <div class="tab-panel active" id="tab-activity">
+          <div class="card">
+            <h2>Activity log</h2>
+            <p class="hint">Every agent call, evaluation, and stop-check, in order.</p>
+            <div id="logFeed"></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-draft">
+          <div class="card">
+            <h2>Current draft</h2>
+            <p class="hint">The literal working memo, updated by the Executor and then each Improver pass.</p>
+            <div id="draftContent"><div class="empty-state">No draft yet.</div></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-eval">
+          <div class="card">
+            <h2>Latest evaluation report</h2>
+            <p class="hint">Verbatim Evaluator + Critic output for the most recent round.</p>
+            <div id="evalContent"><div class="empty-state">No evaluation yet.</div></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-history">
+          <div class="card">
+            <h2>Round-over-round history</h2>
+            <p class="hint">Strategic rigor score per round, with delta vs. the previous round.</p>
+            <div class="history-head"><span>Round</span><span>Score</span><span>Δ vs prev</span><span></span></div>
+            <div id="historyList"></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-memory">
+          <div class="card">
+            <h2>Memory manager notes</h2>
+            <p class="hint">Cumulative, pruned notes on recurring weaknesses fed forward into each Improver call.</p>
+            <div id="memoryContent"><div class="empty-state">No memory notes yet.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL SUMMARY ============ -->
+  <section id="finalSummary">
+    <div class="card">
+      <div class="stop-banner" id="stopBanner">
+        <div class="icon" id="stopIcon">✓</div>
+        <div>
+          <h3 id="stopTitle">Stop condition fired</h3>
+          <p id="stopDesc">—</p>
+        </div>
+      </div>
+
+      <h2>Final memo</h2>
+      <p class="hint">Polished by the Final Reviewer after the loop stopped.</p>
+      <div class="draft-box" id="finalDraftBox"></div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="v" id="fsRounds">0</div><div class="l">Rounds run</div></div>
+        <div class="stat-card"><div class="v" id="fsCalls">0</div><div class="l">API calls</div></div>
+        <div class="stat-card"><div class="v" id="fsScore">0</div><div class="l">Final rigor score</div></div>
+        <div class="stat-card"><div class="v" id="fsTime">0s</div><div class="l">Total time</div></div>
+      </div>
+
+      <h2 style="margin-top:24px;">Agent performance summary</h2>
+      <table class="perf-table">
+        <thead><tr><th>Agent</th><th>Calls</th><th>Role this run</th></tr></thead>
+        <tbody id="perfBody"></tbody>
+      </table>
+
+      <h2 style="margin-top:24px;">Architecture overview</h2>
+      <p class="hint" style="margin-bottom:10px;">Planner → Executor produce the seed draft once. The loop — Evaluator → Critic → (stop check) → Improver → Memory Manager — repeats with a real API call every pass until a stop condition fires; Final Reviewer runs once, off the loop, as a separate branch.</p>
+
+      <h2 style="margin-top:24px;">Extension ideas</h2>
+      <div class="extend-grid" id="extendGrid"></div>
+
+      <h2 style="margin-top:24px;">Further prompts for building more advanced autonomous systems</h2>
+      <div class="prompt-list" id="promptList"></div>
+
+      <div class="actions" style="margin-top:22px;">
+        <button class="btn secondary" id="restartBtn">Run another brief</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="explain">
+    <h2 style="font-family:var(--serif);color:var(--text);font-size:16px;">How the agents work together</h2>
+    <div class="agent-explain-grid" id="explainGrid"></div>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CONFIG
+============================================================ */
+const API_URL = "https://api.anthropic.com/v1/messages";
+const MODEL = "claude-sonnet-4-6";
+const MAX_TOKENS = 1000;
+const MAX_RETRIES = 2;
+const PLATEAU_DELTA = 0.3; // score change below this counts as "flat"
+
+/* ============================================================
+   AGENT SYSTEM PROMPTS
+============================================================ */
+const AGENTS = {
+  planner: {
+    label: "Planner", tag: "planner", key: "planner",
+    system: `You are the Planner agent in an autonomous business-writing pipeline. Given a topic brief, target audience, and objective for an executive strategy memo, produce a tight strategic outline that will guide a first draft.
+Cover: (1) the core thesis / recommendation, (2) 3-5 key argument pillars and what evidence or logic each needs, (3) the central strategic tension or risk the memo must resolve, (4) the tone appropriate for this audience.
+Do not write the memo itself, only the plan. Be concise and concrete. Respond in plain text with short headers. Under 350 words. No preamble.`
+  },
+  executor: {
+    label: "Executor", tag: "executor", key: "executor",
+    system: `You are the Executor agent. Given a strategic outline, write the first full draft of an executive strategy memo as persuasive, well-argued prose — a narrative memo a CEO would actually read, not a bullet-heavy template.
+Ground every claim in logic or plausible evidence. Open by stating the recommendation, build the argument, address the strongest counterargument, close with an unambiguous ask.
+Target 400-600 words. Output only the memo text. No preamble, no meta-commentary, no markdown headers.`
+  },
+  evaluator: {
+    label: "Evaluator", tag: "evaluator", key: "evaluator",
+    system: `You are the Evaluator agent, a rigorous strategy-consulting reviewer. Score the given memo draft strictly on STRATEGIC RIGOR: logical soundness of the argument, quality and plausibility of evidence/reasoning, absence of unsupported leaps, internal consistency. Do not reward writing style or persuasiveness unless it masks a logical gap — penalize that instead.
+Respond with ONLY a valid JSON object, no markdown code fences, no text outside the JSON, in exactly this shape:
+{"score": <number 0-10, one decimal place>, "strengths": "<2-3 sentences on what holds up logically>", "weaknesses": "<2-3 sentences on the most significant logical or evidentiary gaps>", "evaluation": "<one full paragraph rationale for the score>"}
+Be a harsh, consistent grader. Reserve 9+ for genuinely airtight reasoning with no unsupported claims.`
+  },
+  critic: {
+    label: "Critic", tag: "critic", key: "critic",
+    system: `You are the Critic agent. You receive a memo draft and the Evaluator's assessment. Your job differs from the Evaluator's: do not assign a score. Instead give sharp, specific, actionable critique focused on what a skeptical board member would push back on.
+Identify: the single weakest argument in the memo, any place it asserts rather than argues, and one concrete way to strengthen the reasoning in the next revision. Reference actual phrases or claims from the draft. Be direct.
+150-250 words. Output only the critique, no preamble.`
+  },
+  improver: {
+    label: "Improver", tag: "improver", key: "improver",
+    system: `You are the Improver agent. You receive the current memo draft, the Evaluator's assessment, the Critic's feedback, and Memory notes on recurring issues across previous rounds.
+Rewrite the FULL memo: strengthen the weakest argument identified, replace assertions with reasoning or evidence, fix any recurring pattern flagged in memory. Preserve passages that already work — don't discard strong writing for its own sake.
+Keep it a narrative memo, 400-650 words. Output only the revised memo text. No preamble, no notes, no markdown headers.`
+  },
+  memory: {
+    label: "Memory Manager", tag: "memory", key: "memory",
+    system: `You are the Memory Manager agent. You maintain a short, running memory of patterns across rounds of revising a strategy memo: recurring weaknesses that keep reappearing, fixes that worked, anything the Improver should keep in mind so mistakes aren't repeated.
+Given the previous memory notes plus this round's evaluation and critique, output an updated memory note: concise (under 120 words), cumulative but pruned — drop resolved issues, keep unresolved patterns, add new ones. Plain text bullet points only. No preamble.`
+  },
+  reviewer: {
+    label: "Final Reviewer", tag: "reviewer", key: "reviewer",
+    system: `You are the Final Reviewer agent, the last checkpoint before this memo reaches executives. You receive the final draft and a short summary of how it evolved across rounds.
+Do a final polish pass: tighten language, make sure the opening lands immediately, make sure the closing ask is unambiguous — without changing the substance of the argument.
+After the memo text, add a line "---" then a section "REVIEWER NOTES:" with 2-3 sentences assessing the memo's readiness for executive review.
+Output the polished memo, the separator, then the reviewer notes. Nothing else.`
+  }
+};
+
+/* ============================================================
+   STATE
+============================================================ */
+let state = {
+  brief:"", audience:"", objective:"", targetScore:8.5, maxRounds:7,
+  plan:"", draft:"", memory:"(none yet — first round)",
+  round:0, history:[], stopReason:null, stopKind:null,
+  apiCalls:0, retries:0, startTime:0, callLog:{planner:0,executor:0,evaluator:0,critic:0,improver:0,memory:0,reviewer:0},
+  finalOutput:""
+};
+
+/* ============================================================
+   DOM HELPERS
+============================================================ */
+const $ = id => document.getElementById(id);
+function setActiveAgent(key){
+  document.querySelectorAll(".agent-node").forEach(n=>{
+    n.classList.remove("active");
+    if(n.dataset.agent===key) n.classList.add("active");
+  });
+}
+function markDone(key){
+  const n = document.querySelector('.agent-node[data-agent="'+key+'"]');
+  if(n){ n.classList.remove("active"); n.classList.add("done"); }
+}
+function clearDoneMarks(){
+  document.querySelectorAll(".agent-node.done").forEach(n=>n.classList.remove("done"));
+}
+function setFlow(loopOn, branchOn){
+  document.querySelectorAll(".loop-path").forEach(p=>p.classList.toggle("flowing", loopOn));
+  document.querySelectorAll(".branch-path").forEach(p=>p.classList.toggle("flowing", branchOn));
+}
+function log(agentTag, msg, kind){
+  const feed = $("logFeed");
+  const item = document.createElement("div");
+  item.className = "log-item" + (kind? " "+kind : "");
+  const t = new Date();
+  const time = t.toLocaleTimeString([], {hour12:false});
+  item.innerHTML = '<div class="lhead"><span class="agent-tag '+agentTag+'">'+agentLabelFor(agentTag)+'</span><span class="ltime">'+time+'</span></div><div class="lmsg"></div>';
+  item.querySelector(".lmsg").textContent = msg;
+  feed.appendChild(item);
+  feed.scrollTop = feed.scrollHeight;
+}
+function agentLabelFor(tag){
+  const found = Object.values(AGENTS).find(a=>a.tag===tag);
+  return found ? found.label : (tag==="system"?"System":tag);
+}
+function setLive(isLive, label){
+  $("liveDot").classList.toggle("live", isLive);
+  $("liveLabel").textContent = label;
+}
+function setRound(label, sub){
+  $("roundLabel").textContent = label;
+  $("roundSub").textContent = sub;
+}
+function updateStats(){
+  $("statCalls").textContent = state.apiCalls;
+  $("statRetries").textContent = state.retries;
+  const elapsed = Math.round((Date.now()-state.startTime)/1000);
+  $("statElapsed").textContent = elapsed+"s";
+  const best = state.history.length ? Math.max(...state.history.map(h=>h.score)).toFixed(1) : "—";
+  $("statBest").textContent = best === "—" ? "—" : best+" / 10";
+}
+let elapsedTimer = null;
+
+/* ============================================================
+   API CALL WITH RETRY
+============================================================ */
+async function callAgent(agentKey, userMessage, loadingLabel){
+  const agent = AGENTS[agentKey];
+  setActiveAgent(agentKey);
+  const loadId = "load_"+Date.now();
+  const feed = $("logFeed");
+  const loadEl = document.createElement("div");
+  loadEl.className = "loading-line";
+  loadEl.id = loadId;
+  loadEl.innerHTML = '<span class="spinner"></span><span>'+loadingLabel+'</span>';
+  feed.appendChild(loadEl);
+  feed.scrollTop = feed.scrollHeight;
+
+  let attempt = 0;
+  let lastErr = null;
+  while(attempt <= MAX_RETRIES){
+    try{
+      state.apiCalls++;
+      state.callLog[agentKey]++;
+      updateStats();
+      const res = await fetch(API_URL, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: MAX_TOKENS,
+          system: agent.system,
+          messages: [{role:"user", content: userMessage}]
+        })
+      });
+      if(!res.ok){
+        const errText = await res.text().catch(()=> "");
+        throw new Error("API returned "+res.status+" "+res.statusText+(errText? (" — "+errText.slice(0,200)) : ""));
+      }
+      const data = await res.json();
+      const textBlock = (data.content||[]).find(b=>b.type==="text");
+      const text = textBlock ? textBlock.text : "";
+      if(!text || !text.trim()) throw new Error("Empty response from model");
+      const el = document.getElementById(loadId);
+      if(el) el.remove();
+      markDone(agentKey);
+      return text.trim();
+    }catch(err){
+      lastErr = err;
+      attempt++;
+      if(attempt <= MAX_RETRIES){
+        state.retries++;
+        updateStats();
+        const el = document.getElementById(loadId);
+        if(el) el.querySelector("span:last-child").textContent = loadingLabel+" — retrying ("+attempt+"/"+MAX_RETRIES+") after error: "+err.message;
+        await new Promise(r=>setTimeout(r, 700*attempt));
+      }
+    }
+  }
+  const el = document.getElementById(loadId);
+  if(el) el.remove();
+  log(agent.tag, "Failed after "+MAX_RETRIES+" retries: "+(lastErr? lastErr.message : "unknown error"), "err");
+  throw lastErr || new Error("Unknown failure calling "+agent.label);
+}
+
+/* ============================================================
+   PARSING HELPERS
+============================================================ */
+function parseEvaluatorJSON(text){
+  let cleaned = text.trim();
+  cleaned = cleaned.replace(/^```(json)?/i,"").replace(/```$/,"").trim();
+  try{
+    const obj = JSON.parse(cleaned);
+    if(typeof obj.score === "number"){
+      return {
+        score: Math.max(0, Math.min(10, obj.score)),
+        strengths: obj.strengths || "",
+        weaknesses: obj.weaknesses || "",
+        evaluation: obj.evaluation || "",
+        raw: text
+      };
+    }
+  }catch(e){ /* fall through to regex fallback */ }
+  // Fallback: try to find a JSON object substring
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if(match){
+    try{
+      const obj = JSON.parse(match[0]);
+      if(typeof obj.score === "number"){
+        return {
+          score: Math.max(0, Math.min(10, obj.score)),
+          strengths: obj.strengths || "",
+          weaknesses: obj.weaknesses || "",
+          evaluation: obj.evaluation || "",
+          raw: text
+        };
+      }
+    }catch(e2){ /* still fails */ }
+  }
+  // Last resort: extract a number that looks like a score
+  const numMatch = cleaned.match(/(\d(\.\d)?)\s*\/\s*10/) || cleaned.match(/score["\s:]+(\d(\.\d)?)/i);
+  const score = numMatch ? parseFloat(numMatch[1]) : 5.0;
+  return { score: Math.max(0, Math.min(10, score)), strengths:"", weaknesses:"", evaluation: text, raw: text };
+}
+
+/* ============================================================
+   UI RENDER FUNCTIONS
+============================================================ */
+function renderDraft(){
+  const box = $("draftContent");
+  if(!state.draft){ box.innerHTML = '<div class="empty-state">No draft yet.</div>'; return; }
+  box.innerHTML = '<div class="draft-box"></div>';
+  box.querySelector(".draft-box").textContent = state.draft;
+}
+
+function renderEval(round){
+  $("evalBadge").textContent = state.history.length;
+  const box = $("evalContent");
+  if(!round){ box.innerHTML = '<div class="empty-state">No evaluation yet.</div>'; return; }
+  const deltaClass = round.delta > 0.05 ? "up" : (round.delta < -0.05 ? "down" : "flat");
+  const deltaSign = round.delta > 0 ? "+" : "";
+  box.innerHTML = `
+    <div class="score-row">
+      <div class="score-badge">${round.score.toFixed(1)}<small> / 10</small></div>
+      ${round.delta !== null ? `<div class="delta-tag ${deltaClass}">${deltaSign}${round.delta.toFixed(1)} vs previous round</div>` : ""}
+      <span class="agent-tag evaluator" style="margin-left:auto;">Round ${round.round}</span>
+    </div>
+    <div class="eval-block"><h4>Strengths</h4><p></p></div>
+    <div class="eval-block"><h4>Weaknesses</h4><p></p></div>
+    <div class="eval-block"><h4>Evaluator rationale</h4><p></p></div>
+    <div class="eval-block"><h4>Critic feedback</h4><p></p></div>
+  `;
+  const ps = box.querySelectorAll(".eval-block p");
+  ps[0].textContent = round.strengths || "—";
+  ps[1].textContent = round.weaknesses || "—";
+  ps[2].textContent = round.evaluation || "—";
+  ps[3].textContent = round.critique || "(pending)";
+}
+
+function renderHistory(){
+  $("histBadge").textContent = state.history.length;
+  const list = $("historyList");
+  list.innerHTML = "";
+  state.history.forEach((h)=>{
+    const row = document.createElement("div");
+    row.className = "history-row";
+    const pct = (h.score/10*100).toFixed(0);
+    const deltaTxt = h.delta === null ? "—" : (h.delta>0?"+":"")+h.delta.toFixed(1);
+    const deltaClass = h.delta===null ? "flat" : (h.delta>0.05?"up":(h.delta<-0.05?"down":"flat"));
+    row.innerHTML = `
+      <div class="rnum">R${h.round}</div>
+      <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
+      <div class="sc">${h.score.toFixed(1)}</div>
+      <div class="sc"><span class="delta-tag ${deltaClass}" style="padding:2px 7px;font-size:11.5px;">${deltaTxt}</span></div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function renderMemory(){
+  const box = $("memoryContent");
+  if(!state.memory || state.memory === "(none yet — first round)"){
+    box.innerHTML = '<div class="empty-state">No memory notes yet.</div>';
+    return;
+  }
+  box.innerHTML = '<div class="memory-box"></div>';
+  box.querySelector(".memory-box").textContent = state.memory;
+}
+
+/* ============================================================
+   TABS
+============================================================ */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    $("tab-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+/* ============================================================
+   PIPELINE VISUALIZATION (SVG)
+============================================================ */
+function buildLoopSvg(){
+  const svg = $("loopSvg");
+  const nodes = [
+    {key:"planner", x:160, y:28, label:"Planner", sub:"outline"},
+    {key:"executor", x:160, y:96, label:"Executor", sub:"first draft"},
+    {key:"evaluator", x:70, y:180, label:"Evaluator", sub:"scores rigor"},
+    {key:"critic", x:250, y:180, label:"Critic", sub:"critiques"},
+    {key:"improver", x:160, y:262, label:"Improver", sub:"revises"},
+    {key:"memory", x:70, y:262, label:"Memory", sub:"remembers"},
+    {key:"reviewer", x:160, y:346, label:"Final Reviewer", sub:"branch — once"}
+  ];
+  let svgContent = "";
+
+  // static connectors: planner -> executor -> evaluator (seed path)
+  svgContent += path([[160,50],[160,74]], "loop-path seedpath");
+  svgContent += path([[160,118],[160,140],[70,140],[70,158]], "loop-path seedpath");
+
+  // loop: evaluator -> critic -> improver -> memory -> back to evaluator
+  svgContent += path([[92,180],[228,180]], "loop-path"); // evaluator -> critic
+  svgContent += path([[250,202],[250,230],[182,262]], "loop-path"); // critic -> improver
+  svgContent += path([[138,262],[92,262]], "loop-path"); // improver -> memory
+  svgContent += `<path class="loop-path" d="M 70 240 C 20 210, 20 150, 48 180" marker-end="url(#arrow)"></path>`; // memory -> evaluator return arrow
+
+  // branch: evaluator area -> final reviewer (fires on stop)
+  svgContent += `<path class="branch-path" d="M 70 202 C 70 300, 120 330, 138 346" marker-end="url(#arrow2)"></path>`;
+
+  // arrow marker defs
+  svgContent = `<defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="var(--teal)"></path>
+      </marker>
+      <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="var(--brass)"></path>
+      </marker>
+    </defs>` + svgContent;
+
+  nodes.forEach(n=>{
+    const w = n.key==="reviewer" ? 118 : 92;
+    svgContent += `<g class="agent-node" data-agent="${n.key}" transform="translate(${n.x - w/2},${n.y - 18})">
+        <circle class="pulse-ring" cx="${w/2}" cy="18" r="26"></circle>
+        <rect class="node-bg" x="0" y="0" width="${w}" height="36" rx="8"></rect>
+        <text class="node-label" x="${w/2}" y="16" text-anchor="middle">${n.label}</text>
+        <text class="node-sub" x="${w/2}" y="28" text-anchor="middle">${n.sub}</text>
+      </g>`;
+  });
+
+  svg.innerHTML = svgContent;
+}
+function path(points, cls){
+  const d = points.map((p,i)=> (i===0?"M ":"L ")+p[0]+" "+p[1]).join(" ");
+  return `<path class="${cls}" d="${d}" marker-end="url(#arrow)"></path>`;
+}
+buildLoopSvg();
+
+/* ============================================================
+   FORM WIRING
+============================================================ */
+$("targetScore").addEventListener("input", e=>{
+  $("targetScoreVal").textContent = parseFloat(e.target.value).toFixed(1)+" / 10";
+});
+$("maxRounds").addEventListener("input", e=>{
+  $("maxRoundsVal").textContent = e.target.value+" rounds";
+});
+
+$("startBtn").addEventListener("click", async ()=>{
+  const brief = $("brief").value.trim();
+  const audience = $("audience").value.trim();
+  const objective = $("objective").value.trim();
+  if(!brief || !audience || !objective){
+    $("setupErr").style.display = "block";
+    $("setupErr").textContent = "Please fill in the brief, audience, and objective before starting.";
+    return;
+  }
+  $("setupErr").style.display = "none";
+  state.brief = brief;
+  state.audience = audience;
+  state.objective = objective;
+  state.targetScore = parseFloat($("targetScore").value);
+  state.maxRounds = parseInt($("maxRounds").value,10);
+
+  $("setup").style.display = "none";
+  $("dashboard").style.display = "block";
+  $("startBtn").disabled = true;
+
+  state.startTime = Date.now();
+  elapsedTimer = setInterval(updateStats, 1000);
+  setLive(true, "Running");
+
+  try{
+    await runPipeline();
+  }catch(err){
+    setLive(false, "Failed");
+    setRound("Pipeline halted", "An unrecoverable error stopped the run: "+err.message);
+    log("system", "Pipeline halted: "+err.message, "err");
+  }
+});
+
+$("restartBtn").addEventListener("click", ()=>{
+  location.reload();
+});
+
+/* ============================================================
+   ORCHESTRATION — the real loop
+============================================================ */
+async function runPipeline(){
+  clearDoneMarks();
+  // ---- Planner ----
+  setRound("Planning", "Planner is structuring the strategic outline.");
+  log("planner", "Building strategic outline from brief, audience, and objective.");
+  const plannerMsg = `Brief: ${state.brief}\nAudience: ${state.audience}\nObjective: ${state.objective}`;
+  state.plan = await callAgent("planner", plannerMsg, "Planner is drafting the strategic outline…");
+  log("planner", "Outline complete ("+state.plan.length+" chars).", "ok");
+
+  // ---- Executor ----
+  setRound("Drafting", "Executor is writing the first full memo draft from the outline.");
+  log("executor", "Writing first draft from the Planner's outline.");
+  const executorMsg = `Audience: ${state.audience}\nObjective: ${state.objective}\n\nStrategic outline to write from:\n${state.plan}`;
+  state.draft = await callAgent("executor", executorMsg, "Executor is writing the first draft…");
+  log("executor", "First draft complete ("+state.draft.split(/\s+/).length+" words).", "ok");
+  renderDraft();
+  markDone("planner");
+
+  // ---- Improvement loop ----
+  let stop = false;
+  while(!stop){
+    state.round++;
+    setFlow(true, false);
+    setRound("Round "+state.round+" — checking stop condition…", "Evaluator is scoring the current draft for strategic rigor.");
+    document.querySelectorAll(".tab-btn[data-tab=eval]")[0].click();
+
+    // Evaluator
+    log("evaluator", "Scoring round "+state.round+" draft for strategic rigor.");
+    const evalMsg = `Memo draft to evaluate:\n\n${state.draft}\n\nRubric focus: STRATEGIC RIGOR only (logical soundness, evidence quality, absence of unsupported leaps, internal consistency).`;
+    const evalRaw = await callAgent("evaluator", evalMsg, "Evaluator is scoring strategic rigor…");
+    const evalParsed = parseEvaluatorJSON(evalRaw);
+    log("evaluator", "Round "+state.round+" score: "+evalParsed.score.toFixed(1)+" / 10.", "ok");
+
+    const prevScore = state.history.length ? state.history[state.history.length-1].score : null;
+    const delta = prevScore === null ? null : +(evalParsed.score - prevScore).toFixed(2);
+
+    const roundRecord = {
+      round: state.round,
+      score: evalParsed.score,
+      strengths: evalParsed.strengths,
+      weaknesses: evalParsed.weaknesses,
+      evaluation: evalParsed.evaluation,
+      delta: delta,
+      draftSnapshot: state.draft,
+      critique: null
+    };
+    state.history.push(roundRecord);
+    renderHistory();
+    renderEval(roundRecord);
+    updateStats();
+
+    // Critic
+    setRound("Round "+state.round+" — checking stop condition…", "Critic is stress-testing the argument.");
+    log("critic", "Critiquing round "+state.round+" draft against the Evaluator's assessment.");
+    const criticMsg = `Memo draft:\n\n${state.draft}\n\nEvaluator's assessment:\nScore: ${evalParsed.score}/10\nStrengths: ${evalParsed.strengths}\nWeaknesses: ${evalParsed.weaknesses}\n${evalParsed.evaluation}`;
+    const critique = await callAgent("critic", criticMsg, "Critic is identifying the weakest argument…");
+    roundRecord.critique = critique;
+    log("critic", "Critique complete for round "+state.round+".", "ok");
+    renderEval(roundRecord);
+
+    // ---- STOP CHECKS, in order ----
+    let stopFired = null;
+    let stopKind = null;
+
+    // 1. Plateau: last 2 consecutive rounds improved less than PLATEAU_DELTA, needs at least 3 rounds of data
+    if(state.history.length >= 3){
+      const a = state.history[state.history.length-3].score;
+      const b = state.history[state.history.length-2].score;
+      const c = state.history[state.history.length-1].score;
+      const d1 = Math.abs(b-a);
+      const d2 = Math.abs(c-b);
+      if(d1 < PLATEAU_DELTA && d2 < PLATEAU_DELTA){
+        stopFired = "Plateau reached — score moved less than "+PLATEAU_DELTA+" points for two consecutive rounds ("+a.toFixed(1)+" → "+b.toFixed(1)+" → "+c.toFixed(1)+"). Further rounds are unlikely to add strategic rigor.";
+        stopKind = "plateau";
+      }
+    }
+    // 2. Threshold
+    if(!stopFired && evalParsed.score >= state.targetScore){
+      stopFired = "Target rigor score reached — round "+state.round+" scored "+evalParsed.score.toFixed(1)+"/10, at or above the "+state.targetScore.toFixed(1)+" target set at interview.";
+      stopKind = "threshold";
+    }
+    // 3. Hard cap (safety fallback)
+    if(!stopFired && state.round >= state.maxRounds){
+      stopFired = "Hard iteration cap reached — "+state.maxRounds+" rounds completed without crossing the threshold or plateauing. Stopping as a safety fallback.";
+      stopKind = "cap";
+    }
+
+    if(stopFired){
+      state.stopReason = stopFired;
+      state.stopKind = stopKind;
+      log("system", "Stop condition fired ("+stopKind+"): "+stopFired, "ok");
+      setFlow(false, true);
+      stop = true;
+      break;
+    }
+
+    // ---- Improver ----
+    setRound("Round "+state.round+" — improving", "Improver is rewriting the memo using this round's evaluation, critique, and memory.");
+    log("improver", "Revising memo using evaluation, critique, and memory notes.");
+    const improverMsg = `Current draft:\n\n${state.draft}\n\nEvaluator assessment (score ${evalParsed.score}/10):\n${evalParsed.evaluation}\nWeaknesses: ${evalParsed.weaknesses}\n\nCritic feedback:\n${critique}\n\nMemory notes from previous rounds:\n${state.memory}`;
+    state.draft = await callAgent("improver", improverMsg, "Improver is rewriting the memo…");
+    log("improver", "Round "+state.round+" revision complete.", "ok");
+    renderDraft();
+
+    // ---- Memory Manager ----
+    log("memory", "Updating running memory with this round's patterns.");
+    const memoryMsg = `Previous memory notes:\n${state.memory}\n\nThis round's evaluation weaknesses: ${evalParsed.weaknesses}\n\nThis round's critique: ${critique}`;
+    state.memory = await callAgent("memory", memoryMsg, "Memory Manager is updating running notes…");
+    log("memory", "Memory notes updated.", "ok");
+    renderMemory();
+
+    clearDoneMarks();
+  }
+
+  // ---- Final Reviewer (separate branch, runs once) ----
+  setFlow(false, true);
+  setRound("Final review", "Final Reviewer is polishing the memo before it's marked complete.");
+  log("reviewer", "Running final polish pass and readiness assessment.");
+  const historySummary = state.history.map(h=>"Round "+h.round+": score "+h.score.toFixed(1)+"/10 — "+ (h.weaknesses||"").slice(0,140)).join("\n");
+  const reviewerMsg = `Final draft:\n\n${state.draft}\n\nHow it evolved across rounds:\n${historySummary}\n\nStop reason: ${state.stopReason}`;
+  const reviewerOut = await callAgent("reviewer", reviewerMsg, "Final Reviewer is polishing the memo…");
+  markDone("reviewer");
+  log("reviewer", "Final review complete.", "ok");
+  setFlow(false, false);
+
+  state.finalOutput = reviewerOut;
+  setLive(false, "Complete");
+  clearInterval(elapsedTimer);
+  setRound("Complete", "Stopped: "+state.stopKind+".");
+  renderFinalSummary();
+}
+
+/* ============================================================
+   FINAL SUMMARY RENDER
+============================================================ */
+function renderFinalSummary(){
+  $("dashboard").style.display = "none";
+  $("finalSummary").style.display = "block";
+
+  const banner = $("stopBanner");
+  const icon = $("stopIcon");
+  const title = $("stopTitle");
+  const desc = $("stopDesc");
+  if(state.stopKind === "threshold"){
+    banner.className = "stop-banner";
+    icon.textContent = "🎯";
+    title.textContent = "Stopped: target rigor threshold crossed";
+  }else if(state.stopKind === "plateau"){
+    banner.className = "stop-banner";
+    icon.textContent = "📈";
+    title.textContent = "Stopped: score plateaued";
+  }else{
+    banner.className = "stop-banner cap";
+    icon.textContent = "⏱";
+    title.textContent = "Stopped: hard iteration cap (safety fallback)";
+  }
+  desc.textContent = state.stopReason;
+
+  // split reviewer output into memo + notes
+  let memoText = state.finalOutput;
+  let notesText = "";
+  const sep = state.finalOutput.indexOf("---");
+  if(sep !== -1){
+    memoText = state.finalOutput.slice(0, sep).trim();
+    notesText = state.finalOutput.slice(sep+3).replace(/REVIEWER NOTES:?/i,"").trim();
+  }
+  $("finalDraftBox").textContent = memoText + (notesText ? "\n\n— Reviewer notes —\n"+notesText : "");
+
+  const lastScore = state.history.length ? state.history[state.history.length-1].score : 0;
+  $("fsRounds").textContent = state.round;
+  $("fsCalls").textContent = state.apiCalls;
+  $("fsScore").textContent = lastScore.toFixed(1);
+  $("fsTime").textContent = Math.round((Date.now()-state.startTime)/1000)+"s";
+
+  const perfBody = $("perfBody");
+  const roles = {
+    planner:"Structured the strategic outline (1 call)",
+    executor:"Wrote the seed draft (1 call)",
+    evaluator:"Scored strategic rigor each round",
+    critic:"Stress-tested the argument each round",
+    improver:"Rewrote the memo each round",
+    memory:"Tracked recurring weaknesses each round",
+    reviewer:"Final polish + readiness note (1 call)"
+  };
+  perfBody.innerHTML = "";
+  Object.keys(AGENTS).forEach(k=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><span class="agent-tag ${AGENTS[k].tag}">${AGENTS[k].label}</span></td><td>${state.callLog[k]}</td><td>${roles[k]}</td>`;
+    perfBody.appendChild(tr);
+  });
+
+  $("extendGrid").innerHTML = `
+    <div class="extend-card"><b>Add a Safety Monitor</b>Insert a fast-pass agent between Executor/Improver and Evaluator that screens for unsupported financial claims or overconfident guarantees before rigor scoring even starts.</div>
+    <div class="extend-card"><b>Parallel drafts</b>Run the Executor twice with different framings (risk-first vs. opportunity-first) and let the Evaluator pick the stronger seed before the loop begins.</div>
+    <div class="extend-card"><b>Multi-rubric Evaluator</b>Split scoring into rigor, persuasiveness, and actionability as three parallel calls, and let the stop check require all three to cross threshold.</div>
+    <div class="extend-card"><b>Human-in-the-loop gate</b>Pause after the plateau check fires and let a human approve, edit the memory notes, or force one more round before Final Review runs.</div>
+    <div class="extend-card"><b>Persistent memory across briefs</b>Store the Memory Manager's notes in localStorage keyed by document type, so lessons from this memo carry into the next one you generate.</div>
+    <div class="extend-card"><b>Tool-using Executor</b>Give the Executor a web-search or internal-data tool so early drafts start from real figures instead of plausible-sounding placeholders.</div>
+  `;
+
+  $("promptList").innerHTML = "";
+  const prompts = [
+    "Add a Safety Monitor agent that runs before every Evaluator call and blocks the round if the draft makes an unverifiable financial claim.",
+    "Change the stop condition to require the threshold AND a minimum of 3 rounds, so a lucky first draft can't end the loop early.",
+    "Add a second rubric dimension (persuasiveness) scored in parallel with rigor, and show both as a radar chart in the dashboard.",
+    "Let me edit the Memory Manager's notes directly between rounds before they're passed to the next Improver call.",
+    "Persist run history to localStorage so I can compare this memo's rounds against a previous run side by side."
+  ];
+  prompts.forEach(p=>{
+    const item = document.createElement("div");
+    item.className = "prompt-item";
+    const span = document.createElement("span");
+    span.textContent = p;
+    const btn = document.createElement("button");
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.addEventListener("click", ()=>{
+      navigator.clipboard.writeText(p).then(()=>{
+        btn.textContent = "Copied";
+        setTimeout(()=>btn.textContent="Copy", 1400);
+      }).catch(()=>{});
+    });
+    item.appendChild(span);
+    item.appendChild(btn);
+    $("promptList").appendChild(item);
+  });
+}
+
+/* ============================================================
+   STATIC EXPLAINER GRID (footer)
+============================================================ */
+(function buildExplainGrid(){
+  const grid = $("explainGrid");
+  const items = [
+    {t:"Planner", d:"Turns your brief, audience, and objective into a strategic outline — thesis, argument pillars, the tension to resolve. Runs once, before the loop."},
+    {t:"Executor", d:"Writes the first full memo draft from the outline. Runs once; every round after this is a revision, not a rewrite from scratch."},
+    {t:"Evaluator", d:"Scores the current draft purely on strategic rigor and returns structured JSON. Its score is what the stop-check reads every round."},
+    {t:"Critic", d:"Reads the same draft and the Evaluator's score, then argues like a skeptical board member — different lens, same round."},
+    {t:"Improver", d:"Rewrites the full memo using this round's evaluation, critique, and the Memory Manager's running notes — the only agent that changes the draft."},
+    {t:"Memory Manager", d:"Prunes and carries forward recurring weaknesses across rounds, so the Improver doesn't just fix this round's issue and reintroduce last round's."},
+    {t:"Final Reviewer", d:"Runs once, off the loop, only after a stop condition fires. Polishes language without touching substance and files a readiness note."}
+  ];
+  grid.innerHTML = items.map(i=>`<div class="agent-explain"><b>${i.t}</b><p>${i.d}</p></div>`).join("");
+})();
+
+})();
+</script>
+</body>
+</html>
