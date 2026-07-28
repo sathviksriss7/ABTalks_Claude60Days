@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Departures — Career Path Comparator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-950:#070c17;
+    --navy-900:#0b1526;
+    --navy-800:#111e35;
+    --navy-700:#182946;
+    --board-line:#25395c;
+    --amber:#f2a93b;
+    --amber-dim:#8a6220;
+    --teal:#2dd4bf;
+    --teal-dim:#155e56;
+    --paper:#edeff4;
+    --muted:#8b95ac;
+    --danger:#e2694f;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(45,212,191,0.07), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(242,169,59,0.06), transparent 55%),
+      var(--navy-950);
+    color:var(--paper);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .display{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.03em;}
+
+  /* ===== Layout shell ===== */
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px;}
+
+  /* ===== Header / departure board masthead ===== */
+  header.board-head{
+    border:1px solid var(--board-line);
+    background:linear-gradient(180deg, var(--navy-800), var(--navy-900));
+    border-radius:var(--radius);
+    padding:22px 24px 18px;
+    margin-bottom:22px;
+    position:relative;
+    overflow:hidden;
+  }
+  header.board-head::before{
+    content:"";
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(180deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+  }
+  .board-eyebrow{
+    display:flex; align-items:center; gap:10px;
+    font-size:11.5px; letter-spacing:0.18em; color:var(--amber);
+    font-family:'IBM Plex Mono',monospace; text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .board-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 2.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  h1.board-title{
+    font-size:clamp(28px,4.4vw,44px);
+    margin:0 0 8px;
+    color:var(--paper);
+    line-height:1.05;
+  }
+  h1.board-title span{color:var(--amber);}
+  .board-sub{color:var(--muted); font-size:15px; max-width:640px; margin:0;}
+  .board-meta{
+    margin-top:16px; display:flex; flex-wrap:wrap; gap:18px;
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--muted); letter-spacing:.04em;
+  }
+  .board-meta b{color:var(--paper); font-weight:500;}
+
+  /* ===== Section shell ===== */
+  section{margin-bottom:26px;}
+  .panel{
+    border:1px solid var(--board-line);
+    background:var(--navy-900);
+    border-radius:var(--radius);
+    padding:22px 24px;
+  }
+  h2.section-title{
+    display:flex; align-items:center; gap:10px;
+    font-size:14px; letter-spacing:.14em; color:var(--muted);
+    margin:0 0 16px; font-family:'IBM Plex Mono',monospace; text-transform:uppercase;
+  }
+  h2.section-title::before{content:"";width:18px;height:1px;background:var(--amber);}
+
+  /* ===== Weight controls ===== */
+  .weights-grid{display:grid; grid-template-columns:1fr; gap:16px;}
+  .weight-row{
+    display:grid; grid-template-columns:180px 1fr 56px; align-items:center; gap:14px;
+  }
+  .weight-row label{font-size:13.5px; color:var(--paper); font-weight:500;}
+  .weight-row .hint{display:block; font-size:11px; color:var(--muted); margin-top:2px; font-weight:400;}
+  input[type=range]{
+    -webkit-appearance:none; appearance:none;
+    width:100%; height:4px; border-radius:4px;
+    background:var(--navy-700);
+    outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:16px; height:16px; border-radius:50%;
+    background:var(--amber); cursor:pointer;
+    border:2px solid var(--navy-950);
+    box-shadow:0 0 0 1px var(--amber-dim);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%;
+    background:var(--amber); cursor:pointer; border:2px solid var(--navy-950);
+  }
+  .weight-val{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--amber);
+    text-align:right;
+  }
+  .reset-btn{
+    margin-top:18px; background:transparent; border:1px solid var(--board-line);
+    color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+    letter-spacing:.08em; text-transform:uppercase; padding:9px 16px; border-radius:var(--radius);
+    cursor:pointer; transition:all .15s ease;
+  }
+  .reset-btn:hover{color:var(--paper); border-color:var(--teal); background:rgba(45,212,191,0.06);}
+
+  /* ===== Split-flap ranked board ===== */
+  .board-list{display:flex; flex-direction:column; gap:10px;}
+  .flap-row{
+    display:grid; grid-template-columns:44px 1fr auto; align-items:center; gap:16px;
+    background:var(--navy-800); border:1px solid var(--board-line); border-radius:var(--radius);
+    padding:14px 16px; transition:transform .3s ease, border-color .3s ease, background .3s ease;
+  }
+  .flap-row.rank-1{border-color:var(--amber); background:linear-gradient(90deg, rgba(242,169,59,0.10), var(--navy-800) 40%);}
+  .flap-rank{
+    font-family:'IBM Plex Mono',monospace; font-size:20px; color:var(--muted); text-align:center;
+    transition:color .3s ease;
+  }
+  .flap-row.rank-1 .flap-rank{color:var(--amber);}
+  .flap-name{display:flex; flex-direction:column; gap:3px; min-width:0;}
+  .flap-name .opt-name{font-size:16px; font-weight:600; color:var(--paper);}
+  .flap-name .opt-tag{font-size:12.5px; color:var(--muted);}
+  .flap-score{
+    display:flex; align-items:center; gap:12px; justify-self:end;
+  }
+  .flap-bar-track{width:140px; height:7px; background:var(--navy-700); border-radius:6px; overflow:hidden; display:none;}
+  .flap-bar-fill{height:100%; background:linear-gradient(90deg, var(--teal-dim), var(--teal)); transition:width .5s cubic-bezier(.4,0,.2,1);}
+  .flap-num{
+    font-family:'IBM Plex Mono',monospace; font-size:19px; color:var(--teal); min-width:58px; text-align:right;
+    transition:color .3s ease;
+  }
+  .flap-row.rank-1 .flap-num{color:var(--amber);}
+  @media(min-width:600px){ .flap-bar-track{display:block;} }
+
+  /* ===== Data table (manifest) ===== */
+  .manifest-scroll{overflow-x:auto; border:1px solid var(--board-line); border-radius:var(--radius);}
+  table.manifest{
+    width:100%; border-collapse:collapse; min-width:760px;
+    font-size:13.5px;
+  }
+  table.manifest th, table.manifest td{
+    padding:12px 14px; text-align:left; border-bottom:1px solid var(--board-line);
+    vertical-align:top;
+  }
+  table.manifest thead th{
+    background:var(--navy-800); font-family:'IBM Plex Mono',monospace; font-size:11px;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:500;
+    position:sticky; top:0;
+  }
+  table.manifest tbody tr:hover{background:rgba(255,255,255,0.02);}
+  table.manifest td.crit-label{color:var(--paper); font-weight:500; white-space:nowrap;}
+  .cell-val{font-family:'IBM Plex Mono',monospace; font-size:12.8px; color:var(--paper); display:block; margin-bottom:5px;}
+  .badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.05em; text-transform:uppercase;
+    padding:2px 7px; border-radius:20px; border:1px solid;
+  }
+  .badge.sourced{color:var(--teal); border-color:var(--teal-dim); background:rgba(45,212,191,0.06);}
+  .badge.estimate{color:var(--amber); border-color:var(--amber-dim); background:rgba(242,169,59,0.07);}
+  .cite-links{display:block; margin-top:4px; font-size:11px;}
+  .cite-links a{color:var(--muted); text-decoration:none; border-bottom:1px dotted var(--muted); margin-right:8px;}
+  .cite-links a:hover{color:var(--teal); border-color:var(--teal);}
+
+  /* ===== Collapsible panels ===== */
+  details.collapse{
+    border:1px solid var(--board-line); border-radius:var(--radius); background:var(--navy-900);
+    margin-bottom:14px; overflow:hidden;
+  }
+  details.collapse summary{
+    cursor:pointer; padding:16px 20px; list-style:none;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--paper);
+  }
+  details.collapse summary::-webkit-details-marker{display:none;}
+  details.collapse summary .chevron{color:var(--amber); transition:transform .2s ease; font-size:14px;}
+  details.collapse[open] summary .chevron{transform:rotate(90deg);}
+  details.collapse .collapse-body{padding:0 20px 20px; color:var(--muted); font-size:14px;}
+  details.collapse .collapse-body p{margin:0 0 12px;}
+  details.collapse .collapse-body strong{color:var(--paper); font-weight:600;}
+  details.collapse .collapse-body ul{margin:0 0 14px; padding-left:20px;}
+  details.collapse .collapse-body li{margin-bottom:6px;}
+
+  /* Sources list */
+  ol.source-list{margin:0; padding-left:22px; columns:1; font-size:13px; color:var(--muted);}
+  ol.source-list li{margin-bottom:10px; break-inside:avoid;}
+  ol.source-list a{color:var(--paper); text-decoration:none; border-bottom:1px solid var(--board-line);}
+  ol.source-list a:hover{color:var(--teal); border-color:var(--teal);}
+  ol.source-list .src-note{display:block; color:var(--muted); font-size:12px; margin-top:2px;}
+  @media(min-width:760px){ ol.source-list{columns:2; column-gap:32px;} }
+
+  /* Empty/loading state */
+  .loading-shimmer{
+    height:56px; border-radius:var(--radius); margin-bottom:10px;
+    background:linear-gradient(90deg, var(--navy-800) 25%, var(--navy-700) 37%, var(--navy-800) 63%);
+    background-size:400% 100%; animation:shimmer 1.4s ease infinite;
+  }
+  @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:0 0;}}
+  .empty-state{
+    text-align:center; padding:32px 20px; color:var(--muted); font-size:13.5px;
+    border:1px dashed var(--board-line); border-radius:var(--radius);
+  }
+
+  footer{
+    margin-top:30px; padding-top:20px; border-top:1px solid var(--board-line);
+    color:var(--muted); font-size:12px; text-align:center;
+  }
+
+  /* Priority-focus toggle chip row */
+  .quick-presets{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;}
+  .preset-chip{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+    padding:7px 13px; border-radius:20px; border:1px solid var(--board-line); background:transparent;
+    color:var(--muted); cursor:pointer; transition:all .15s ease;
+  }
+  .preset-chip:hover{color:var(--paper); border-color:var(--teal);}
+  .preset-chip.active{color:var(--navy-950); background:var(--amber); border-color:var(--amber); font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="board-head">
+    <div class="board-eyebrow"><span class="dot"></span>LIVE COMPARISON &middot; UPDATES AS YOU ADJUST WEIGHTS</div>
+    <h1 class="board-title">Where should you <span>build your career</span> next?</h1>
+    <p class="board-sub">A weighted, source-checked comparison of four real paths for a Program/Project Manager considering relocation: staying fully remote in India, going hybrid in Hyderabad or Bangalore, or relocating to Singapore or Dubai on a work visa.</p>
+    <div class="board-meta">
+      <span><b>4</b> options</span>
+      <span><b>5</b> criteria</span>
+      <span><b>22</b> cited sources</span>
+      <span>Board updated <b>Jul 2026</b></span>
+    </div>
+  </header>
+
+  <section>
+    <div class="panel">
+      <h2 class="section-title">01 &nbsp;Set your priorities</h2>
+      <div class="quick-presets" id="presetRow">
+        <button class="preset-chip" data-preset="balanced">Balanced (default)</button>
+        <button class="preset-chip" data-preset="pay">Maximize pay</button>
+        <button class="preset-chip" data-preset="ease">Lowest hassle</button>
+        <button class="preset-chip" data-preset="life">Best quality of life</button>
+        <button class="preset-chip" data-preset="stay">Stay-in-India bias</button>
+      </div>
+      <div class="weights-grid" id="weightsGrid"></div>
+      <button class="reset-btn" id="resetBtn">Reset to equal weights</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h2 class="section-title">02 &nbsp;Departures board — ranked result</h2>
+      <div class="board-list" id="rankedBoard">
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h2 class="section-title">03 &nbsp;Full data manifest</h2>
+      <div class="manifest-scroll">
+        <table class="manifest" id="manifestTable">
+          <thead><tr id="manifestHead"></tr></thead>
+          <tbody id="manifestBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <details class="collapse" id="howResearched">
+      <summary>How this was researched <span class="chevron">&#9656;</span></summary>
+      <div class="collapse-body" id="howResearchedBody"></div>
+    </details>
+
+    <details class="collapse" id="sourcesPanel">
+      <summary>Sources panel — every citation used <span class="chevron">&#9656;</span></summary>
+      <div class="collapse-body">
+        <ol class="source-list" id="sourceList"></ol>
+      </div>
+    </details>
+  </section>
+
+  <footer id="footerNote">Loading…</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     SOURCES — every citation used in this tool
+  ============================================================ */
+  const SOURCES = {
+    S1:  {name:"Indeed India — Program Manager salaries", url:"https://in.indeed.com/career/program-manager/salaries", note:"National average base pay, updated Jul 2026."},
+    S2:  {name:"Gururo — Program Manager Salary in India 2026 (citing Glassdoor)", url:"https://gururo.com/program-manager-salary-in-india-for-freshers-experienced/", note:"Glassdoor-sourced avg ₹26.5L; Naukri city-wise job counts."},
+    S3:  {name:"Levels.fyi — Program Manager, India", url:"https://www.levels.fyi/t/program-manager/locations/india", note:"Total comp range ₹25.5L–₹50.2L, tech-industry skewed."},
+    S4:  {name:"upGrad — Program Manager Salary in India (2025)", url:"https://www.upgrad.com/blog/program-manager-salary-in-india-responsibilities-and-factors/", note:"Company-wise breakdown (Accenture, Adobe, Tech Mahindra, Dell, Cisco)."},
+    S5:  {name:"Glassdoor — Program Manager salary, Singapore", url:"https://www.glassdoor.sg/Salaries/singapore-program-manager-salary-SRCH_IL.0,9_IM1123_KO10,25.htm", note:"25th–75th percentile SGD 74.5K–143.5K/yr, Jun 2026."},
+    S6:  {name:"Levels.fyi — Program Manager, Singapore", url:"https://www.levels.fyi/t/program-manager/locations/singapore", note:"Total comp avg SGD 196,898 — skews toward large tech employers."},
+    S7:  {name:"ZeroTaxJobs — Program Manager salary, Dubai", url:"https://zerotaxjobs.com/salaries/program-manager/dubai", note:"Senior-level range $100K–135K/yr, tax-free."},
+    S8:  {name:"WorldSalaries — Program Manager salary, Dubai", url:"https://worldsalaries.com/average-program-manager-salary-in-dubai/united-arab-emirates/", note:"Broader market range AED 189.3K–649.7K incl. benefits."},
+    S9:  {name:"Glassdoor — Program Manager salary, Dubai", url:"https://www.glassdoor.com/Salaries/dubai-program-manager-salary-SRCH_IL.0,5_IC2204498_KO6,21.htm", note:"Base-pay-only figures, notably lower than total-comp sources."},
+    S10: {name:"Numbeo — Cost of Living: Bangalore vs Singapore", url:"https://www.numbeo.com/cost-of-living/compare_cities.jsp?country1=India&city1=Bangalore&country2=Singapore&city2=Singapore", note:"Singapore requires ~4.95x the budget of Bangalore for equivalent living standard."},
+    S11: {name:"Numbeo — Cost of Living: Dubai vs Bangalore", url:"https://www.numbeo.com/cost-of-living/compare_cities.jsp?country1=United+Arab+Emirates&city1=Dubai&country2=India&city2=Bangalore", note:"Dubai requires ~3.70x the budget of Bangalore for equivalent living standard."},
+    S12: {name:"Newsreel Asia — How India Ranks in Global Quality of Life Index 2026 (Numbeo data)", url:"https://newsreel.asia/articles/india-ranking-quality-of-life-2026", note:"India: rank 63/89 globally, 18/26 in Asia, score 122.3. Singapore sub-indices: healthcare 71.9, safety 77.5, Asia rank 9/26."},
+    S13: {name:"Databoks — Best Quality of Life Cities in Asia (Numbeo data, 2022)", url:"https://databoks.katadata.co.id/en/consumer-services/statistics/d5f5b2aabd72ad7/10-cities-with-the-best-quality-of-life-in-asia-is-jakarta-on-the-list", note:"Dated 2022 city-level index: Dubai 178.6, Singapore 151.67 — used only as directional signal, flagged as outdated."},
+    S14: {name:"Expatriate Healthcare — Best Countries to Live In 2026 (Numbeo safety data)", url:"https://www.expatriatehealthcare.com/the-best-countries-to-live-in-2026/", note:"UAE ranked the world's safest country in the Numbeo Quality of Life safety sub-index."},
+    S15: {name:"ProThoughts — Program Manager Salary in India 2026 (citing Naukri Hiring Outlook)", url:"https://prothoughts.co.in/blog/program-manager-salary/", note:"72% of Indian employers plan to increase hiring per Naukri's 2025 Hiring Outlook."},
+    S16: {name:"Gururo — Naukri job-count data by city", url:"https://gururo.com/program-manager-salary-in-india-for-freshers-experienced/", note:"35,000+ program-manager-related openings nationally on Naukri; ~9,662 concentrated in Bangalore."},
+    S17: {name:"Indeed Singapore — Program Manager jobs", url:"https://sg.indeed.com/q-program-manager-jobs.html", note:"~270–400 live listings, Jul 2026."},
+    S18: {name:"LinkedIn Singapore — Program Manager jobs", url:"https://sg.linkedin.com/jobs/program-manager-jobs", note:"3,000+ listings (LinkedIn counts trend higher than job-board aggregators)."},
+    S19: {name:"CFOTech Asia — LinkedIn names DBS top Singapore employer for career growth (2026)", url:"https://cfotech.asia/story/linkedin-names-dbs-top-singapore-employer-for-career-growth", note:"58% of Singaporeans job-hunting in 2026; 82% say the search is harder than before — signals rising competition."},
+    S20: {name:"Indeed UAE — Program Manager jobs, Dubai", url:"https://ae.indeed.com/q-program-manager-l-dubai-jobs.html", note:"Listing counts fluctuate widely by search scope/date — from 43 to 1,200+ — indicating a smaller, less standardized job market."},
+    S21: {name:"Terra Advisory Services — Singapore Employment Pass 2026 guide", url:"https://terraadvisoryservices.com/singapore-employment-pass/", note:"EP minimum qualifying salary S$5,600–10,700/month by age (2026), plus 40-point COMPASS assessment."},
+    S22: {name:"Deel / Wego / Velmont Crest — UAE work visa guides 2026", url:"https://www.deel.com/blog/how-to-get-a-visa-and-work-permit-in-uae/", note:"Employer-sponsored, 2–6 week processing, AED 4,000–9,000 cost, no fixed minimum-salary gate."}
+  };
+
+  /* ============================================================
+     OPTIONS
+  ============================================================ */
+  const OPTIONS = [
+    {id:"remote_india", name:"Remote — India (home base)", tag:"Work from anywhere in India for a domestic or global remote employer"},
+    {id:"hybrid_hb",     name:"Hybrid — Hyderabad / Bangalore", tag:"In-office or hybrid PM/Program Manager role in India's two largest tech hubs"},
+    {id:"singapore",     name:"Singapore", tag:"Relocate on an employer-sponsored Employment Pass"},
+    {id:"dubai",         name:"Dubai, UAE", tag:"Relocate on an employer-sponsored UAE work visa"}
+  ];
+
+  /* ============================================================
+     CRITERIA — id, label, unit hint, direction, and per-option data
+     raw: number used for min-max normalization
+     display: human string shown in the manifest table
+     sourced: true = directly reported figure, false = derived/estimated (flagged)
+     cites: array of SOURCES keys
+  ============================================================ */
+  const CRITERIA = [
+    {
+      id:"compensation", label:"Compensation", direction:"higher",
+      unitNote:"₹-lakh/year equivalent (senior PM/Program Manager, market-rate mid-point)",
+      data:{
+        remote_india: {raw:26.5, display:"₹18L – 35L/yr &nbsp;(avg ≈ ₹26.5L)", sourced:true, cites:["S1","S2","S3"]},
+        hybrid_hb:    {raw:29,   display:"₹20L – 38L/yr &nbsp;(hub premium; e.g. Accenture ₹24.4L, Adobe ₹24.1L)", sourced:true, cites:["S2","S4"]},
+        singapore:    {raw:70.8, display:"SGD 74.5K – 143.5K/yr &nbsp;(≈ ₹48L–93L, mid ≈ ₹70.8L)", sourced:true, cites:["S5","S6"]},
+        dubai:        {raw:102.8,display:"AED ~250K – 450K/yr, tax-free &nbsp;(≈ $100K–135K, mid ≈ ₹102.8L)", sourced:true, cites:["S7","S8","S9"]}
+      },
+      note:"₹-lakh figures for Singapore and Dubai are currency-converted at approx. mid-2026 rates (1 SGD≈₹65, 1 USD≈₹87.5) for comparability — the conversion itself is an estimate; the native-currency figures are directly sourced."
+    },
+    {
+      id:"costOfLiving", label:"Cost of Living", direction:"lower",
+      unitNote:"Relative index, Bangalore = 100 (Numbeo cost-of-living-plus-rent comparison)",
+      data:{
+        remote_india: {raw:70,  display:"Index ≈ 70 &nbsp;(smaller Tier-2 cities/remote locations, typically cheaper than Bangalore)", sourced:false, cites:["S10","S11"]},
+        hybrid_hb:    {raw:100, display:"Index = 100 &nbsp;(Bangalore baseline)", sourced:true, cites:["S10","S11"]},
+        singapore:    {raw:495, display:"Index ≈ 495 &nbsp;(needs ~4.95x a Bangalore budget for equivalent living standard)", sourced:true, cites:["S10"]},
+        dubai:        {raw:370, display:"Index ≈ 370 &nbsp;(needs ~3.70x a Bangalore budget for equivalent living standard)", sourced:true, cites:["S11"]}
+      },
+      note:"The Remote-India figure is an estimate: Numbeo doesn't publish a single 'remote India' city, so this reflects a plausible Tier-2/lower-cost-of-living location relative to the Bangalore baseline, not a literal Numbeo data point."
+    },
+    {
+      id:"jobDemand", label:"Job Security & Market Demand", direction:"higher",
+      unitNote:"0–100 relative demand score, derived from listing volume + hiring-outlook signals",
+      data:{
+        remote_india: {raw:90, display:"35,000+ PM-related openings nationally on Naukri; 72% of employers plan to increase hiring", sourced:true, cites:["S15","S16"]},
+        hybrid_hb:    {raw:88, display:"Bangalore alone accounts for ~9,662 of those Naukri listings — India's single largest PM hub", sourced:true, cites:["S16"]},
+        singapore:    {raw:55, display:"270–400 listings (Indeed), 3,000+ (LinkedIn); but 58% of Singaporeans are job-hunting and 82% report a harder market", sourced:true, cites:["S17","S18","S19"]},
+        dubai:        {raw:42, display:"Listing volume swings from ~43 to 1,200+ depending on search scope/date — smaller, less standardized market", sourced:true, cites:["S20"]}
+      },
+      note:"Raw job-board counts aren't directly comparable across platforms and countries (different indexing, duplicate listings, market size). The 0–100 score is a derived composite that weighs absolute volume against hiring-outlook and competition signals — flagged as an estimate throughout, not a literal count."
+    },
+    {
+      id:"visaEase", label:"Visa & Relocation Ease", direction:"higher",
+      unitNote:"0–100, higher = fewer/lower relocation hurdles",
+      data:{
+        remote_india: {raw:100, display:"No visa or relocation required — domestic employment", sourced:true, cites:[]},
+        hybrid_hb:    {raw:100, display:"No visa required — domestic city move only", sourced:true, cites:[]},
+        singapore:    {raw:52,  display:"Employment Pass: min. S$5,600–10,700/month by age (2026) + 40-point COMPASS assessment", sourced:true, cites:["S21"]},
+        dubai:        {raw:72,  display:"Employer-sponsored work visa: 2–6 weeks processing, AED 4,000–9,000 cost, no fixed minimum-salary gate", sourced:true, cites:["S22"]}
+      },
+      note:"Scores for Singapore/Dubai are a derived comparison of documented visa mechanics (salary thresholds, points systems, processing time, cost) rather than an official 'ease' ranking — flagged as an estimate."
+    },
+    {
+      id:"qualityOfLife", label:"Quality of Life", direction:"higher",
+      unitNote:"0–100 composite, anchored to Numbeo's Quality of Life Index",
+      data:{
+        remote_india: {raw:59, display:"Numbeo QoL score 122.3 — ranked 63rd of 89 countries globally, 18th of 26 in Asia", sourced:true, cites:["S12"]},
+        hybrid_hb:    {raw:59, display:"Same national Numbeo figure used (no separate city-level India QoL index was available)", sourced:false, cites:["S12"]},
+        singapore:    {raw:74, display:"Ranked 9th of 26 in Asia; healthcare sub-index 71.9, safety sub-index 77.5", sourced:false, cites:["S12"]},
+        dubai:        {raw:80, display:"UAE ranked the world's safest country; Dubai's 2022 city QoL index was 178.6, then Asia's highest", sourced:false, cites:["S13","S14"]}
+      },
+      note:"India's score is a direct 2026 Numbeo figure. Singapore's and Dubai's composite scores are estimates: the exact current total Numbeo index for these specific cities wasn't retrievable from search, so scores are derived from documented sub-indices, Asia rank position, and (for Dubai) a dated 2022 city index — each explicitly flagged in the table rather than presented as a fresh sourced total."
+    }
+  ];
+
+  /* ============================================================
+     NORMALIZATION + SCORING ENGINE
+  ============================================================ */
+  function computeNormalizedScores(){
+    const norm = {};
+    CRITERIA.forEach(crit=>{
+      const vals = OPTIONS.map(o=>crit.data[o.id].raw);
+      const min = Math.min(...vals), max = Math.max(...vals);
+      norm[crit.id] = {};
+      OPTIONS.forEach(o=>{
+        const raw = crit.data[o.id].raw;
+        let n = (max===min) ? 100 : ((raw-min)/(max-min))*100;
+        if(crit.direction==="lower") n = 100 - n;
+        norm[crit.id][o.id] = Math.round(n*10)/10;
+      });
+    });
+    return norm;
+  }
+  const NORM = computeNormalizedScores();
+
+  /* ============================================================
+     WEIGHTS STATE
+  ============================================================ */
+  const DEFAULT_WEIGHTS = {compensation:20, costOfLiving:20, jobDemand:20, visaEase:20, qualityOfLife:20};
+  const PRESETS = {
+    balanced: {compensation:20, costOfLiving:20, jobDemand:20, visaEase:20, qualityOfLife:20},
+    pay:      {compensation:50, costOfLiving:15, jobDemand:15, visaEase:10, qualityOfLife:10},
+    ease:     {compensation:10, costOfLiving:15, jobDemand:15, visaEase:45, qualityOfLife:15},
+    life:     {compensation:10, costOfLiving:15, jobDemand:10, visaEase:10, qualityOfLife:55},
+    stay:     {compensation:20, costOfLiving:25, jobDemand:30, visaEase:15, qualityOfLife:10}
+  };
+  let weights = Object.assign({}, DEFAULT_WEIGHTS);
+
+  /* ============================================================
+     RENDER: weight sliders
+  ============================================================ */
+  const weightsGrid = document.getElementById("weightsGrid");
+  function renderWeightSliders(){
+    weightsGrid.innerHTML = "";
+    CRITERIA.forEach(crit=>{
+      const row = document.createElement("div");
+      row.className = "weight-row";
+      row.innerHTML = `
+        <label>${crit.label}<span class="hint">${crit.direction==="lower"?"lower is better":"higher is better"}</span></label>
+        <input type="range" min="0" max="100" step="1" value="${weights[crit.id]}" data-crit="${crit.id}" aria-label="${crit.label} weight">
+        <span class="weight-val mono" id="val-${crit.id}">${weights[crit.id]}%</span>
+      `;
+      weightsGrid.appendChild(row);
+    });
+    weightsGrid.querySelectorAll("input[type=range]").forEach(inp=>{
+      inp.addEventListener("input", e=>{
+        weights[e.target.dataset.crit] = Number(e.target.value);
+        document.getElementById("val-"+e.target.dataset.crit).textContent = e.target.value + "%";
+        clearActivePreset();
+        renderAll();
+      });
+    });
+  }
+
+  function clearActivePreset(){
+    document.querySelectorAll(".preset-chip").forEach(c=>c.classList.remove("active"));
+  }
+
+  document.getElementById("presetRow").addEventListener("click", e=>{
+    const btn = e.target.closest(".preset-chip");
+    if(!btn) return;
+    const key = btn.dataset.preset;
+    weights = Object.assign({}, PRESETS[key]);
+    document.querySelectorAll(".preset-chip").forEach(c=>c.classList.remove("active"));
+    btn.classList.add("active");
+    renderWeightSliders();
+    renderAll();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", ()=>{
+    weights = Object.assign({}, DEFAULT_WEIGHTS);
+    clearActivePreset();
+    document.querySelector('.preset-chip[data-preset="balanced"]').classList.add("active");
+    renderWeightSliders();
+    renderAll();
+  });
+
+  /* ============================================================
+     RENDER: ranked departures board
+  ============================================================ */
+  const rankedBoard = document.getElementById("rankedBoard");
+  function computeRanking(){
+    const totalW = CRITERIA.reduce((s,c)=>s+weights[c.id],0);
+    const scored = OPTIONS.map(o=>{
+      let score = 0;
+      if(totalW>0){
+        CRITERIA.forEach(c=>{ score += (weights[c.id]/totalW) * NORM[c.id][o.id]; });
+      }
+      return {opt:o, score: Math.round(score*10)/10};
+    });
+    scored.sort((a,b)=>b.score-a.score);
+    return scored;
+  }
+
+  function renderRankedBoard(){
+    const totalW = CRITERIA.reduce((s,c)=>s+weights[c.id],0);
+    if(totalW===0){
+      rankedBoard.innerHTML = `<div class="empty-state">All weights are at zero — move at least one slider above to rank the options.</div>`;
+      return;
+    }
+    const ranking = computeRanking();
+    rankedBoard.innerHTML = "";
+    ranking.forEach((r,i)=>{
+      const row = document.createElement("div");
+      row.className = "flap-row" + (i===0?" rank-1":"");
+      row.innerHTML = `
+        <div class="flap-rank mono">${i+1}</div>
+        <div class="flap-name">
+          <span class="opt-name">${r.opt.name}</span>
+          <span class="opt-tag">${r.opt.tag}</span>
+        </div>
+        <div class="flap-score">
+          <div class="flap-bar-track"><div class="flap-bar-fill" style="width:${r.score}%"></div></div>
+          <span class="flap-num mono">${r.score.toFixed(1)}</span>
+        </div>
+      `;
+      rankedBoard.appendChild(row);
+    });
+  }
+
+  /* ============================================================
+     RENDER: manifest data table
+  ============================================================ */
+  const manifestHead = document.getElementById("manifestHead");
+  const manifestBody = document.getElementById("manifestBody");
+  function renderManifest(){
+    manifestHead.innerHTML = `<th>Criterion</th>` + OPTIONS.map(o=>`<th>${o.name}</th>`).join("");
+    manifestBody.innerHTML = "";
+    CRITERIA.forEach(crit=>{
+      const tr = document.createElement("tr");
+      let cells = `<td class="crit-label">${crit.label}<span style="display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:3px;">${crit.unitNote}</span></td>`;
+      OPTIONS.forEach(o=>{
+        const d = crit.data[o.id];
+        const badge = d.sourced
+          ? `<span class="badge sourced">Sourced</span>`
+          : `<span class="badge estimate">Estimate</span>`;
+        const links = d.cites.length
+          ? `<span class="cite-links">${d.cites.map(c=>`<a href="${SOURCES[c].url}" target="_blank" rel="noopener">[${c}]</a>`).join(" ")}</span>`
+          : `<span class="cite-links" style="color:var(--muted);">no visa needed — not applicable</span>`;
+        cells += `<td><span class="cell-val">${d.display}</span>${badge}${links}</td>`;
+      });
+      tr.innerHTML = cells;
+      manifestBody.appendChild(tr);
+    });
+  }
+
+  /* ============================================================
+     RENDER: sources panel
+  ============================================================ */
+  const sourceList = document.getElementById("sourceList");
+  function renderSources(){
+    sourceList.innerHTML = "";
+    Object.keys(SOURCES).forEach(key=>{
+      const s = SOURCES[key];
+      const li = document.createElement("li");
+      li.innerHTML = `<b class="mono" style="color:var(--amber);">[${key}]</b> <a href="${s.url}" target="_blank" rel="noopener">${s.name}</a><span class="src-note">${s.note}</span>`;
+      sourceList.appendChild(li);
+    });
+  }
+
+  /* ============================================================
+     RENDER: "how this was researched" panel
+  ============================================================ */
+  function renderHowResearched(){
+    const body = document.getElementById("howResearchedBody");
+    let notesHtml = CRITERIA.map(c=>`<li><strong>${c.label}:</strong> ${c.note}</li>`).join("");
+    body.innerHTML = `
+      <p><strong>Scope.</strong> All compensation and demand figures target a senior-level Program/Project Manager (roughly 6–10 years' experience) — the same seniority band across all four options, so figures aren't directly comparable to entry-level postings.</p>
+      <p><strong>Methodology.</strong> Every criterion is stored as a real-world raw value (₹-lakh/year, a Numbeo cost index, a job-count-derived demand score, etc.) and then min-max normalized to a 0–100 scale across the four options. For "lower is better" criteria (cost of living), the normalized score is inverted. Your weight sliders are applied as a weighted average of these normalized scores — the ranked board recalculates live, entirely in your browser.</p>
+      <p><strong>Conflicts &amp; resolution.</strong></p>
+      <ul>
+        <li>Salary sources disagreed sharply by methodology: Glassdoor's Dubai figures (base pay only, ~AED 26–27K/yr) are far below ZeroTaxJobs' and WorldSalaries' totals (AED 250K–650K/yr) because Glassdoor's headline number excludes the tax-free housing/transport allowances standard in UAE packages. We used the total-compensation sources (S7, S8) as the primary figure and noted the discrepancy rather than silently picking one.</li>
+        <li>Levels.fyi consistently skews higher than Glassdoor/Indeed for the same city because it's crowdsourced almost entirely from large tech employers (Google, Microsoft, Amazon) rather than the full market. We used it as a supporting upper-bound reference, not the sole figure.</li>
+        <li>Job-listing counts vary 3–10x across Indeed, LinkedIn, and Naukri for the same city because of duplicate postings, different indexing windows, and re-posted roles. We treated raw counts as directional signals only, combined with independent hiring-outlook data (e.g., Naukri's 72%-employers-hiring stat, LinkedIn's 58%-job-searching stat) rather than ranking purely by listing volume.</li>
+      </ul>
+      <p><strong>Per-criterion notes:</strong></p>
+      <ul>${notesHtml}</ul>
+      <p><strong>What's a clean fact vs. an estimate.</strong> Every data point in the manifest below is tagged <span class="badge sourced" style="margin:0 2px;">Sourced</span> when it's a figure directly reported by a named source, or <span class="badge estimate" style="margin:0 2px;">Estimate</span> when it required interpolation, currency conversion, an outdated data point, or deriving a composite score from partial data (e.g. Asia-rank position rather than a fetched total index number). Nothing in this tool is invented outright — estimates are always built from a real cited figure, just combined or projected rather than quoted directly.</p>
+    `;
+  }
+
+  /* ============================================================
+     Footer
+  ============================================================ */
+  function renderFooter(){
+    document.getElementById("footerNote").innerHTML =
+      `Built for general informational comparison, not individualized financial or immigration advice. Salary, cost-of-living, and visa rules change frequently — verify current figures with the linked primary sources before making a relocation decision. Data compiled Jul 2026.`;
+  }
+
+  /* ============================================================
+     Init
+  ============================================================ */
+  function renderAll(){
+    renderRankedBoard();
+    renderManifest();
+  }
+
+  function boot(){
+    try{
+      renderWeightSliders();
+      document.querySelector('.preset-chip[data-preset="balanced"]').classList.add("active");
+      renderAll();
+      renderSources();
+      renderHowResearched();
+      renderFooter();
+    }catch(err){
+      rankedBoard.innerHTML = `<div class="empty-state">Something went wrong rendering the comparison (${err.message}). Try reloading the page.</div>`;
+      console.error(err);
+    }
+  }
+
+  // Simulate a brief loading state for the split-flap board on first paint
+  setTimeout(boot, 220);
+
+})();
+</script>
+</body>
+</html>
