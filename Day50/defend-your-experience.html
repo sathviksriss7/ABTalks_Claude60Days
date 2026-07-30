@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEFEND YOUR EXPERIENCE — Interview Stress-Test</title>
+<style>
+  :root{
+    --paper:#f3efe4;
+    --paper-2:#eae4d3;
+    --paper-3:#e1d9c4;
+    --ink:#221f1a;
+    --ink-soft:#5c574c;
+    --ink-faint:#8a8474;
+    --line:#c7bfa6;
+    --amber:#a8631a;
+    --red:#a3362a;
+    --green:#2e6b4f;
+    --blue:#2c4b60;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono','Roboto Mono','Cascadia Mono',ui-monospace,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:32px 32px;
+    background-attachment:fixed;
+    background-position:-1px -1px;
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.5;
+    min-height:100vh;
+  }
+  ::selection{background:var(--ink);color:var(--paper);}
+
+  /* ---------- layout ---------- */
+  #app{max-width:1180px;margin:0 auto;padding:0 20px 80px;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 0 16px;border-bottom:2px solid var(--ink);margin-bottom:28px;
+    flex-wrap:wrap;gap:10px;
+  }
+  .brand{display:flex;align-items:baseline;gap:12px;}
+  .brand .mark{
+    font-family:var(--mono);font-weight:700;font-size:1.4rem;letter-spacing:.02em;
+    border:2px solid var(--ink);padding:2px 8px;
+  }
+  .brand .tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);}
+  .status-pill{
+    font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+    border:1px solid var(--ink);padding:5px 10px;color:var(--ink-soft);
+    display:flex;align-items:center;gap:7px;
+  }
+  .status-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-faint);}
+  .status-pill.live .dot{background:var(--green);box-shadow:0 0 0 3px rgba(46,107,79,.18);animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  .screen{display:none;animation:fade .25s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  .label{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);}
+  h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0 0 .4em;}
+  h1{font-size:2rem;}
+  h2{font-size:1.35rem;}
+  h3{font-size:1.05rem;}
+  p{margin:.4em 0;}
+  .muted{color:var(--ink-soft);}
+  .small{font-size:.85rem;}
+
+  /* ---------- panel ---------- */
+  .panel{
+    position:relative;background:var(--paper);
+    border:1px solid var(--ink);
+    padding:26px;margin-bottom:22px;
+  }
+  .panel::before,.panel::after{
+    content:'';position:absolute;width:11px;height:11px;border:2px solid var(--ink);
+  }
+  .panel::before{top:-2px;left:-2px;border-right:none;border-bottom:none;}
+  .panel::after{bottom:-2px;right:-2px;border-left:none;border-top:none;}
+  .panel-header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-bottom:16px;padding-bottom:12px;border-bottom:1px dashed var(--line);
+    flex-wrap:wrap;
+  }
+
+  .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:820px){.grid-2{grid-template-columns:1fr;} .grid-3{grid-template-columns:1fr;}}
+
+  /* ---------- buttons / inputs ---------- */
+  .btn{
+    font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;
+    border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+    padding:.85em 1.5em;cursor:pointer;transition:.15s;font-weight:600;
+  }
+  .btn:hover:not(:disabled){background:var(--paper);color:var(--ink);}
+  .btn:disabled{opacity:.35;cursor:not-allowed;}
+  .btn-outline{background:transparent;color:var(--ink);}
+  .btn-outline:hover:not(:disabled){background:var(--ink);color:var(--paper);}
+  .btn-danger{border-color:var(--red);color:var(--red);background:transparent;}
+  .btn-danger:hover:not(:disabled){background:var(--red);color:var(--paper);}
+  .btn-sm{padding:.55em 1em;font-size:.65rem;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+
+  textarea, select, input[type=text]{
+    width:100%;font-family:var(--sans);font-size:.95rem;color:var(--ink);
+    background:var(--paper-2);border:1px solid var(--ink);padding:12px;
+    resize:vertical;
+  }
+  textarea:focus,select:focus,input:focus{outline:2px solid var(--blue);outline-offset:1px;}
+  select{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;padding:10px;}
+
+  /* ---------- dropzone ---------- */
+  .dropzone{
+    border:2px dashed var(--line);padding:26px;text-align:center;cursor:pointer;
+    transition:.15s;margin-bottom:14px;
+  }
+  .dropzone.drag{border-color:var(--ink);background:var(--paper-3);}
+  .dropzone .big{font-size:1.6rem;}
+
+  /* ---------- badges ---------- */
+  .badge{
+    display:inline-block;font-family:var(--mono);font-size:.62rem;
+    padding:.25em .65em;border:1px solid currentColor;letter-spacing:.06em;
+    text-transform:uppercase;white-space:nowrap;
+  }
+  .badge-high{color:var(--red);}
+  .badge-medium{color:var(--amber);}
+  .badge-low{color:var(--green);}
+  .badge-defended{color:var(--green);}
+  .badge-developing{color:var(--amber);}
+  .badge-weak{color:var(--red);}
+  .badge-pending, .badge-not_attempted{color:var(--ink-faint);}
+  .badge-skipped{color:var(--ink-faint);text-decoration:line-through;}
+  .badge-active{color:var(--blue);}
+
+  /* ---------- claim cards ---------- */
+  .cat-group{margin-bottom:20px;}
+  .cat-title{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .cat-title::after{content:'';flex:1;height:1px;background:var(--line);}
+  .claim-card{
+    border:1px solid var(--line);background:var(--paper-2);padding:14px 16px;margin-bottom:10px;
+    display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;
+  }
+  .claim-card .txt{flex:1;min-width:220px;}
+  .claim-card .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .claim-card .why{font-size:.8rem;color:var(--ink-soft);margin-top:4px;font-style:italic;}
+  .claim-card .actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+  .mini-bar{width:110px;height:6px;background:var(--line);position:relative;}
+  .mini-bar span{position:absolute;left:0;top:0;bottom:0;background:var(--ink);}
+
+  /* ---------- progress ---------- */
+  .fuel{display:flex;gap:3px;height:14px;margin:6px 0 2px;}
+  .fuel i{flex:1;background:var(--line);}
+  .fuel i.on{background:var(--ink);}
+
+  /* ---------- gauge ---------- */
+  .gauge-wrap{text-align:center;}
+  .gauge svg{width:100%;max-width:180px;height:auto;}
+  .gauge-track{fill:none;stroke:var(--line);stroke-width:12;}
+  .gauge-fill{fill:none;stroke:var(--ink);stroke-width:12;transition:stroke-dasharray .4s ease;}
+  .gauge-needle{stroke:var(--red);stroke-width:2.5;transition:transform .4s ease;}
+  .gauge-hub{fill:var(--ink);}
+  .gauge-value{font-family:var(--mono);font-size:22px;fill:var(--ink);font-weight:700;}
+  .gauge-cap{font-family:var(--mono);font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;}
+
+  /* ---------- interview ---------- */
+  .transcript{max-height:340px;overflow-y:auto;border:1px solid var(--line);background:var(--paper-2);padding:14px;margin-bottom:16px;}
+  .qa-block{margin-bottom:16px;}
+  .qa-q{font-family:var(--mono);font-size:.85rem;color:var(--ink);padding-left:14px;border-left:3px solid var(--ink);margin-bottom:6px;}
+  .qa-a{font-size:.9rem;color:var(--ink-soft);padding-left:14px;border-left:3px solid var(--line);white-space:pre-wrap;}
+  .qa-eval{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0 14px;}
+  .chip{font-family:var(--mono);font-size:.62rem;padding:.2em .5em;border:1px solid var(--line);color:var(--ink-soft);}
+  .chip.pos{border-color:var(--green);color:var(--green);}
+  .chip.neg{border-color:var(--red);color:var(--red);}
+
+  .current-q{
+    background:var(--ink);color:var(--paper);padding:20px;margin-bottom:16px;
+    position:relative;font-family:var(--serif);font-size:1.15rem;line-height:1.5;
+  }
+  .current-q .qlabel{font-family:var(--mono);font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;opacity:.6;margin-bottom:8px;display:block;}
+  .typing{display:inline-flex;gap:4px;align-items:center;font-family:var(--mono);font-size:.75rem;color:var(--ink-soft);}
+  .typing span{width:5px;height:5px;border-radius:50%;background:var(--ink-soft);animation:tb 1s infinite;}
+  .typing span:nth-child(2){animation-delay:.15s;}
+  .typing span:nth-child(3){animation-delay:.3s;}
+  @keyframes tb{0%,60%,100%{opacity:.25}30%{opacity:1}}
+
+  /* ---------- toast ---------- */
+  #toast-container{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;max-width:340px;}
+  .toast{
+    font-family:var(--mono);font-size:.78rem;background:var(--ink);color:var(--paper);
+    padding:12px 14px;border-left:4px solid var(--amber);box-shadow:0 4px 14px rgba(0,0,0,.25);
+    animation:fade .2s ease;
+  }
+  .toast.error{border-left-color:var(--red);}
+  .toast.success{border-left-color:var(--green);}
+  .toast .row{display:flex;justify-content:space-between;gap:10px;align-items:center;}
+  .toast button{background:none;border:1px solid var(--paper);color:var(--paper);font-family:var(--mono);font-size:.65rem;padding:4px 8px;cursor:pointer;margin-top:6px;}
+
+  /* ---------- report ---------- */
+  .score-hero{display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
+  .score-num{font-family:var(--mono);font-size:4rem;font-weight:700;line-height:1;}
+  .bar-row{display:grid;grid-template-columns:200px 1fr 46px;align-items:center;gap:10px;margin-bottom:10px;}
+  .bar-row .name{font-size:.82rem;}
+  .bar-track{height:16px;background:var(--paper-2);border:1px solid var(--line);position:relative;}
+  .bar-fill{position:absolute;top:0;left:0;bottom:0;background:var(--ink);}
+  .bar-fill.weak{background:var(--red);}
+  .bar-fill.developing{background:var(--amber);}
+  .bar-fill.defended{background:var(--green);}
+  .bar-val{font-family:var(--mono);font-size:.75rem;text-align:right;}
+
+  ul.tick-list{list-style:none;padding:0;margin:0;}
+  ul.tick-list li{padding:8px 0 8px 22px;position:relative;border-bottom:1px dashed var(--line);font-size:.9rem;}
+  ul.tick-list li:last-child{border-bottom:none;}
+  ul.tick-list li::before{content:'—';position:absolute;left:0;color:var(--ink-faint);font-family:var(--mono);}
+  ul.tick-list.pos li::before{content:'+';color:var(--green);}
+  ul.tick-list.neg li::before{content:'!';color:var(--red);}
+
+  .rec-item{border-left:3px solid var(--amber);padding:8px 12px;margin-bottom:10px;background:var(--paper-2);}
+  .rec-item .rc-claim{font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .rec-item .rc-fix{font-size:.88rem;margin-top:4px;}
+
+  /* ---------- history ---------- */
+  .hist-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;gap:8px;}
+  .hist-item:last-child{border-bottom:none;}
+
+  .empty-state{text-align:center;padding:36px 16px;color:var(--ink-soft);}
+  .empty-state .glyph{font-size:2rem;margin-bottom:8px;}
+
+  footer.appfoot{text-align:center;margin-top:36px;font-family:var(--mono);font-size:.65rem;color:var(--ink-faint);letter-spacing:.1em;text-transform:uppercase;}
+
+  @media print{
+    body{background:#fff;}
+    .topbar, .btn, #toast-container, .screen:not(#screen-report){display:none !important;}
+    #screen-report{display:block !important;}
+    .panel{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="mark">DYE</span>
+      <span class="tag">Defend Your Experience — Interview Stress-Test Unit</span>
+    </div>
+    <div class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">Idle</span></div>
+  </div>
+
+  <!-- ============ LANDING ============ -->
+  <section class="screen active" id="screen-landing">
+    <div class="panel">
+      <h1>Don't polish the resume. Defend it.</h1>
+      <p class="muted">This isn't a resume reviewer. Every claim you upload becomes something an interviewer can attack — vague metrics, unverifiable ownership, thin evidence. You'll answer, a skeptical interviewer will push back, and you'll build a Defense Report showing exactly what's solid and what will crack under pressure.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header"><h2 style="margin:0">01 · Load the material</h2><span class="label">Input</span></div>
+        <div class="dropzone" id="dropzone">
+          <div class="big">⇩</div>
+          <div class="label" style="margin-top:6px">Drag a .txt file here, or click to browse</div>
+          <div class="small muted" style="margin-top:4px">PDF/Word? Paste the text into the box below instead.</div>
+          <input type="file" id="fileInput" accept=".txt,.md" style="display:none">
+        </div>
+        <textarea id="resumeInput" rows="12" placeholder="Paste resume, LinkedIn summary, project write-up, startup story, performance review — anything with claims to defend..."></textarea>
+        <div class="btn-row" style="margin-top:14px;justify-content:space-between">
+          <span class="small muted" id="charCount">0 characters</span>
+          <button class="btn" id="analyzeBtn">Extract Claims →</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2 style="margin:0">02 · Context</h2><span class="label">Setup</span></div>
+        <label class="label">Toughest audience you're prepping for</label>
+        <select id="audienceSelect" style="margin:8px 0 16px">
+          <option value="Recruiter / HR screener">Recruiter / HR screener</option>
+          <option value="Hiring manager (functional)" selected>Hiring manager (functional)</option>
+          <option value="Panel / executive interview">Panel / executive interview</option>
+          <option value="Technical / domain expert interviewer">Technical / domain expert interviewer</option>
+        </select>
+        <label class="label">Which story are we stress-testing?</label>
+        <select id="trackSelect" style="margin:8px 0 4px">
+          <option value="Both tracks / general career narrative" selected>Both tracks / general narrative</option>
+          <option value="BizOps / Chief-of-Staff track">BizOps / Chief-of-Staff track</option>
+          <option value="AI PM / Data Science track">AI PM / Data Science track</option>
+        </select>
+        <p class="small muted" style="margin-top:14px">The interviewer adapts its pressure-testing style to whichever audience and track you pick — a technical interviewer probes methodology, an executive panel probes scale and trade-offs.</p>
+      </div>
+    </div>
+
+    <div class="panel" id="historyPanel">
+      <div class="panel-header"><h2 style="margin:0">Session Log</h2><span class="label" id="histCount">0 sessions</span></div>
+      <div id="historyList"></div>
+    </div>
+  </section>
+
+  <!-- ============ EXTRACTING ============ -->
+  <section class="screen" id="screen-extracting">
+    <div class="panel" style="text-align:center;padding:60px 26px">
+      <div class="typing" style="justify-content:center;font-size:.9rem;margin-bottom:10px"><span></span><span></span><span></span></div>
+      <h3 id="extractingLabel">Reading between the lines...</h3>
+      <p class="muted small">Isolating every claim a skeptical interviewer would flag.</p>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section class="screen" id="screen-dashboard">
+    <div class="panel">
+      <div class="panel-header">
+        <h2 style="margin:0">Claims Under Review</h2>
+        <span class="label" id="claimsCountLabel">0 claims</span>
+      </div>
+      <p class="muted small">Sorted by risk. High-risk claims (vague, unverifiable-sounding, or too-good-to-be-true) get interrogated first. Click any single claim to defend it directly, or run the full session.</p>
+      <div id="claimsList"></div>
+    </div>
+    <div class="panel">
+      <div class="btn-row" style="justify-content:space-between">
+        <button class="btn btn-outline" id="backToLandingBtn">← Start Over</button>
+        <button class="btn" id="beginSessionBtn">Begin Full Defense Session →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ INTERVIEW ============ -->
+  <section class="screen" id="screen-interview">
+    <div class="panel">
+      <div class="label" style="margin-bottom:6px">Overall progress</div>
+      <div class="fuel" id="progressFuel"></div>
+      <div class="small muted" id="progressText"></div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <span class="badge" id="ivCategoryBadge"></span>
+              <span class="badge" id="ivRiskBadge" style="margin-left:6px"></span>
+            </div>
+            <span class="label">Claim under interrogation</span>
+          </div>
+          <p id="ivClaimText" style="font-family:var(--serif);font-size:1.05rem"></p>
+
+          <div class="transcript" id="transcript"></div>
+
+          <div class="current-q" id="currentQBlock">
+            <span class="qlabel">Question</span>
+            <span id="currentQText"></span>
+          </div>
+
+          <textarea id="answerInput" rows="5" placeholder="Answer as if you're in the room. Specifics beat adjectives — numbers, names of tools, what you personally decided."></textarea>
+          <div class="btn-row" style="margin-top:12px;justify-content:space-between">
+            <span class="small muted" id="answerCharCount">0 characters</span>
+            <div class="btn-row">
+              <button class="btn btn-outline btn-sm" id="skipClaimBtn">Skip This Claim</button>
+              <button class="btn" id="submitAnswerBtn">Submit Response →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel gauge-wrap">
+          <div class="label" style="margin-bottom:8px">Confidence — this claim</div>
+          <div class="gauge" id="claimGauge"></div>
+          <div class="gauge-cap" id="claimGaugeLabel">No data yet</div>
+        </div>
+        <div class="panel">
+          <div class="label" style="margin-bottom:10px">Session Controls</div>
+          <div class="btn-row" style="flex-direction:column;align-items:stretch;gap:8px">
+            <button class="btn btn-outline btn-sm" id="pauseBtn">Pause &amp; Save Progress</button>
+            <button class="btn btn-danger btn-sm" id="endSessionBtn">End Session &amp; Generate Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REPORT ============ -->
+  <section class="screen" id="screen-report">
+    <div class="panel" id="reportLoading" style="text-align:center;padding:60px 26px">
+      <div class="typing" style="justify-content:center;font-size:.9rem;margin-bottom:10px"><span></span><span></span><span></span></div>
+      <h3>Compiling your Defense Report...</h3>
+    </div>
+
+    <div id="reportContent" style="display:none">
+      <div class="panel score-hero">
+        <div class="gauge" id="overallGauge" style="max-width:200px"></div>
+        <div>
+          <div class="label">Overall Readiness</div>
+          <div class="score-num" id="overallScoreNum">--</div>
+          <p class="muted small" id="overallVerdictText"></p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Per-Claim Confidence</h3>
+          <div id="reportBars"></div>
+        </div>
+        <div class="panel">
+          <h3>What held up</h3>
+          <ul class="tick-list pos" id="strengthsList"></ul>
+          <h3 style="margin-top:20px">What will get pushed on</h3>
+          <ul class="tick-list neg" id="weaknessesList"></ul>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Fix Before the Real Interview</h3>
+        <div id="recsList"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Stories worth building into full STAR answers</h3>
+        <ul class="tick-list" id="storiesList"></ul>
+        <p class="muted small" id="closingNote" style="margin-top:14px;font-style:italic"></p>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3 style="margin:0">Export &amp; Next Steps</h3></div>
+        <div class="btn-row">
+          <button class="btn btn-outline btn-sm" id="exportJsonBtn">Export JSON</button>
+          <button class="btn btn-outline btn-sm" id="exportTextBtn">Export Text Report</button>
+          <button class="btn btn-outline btn-sm" id="printBtn">Print / Save PDF</button>
+          <button class="btn btn-sm" id="practiceWeakBtn">Practice Weak Claims Again</button>
+          <button class="btn btn-outline btn-sm" id="newSessionBtn">Start New Session</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="appfoot">Every claim gets pressure-tested · nothing here leaves your browser except the questions themselves</footer>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= CONSTANTS ================= */
+  const MODEL = "claude-sonnet-4-6";
+  const MAX_FOLLOWUPS = 2; // additional probing questions per claim beyond the opener
+  const STORAGE_ACTIVE = "dye_active_session_v1";
+  const STORAGE_HISTORY = "dye_sessions_history_v1";
+  const CATEGORY_ORDER = ["Impact/Metrics","Leadership","Technical/AI","Process/Ops","Projects","Education/Credentials"];
+  const CATEGORY_TAG = {
+    "Impact/Metrics":"[METRIC]","Leadership":"[LEAD]","Technical/AI":"[TECH]",
+    "Process/Ops":"[OPS]","Projects":"[PROJ]","Education/Credentials":"[CRED]"
+  };
+  const RISK_ORDER = {high:0, medium:1, low:2};
+
+  const PRESET_RESUME = `SATHVIK SRIRAM
+sathvik.sriram@gmail.com | +91 7022209405 | linkedin.com/in/sathvik-sriram | github.com/sathviksriss7
+
+PROFESSIONAL SUMMARY
+Results-driven Senior Product Manager with 5+ years of experience delivering Gen AI and digital health solutions. Proven track record generating $17M+ in revenue across 4 client projects, leading agile teams, and executing product roadmaps for Generative AI adoption. MBA from IIM Calcutta (CAT 99.69 percentile). Certified PMP, CSPO, and AWS CCP professional with expertise in LLM agents, prompt engineering, and cloud cost optimization.
+
+EXPERIENCE
+Senior Manager — EXL Service | Noida, India (Remote) | Oct 2024 – Present
+- Created and executed a 12-month Gen AI roadmap for EXL's Healthcare solutions; evaluated 6 POCs and advanced 4 to MVPs
+- Generated ~$17M in revenue across 4 client projects through cross-functional collaboration with development, security, compliance, and SME teams
+- Managed 2 agile teams (7 members each); gathered and prioritized product requirements, defined vision, and delivered MVPs showcasing Gen AI-powered applications for process efficiency and cost reduction
+- Improved sprint velocity by 35% by implementing AI coding assistants (GitHub Copilot, Claude Code, Nemoclaw) and designing developer onboarding and training programs
+- Designed Python-based agent evaluation frameworks across accuracy, completeness, policy adherence, clinical relevance, and reasoning; executed automated test harness on 100+ synthetic scenarios
+- Accelerated build cycles by 21% by leading an architecture guild (6+ architects) to standardize LLM integration patterns and eliminate redundant development across 4 product lines
+- Achieved 28% reduction (~$64K) in annual R&D cloud costs within 3 months through compute optimization and VM auto-shutdown pipelines
+
+Manager — EXL Service | Noida, India (Remote) | Jul 2021 – Sep 2024
+- Published 12+ monthly industry research newsletters to prompt strategic opportunity identification for VP+ leadership
+- Managed 6 Healthcare conferences end-to-end, from messaging to professional outreach and VP+ networking
+- Improved DSO from 94 to 85 days by reviewing outstanding invoices and implementing ACH reconciliation systems
+- Ensured accurate resource alignment and cost allocation; reviewed and closed ~400 inactive project cost codes
+
+Management Intern (Sales) — Prione Business Services Ltd. (Amazon Subsidiary) | Bangalore, India (Remote) | May 2020 – Jul 2020
+- Analyzed 11,000+ seller launches; developed the CAN Framework to evaluate seller potential with 90% accuracy
+- Identified 500+ high-value leads; launched 200+ HV/Brand sellers with avg. GMS of $120K; improved TAT ~20% and sales productivity ~17%
+
+Process Engineer — Sai Life Sciences Ltd. | Hyderabad, India | Jul 2018 – Jun 2019
+- Scaled 2 API intermediary products from lab to manufacturing (25x and 60x scale); delivered products worth ~$35M
+
+PROJECTS
+- AI-Powered CRM: Developed an end-to-end AI-powered CRM for managing sales pipelines and customer interactions (~60,000 LOC); demonstrated full-stack software and Gen AI application skills
+- Influencer Management Platform: Selected as Semifinalist in 100x Engineers Buildathon 2.0 for building an AI-powered platform to discover influencers, manage outreach, and streamline brand workflows
+
+EDUCATION
+MBA, General Management — Indian Institute of Management Calcutta (IIM-C) | Jun 2019 – May 2021
+- CAT 99.69 percentile (out of 2.1L candidates); developed subscription model for 1-day delivery across 21 cities for Udaan
+- Authored case study on MG Motors' entry strategy in the Indian SUV market; received A+ grade
+
+B.Tech, Chemical Engineering — NIT Surathkal (NITK) | Aug 2014 – May 2018
+- Awarded IOCL Educational Scholarship (INR 1.44 Lakh) among 300 students for all 4 years of undergraduate study
+
+SKILLS
+Product Management: JIRA, Azure DevOps, Product Roadmaps, PRDs, Agile/Scrum, Stakeholder Management | AI/ML: Python, LLM Agents, Prompt Engineering, Evals, Fine-Tuning, Chatbots | Cloud & Infra: Azure, GCP, Databricks, AWS
+
+CERTIFICATIONS
+PMP | CSPO | Agile Scrum | Generative AI (100x Engineers) | AWS Cloud Practitioner | Ian Golding Customer Experience Framework | Lean Six Sigma Green Belt`;
+
+  /* ================= STATE ================= */
+  let state = {
+    phase: "landing",
+    audience: "Hiring manager (functional)",
+    track: "Both tracks / general narrative",
+    resumeText: "",
+    claims: [],          // {id,category,text,riskLevel,whyRisky,status,confidenceScore,qaHistory,pendingQuestion}
+    claimOrder: [],
+    currentIndex: -1,
+    report: null,
+    sessionId: null
+  };
+
+  /* ================= DOM ================= */
+  const $ = (id) => document.getElementById(id);
+  const dropzone = $("dropzone"), fileInput = $("fileInput"), resumeInput = $("resumeInput");
+
+  /* ================= UTIL ================= */
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+  function esc(s){ return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+
+  function showToast(msg, type, opts){
+    opts = opts || {};
+    const el = document.createElement("div");
+    el.className = "toast" + (type ? " "+type : "");
+    el.innerHTML = `<div class="row"><span>${esc(msg)}</span></div>` + (opts.retry ? `<button type="button">Retry</button>` : ``);
+    if(opts.retry){
+      el.querySelector("button").addEventListener("click", () => { el.remove(); opts.retry(); });
+    }
+    $("toast-container").appendChild(el);
+    if(!opts.retry) setTimeout(() => el.remove(), 5000);
+  }
+
+  function setStatus(text, live){
+    $("statusText").textContent = text;
+    $("statusPill").classList.toggle("live", !!live);
+  }
+
+  function showScreen(name){
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    $("screen-"+name).classList.add("active");
+    state.phase = name;
+    saveActive();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  /* ================= PERSISTENCE ================= */
+  function saveActive(){
+    try{ localStorage.setItem(STORAGE_ACTIVE, JSON.stringify(state)); }catch(e){ /* storage full or unavailable */ }
+  }
+  function loadActive(){
+    try{
+      const raw = localStorage.getItem(STORAGE_ACTIVE);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ return null; }
+  }
+  function clearActive(){ try{ localStorage.removeItem(STORAGE_ACTIVE); }catch(e){} }
+
+  function getHistory(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_HISTORY) || "[]"); }catch(e){ return []; }
+  }
+  function saveHistoryEntry(entry){
+    const hist = getHistory();
+    hist.unshift(entry);
+    try{ localStorage.setItem(STORAGE_HISTORY, JSON.stringify(hist.slice(0,12))); }catch(e){}
+  }
+
+  /* ================= API LAYER ================= */
+  async function fetchClaudeText(system, userContent, attempt){
+    attempt = attempt || 1;
+    try{
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1000,
+          system: system,
+          messages: [{ role: "user", content: userContent }]
+        })
+      });
+
+      if(res.status === 429 || res.status >= 500){
+        if(attempt <= 3){
+          showToast(`Rate limited by the interviewer's assistant — retrying (${attempt}/3)...`, "info");
+          await new Promise(r => setTimeout(r, attempt * 1200));
+          return fetchClaudeText(system, userContent, attempt+1);
+        }
+        throw new Error("RATE_LIMIT");
+      }
+      if(!res.ok){
+        throw new Error("HTTP_"+res.status);
+      }
+      const data = await res.json();
+      return (data.content || [])
+        .filter(b => b.type === "text")
+        .map(b => b.text)
+        .join("\n");
+    }catch(err){
+      if(err.message === "RATE_LIMIT") throw err;
+      if(attempt <= 2 && (err.name === "TypeError" || (err.message||"").startsWith("HTTP_5"))){
+        await new Promise(r => setTimeout(r, attempt * 1000));
+        return fetchClaudeText(system, userContent, attempt+1);
+      }
+      throw err;
+    }
+  }
+
+  async function callClaude(system, userContent){
+    const text = await fetchClaudeText(system, userContent);
+    return parseJsonLoose(text);
+  }
+
+  /* ---- salvage helpers: responses can get cut off at the max_tokens
+     boundary, especially the claims-extraction call which returns an array
+     of objects. Rather than fail the whole step, recover whatever complete
+     objects/fields are present. ---- */
+  function salvageObjectArray(text, key){
+    const startMatch = text.match(new RegExp('"' + key + '"\\s*:\\s*\\['));
+    if(!startMatch) return [];
+    const rest = text.slice(startMatch.index + startMatch[0].length);
+    const re = /\{[^{}]*\}/g;
+    const out = [];
+    let m;
+    while((m = re.exec(rest))){
+      try{ out.push(JSON.parse(m[0])); }catch(e){ /* skip malformed fragment */ }
+    }
+    return out;
+  }
+  function regexString(text, key){
+    const m = text.match(new RegExp('"' + key + '"\\s*:\\s*"([^"]*)"'));
+    return m ? m[1] : null;
+  }
+  function regexNumber(text, key){
+    const m = text.match(new RegExp('"' + key + '"\\s*:\\s*(-?\\d+(?:\\.\\d+)?)'));
+    return m ? Number(m[1]) : null;
+  }
+  function regexStringArray(text, key){
+    const m = text.match(new RegExp('"' + key + '"\\s*:\\s*\\[([\\s\\S]*?)\\]'));
+    if(!m) return [];
+    const items = m[1].match(/"((?:[^"\\]|\\.)*)"/g) || [];
+    return items.map(s => s.slice(1,-1));
+  }
+  function regexStringMap(text, key){
+    const m = text.match(new RegExp('"' + key + '"\\s*:\\s*\\{([\\s\\S]*?)\\}\\s*[,}]'));
+    const out = {};
+    if(!m) return out;
+    const re = /"([^"]+)"\s*:\s*"((?:[^"\\]|\\.)*)"/g;
+    let mm;
+    while((mm = re.exec(m[1]))){ out[mm[1]] = mm[2]; }
+    return out;
+  }
+
+  function parseJsonLoose(text){
+    if(!text) throw new Error("EMPTY_RESPONSE");
+    let cleaned = text.replace(/```json/gi,"").replace(/```/g,"").trim();
+    try{ return JSON.parse(cleaned); }catch(e){}
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if(match){
+      try{ return JSON.parse(match[0]); }catch(e){}
+    }
+    throw new Error("PARSE_FAILED");
+  }
+
+  async function withRetryUI(fn, onFail){
+    try{
+      return await fn();
+    }catch(err){
+      let msg = "Something went wrong reaching the interviewer.";
+      if(err.message === "RATE_LIMIT") msg = "Still rate limited after several retries. Try again shortly.";
+      if(err.message === "PARSE_FAILED" || err.message === "EMPTY_RESPONSE") msg = "The interviewer's response got garbled. Retrying usually fixes it.";
+      showToast(msg, "error", { retry: onFail });
+      throw err;
+    }
+  }
+
+  /* ================= PROMPTS ================= */
+  function extractorSystem(){
+    return `You are a skeptical, senior hiring manager and technical recruiter. You read resumes and other career documents looking for every claim a sharp interviewer would want to verify or pressure-test. You are precise, unimpressed by buzzwords, and focused on quantified or ownership-implying statements. Respond ONLY with valid JSON — no markdown fences, no commentary, no preamble.`;
+  }
+
+  function extractorUser(resumeText, track){
+    return `DOCUMENT TO ANALYZE (career/professional document):
+"""
+${resumeText}
+"""
+
+CONTEXT: The candidate is preparing for interviews on: ${track}.
+
+Extract exactly 9 distinct, meaningful claims from this document that a tough interviewer would want to probe. Prioritize quantified achievements, leadership/ownership claims, technical claims, and differentiators. Skip generic skill lists and plain dates unless a real claim is attached (e.g. a percentile, a scholarship, an award).
+
+For each claim return, KEEPING EVERY FIELD SHORT (this must fit in a small token budget):
+- id: 2-3 word kebab-case slug unique within the list
+- category: exactly one of "Impact/Metrics","Leadership","Technical/AI","Process/Ops","Projects","Education/Credentials"
+- text: the claim, max 14 words, close to the candidate's own words
+- riskLevel: "high" | "medium" | "low" — high = vague, unverifiable-sounding, suspiciously large, or missing the candidate's specific role; low = specific, attributable, well-evidenced
+- whyRisky: max 9 words on exactly what a skeptical interviewer would question
+
+Output ONLY compact JSON, no line breaks or extra spaces, exactly as: {"claims":[{"id":"...","category":"...","text":"...","riskLevel":"...","whyRisky":"..."}]}`;
+  }
+
+  function interviewerSystem(audience){
+    return `You are a sharp, fair but skeptical interviewer conducting a live behavioral/technical interview in the style of a ${audience}. You ask exactly ONE question at a time to pressure-test a single claim from the candidate's resume. You dig for specifics: numbers, the candidate's individual role vs. the team's, methodology, what went wrong, alternative explanations, and what they'd do differently. You are not hostile, but you do not accept vague answers — if an answer is generic, you press harder. Respond ONLY with valid JSON — no markdown fences, no commentary.`;
+  }
+
+  function interviewerUser(claim, audience, track, lastAnswer){
+    const transcript = (claim.qaHistory||[]).map((qa,i) =>
+      `Q${i+1}: ${qa.question}\nA${i+1}: ${qa.answer}\n(scored ${qa.evaluation ? qa.evaluation.score : "n/a"}/100 — ${qa.evaluation ? qa.evaluation.verdict : "n/a"})`
+    ).join("\n\n") || "(no questions asked yet for this claim)";
+
+    const followupsSoFar = (claim.qaHistory||[]).length;
+    const mustWrapUp = followupsSoFar >= MAX_FOLLOWUPS;
+
+    return `AUDIENCE STYLE: ${audience}
+CANDIDATE'S TRACK FOCUS: ${track}
+CLAIM CATEGORY: ${claim.category}
+CLAIM BEING DEFENDED: "${claim.text}"
+INITIAL RISK NOTE: ${claim.whyRisky}
+
+TRANSCRIPT SO FAR FOR THIS CLAIM:
+${transcript}
+
+${lastAnswer
+  ? `CANDIDATE'S LATEST ANSWER TO EVALUATE: "${lastAnswer}"\n\nFirst, evaluate that answer. Then decide whether to probe deeper on this same claim or move on.`
+  : `This is the opening question for this claim. Ask something specific and hard to fake — not "tell me about this."`}
+
+${mustWrapUp && lastAnswer ? 'This must be the FINAL question for this claim regardless of quality — after evaluating, action MUST be "next_claim".' : ''}
+
+Return JSON exactly as:
+{
+  "evaluation": ${lastAnswer ? '{"score": 0-100, "verdict": "strong"|"developing"|"weak", "strengths": ["...max 2, short"], "weaknesses": ["...max 2, short"]}' : 'null'},
+  "action": "probe_deeper" | "next_claim",
+  "nextQuestion": "the single next question to ask (omit only if action is next_claim AND there is nothing more useful to ask — otherwise still include a short transition question)"
+}`;
+  }
+
+  function coachSystem(){
+    return `You are a candid, encouraging but honest interview coach. You just watched a candidate go through a mock interview defending specific claims from their resume. You write a short, specific, non-generic Defense Report. Respond ONLY with valid JSON — no markdown fences, no commentary.`;
+  }
+
+  function coachUser(claims, audience, track){
+    const claimSummaries = claims.map(c => {
+      const attempted = (c.qaHistory||[]).length > 0;
+      return `- [${c.id}] (${c.category}, initial risk: ${c.riskLevel}) "${c.text}"\n  Status: ${c.status}${attempted ? `, final score: ${c.confidenceScore}/100` : ' (not attempted)'}\n  ${attempted ? (c.qaHistory||[]).map((qa,i)=>`Q${i+1}: ${qa.question} | A${i+1} summary: ${qa.answer.slice(0,140)} | eval: ${qa.evaluation ? qa.evaluation.verdict + ' - weaknesses: ' + (qa.evaluation.weaknesses||[]).join('; ') : 'n/a'}`).join('\n  ') : ''}`;
+    }).join("\n\n");
+
+    return `AUDIENCE: ${audience}
+TRACK: ${track}
+
+FULL SESSION TRANSCRIPT SUMMARY:
+${claimSummaries}
+
+Write the Defense Report. Return JSON exactly as:
+{
+  "overallReadinessScore": 0-100,
+  "overallVerdict": "one specific sentence, max 25 words, on where this candidate stands",
+  "topStrengths": ["2-4 specific bullets referencing actual claims/answers, max 20 words each"],
+  "topWeaknesses": ["2-4 specific bullets referencing actual claims/answers, max 20 words each"],
+  "perClaimFixes": { "claim-id": "one concrete, actionable fix, max 22 words" , ... only for claims with status weak or developing ... },
+  "suggestedStories": ["1-3 specific STAR-style story suggestions to build out, referencing real claims, max 22 words each"],
+  "closingNote": "one encouraging but honest sentence, max 25 words"
+}`;
+  }
+
+  /* ================= EXTRACTION FLOW ================= */
+  async function runExtraction(){
+    showScreen("extracting");
+    setStatus("Analyzing document", true);
+    try{
+      const rawText = await withRetryUI(
+        () => fetchClaudeText(extractorSystem(), extractorUser(state.resumeText, state.track)),
+        runExtraction
+      );
+      let result;
+      try{
+        result = parseJsonLoose(rawText);
+      }catch(parseErr){
+        const salvaged = salvageObjectArray(rawText, "claims");
+        if(salvaged.length){
+          result = { claims: salvaged };
+          showToast(`Response was cut short — recovered ${salvaged.length} claim(s).`, "info");
+        }else{
+          throw parseErr;
+        }
+      }
+      const claims = (result.claims || []).filter(c => c && c.text).map(c => ({
+        id: c.id || uid(),
+        category: CATEGORY_ORDER.includes(c.category) ? c.category : "Impact/Metrics",
+        text: c.text || "",
+        riskLevel: ["high","medium","low"].includes(c.riskLevel) ? c.riskLevel : "medium",
+        whyRisky: c.whyRisky || "",
+        status: "pending",
+        confidenceScore: null,
+        qaHistory: [],
+        pendingQuestion: null
+      }));
+      if(claims.length === 0) throw new Error("PARSE_FAILED");
+      state.claims = claims;
+      state.claimOrder = claims.slice().sort((a,b) => RISK_ORDER[a.riskLevel]-RISK_ORDER[b.riskLevel]).map(c=>c.id);
+      state.currentIndex = -1;
+      renderDashboard();
+      showScreen("dashboard");
+      setStatus("Claims extracted", false);
+    }catch(err){
+      showScreen("landing");
+      setStatus("Idle", false);
+    }
+  }
+
+  /* ================= DASHBOARD ================= */
+  function claimById(id){ return state.claims.find(c => c.id === id); }
+
+  function renderDashboard(){
+    $("claimsCountLabel").textContent = state.claims.length + " claims";
+    const byCat = {};
+    state.claims.forEach(c => { (byCat[c.category] = byCat[c.category]||[]).push(c); });
+    let html = "";
+    CATEGORY_ORDER.forEach(cat => {
+      if(!byCat[cat]) return;
+      const list = byCat[cat].slice().sort((a,b)=>RISK_ORDER[a.riskLevel]-RISK_ORDER[b.riskLevel]);
+      html += `<div class="cat-group"><div class="cat-title">${CATEGORY_TAG[cat]} ${esc(cat)}</div>`;
+      list.forEach(c => {
+        const pct = c.confidenceScore == null ? 0 : c.confidenceScore;
+        html += `<div class="claim-card" data-claim="${c.id}">
+          <div class="txt">
+            <div>${esc(c.text)}</div>
+            <div class="why">${esc(c.whyRisky)}</div>
+            <div class="meta">
+              <span class="badge badge-${c.riskLevel}">${c.riskLevel} risk</span>
+              <span class="badge badge-${c.status}">${c.status.replace('_',' ')}</span>
+            </div>
+          </div>
+          <div class="actions">
+            <div class="mini-bar"><span style="width:${pct}%"></span></div>
+            <button class="btn btn-outline btn-sm defend-one" data-claim="${c.id}">Defend This →</button>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    $("claimsList").innerHTML = html;
+    document.querySelectorAll(".defend-one").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        beginSession(btn.getAttribute("data-claim"));
+      });
+    });
+  }
+
+  /* ================= INTERVIEW FLOW ================= */
+  function beginSession(startClaimId){
+    if(startClaimId){
+      state.claimOrder = [startClaimId, ...state.claimOrder.filter(id => id !== startClaimId)];
+    }
+    state.currentIndex = -1;
+    showScreen("interview");
+    advanceToNextClaim();
+  }
+
+  function findNextPendingIndex(){
+    for(let i = state.currentIndex+1; i < state.claimOrder.length; i++){
+      const c = claimById(state.claimOrder[i]);
+      if(c && c.status === "pending") return i;
+    }
+    return -1;
+  }
+
+  async function advanceToNextClaim(){
+    const idx = findNextPendingIndex();
+    if(idx === -1){
+      generateReport();
+      return;
+    }
+    state.currentIndex = idx;
+    const claim = claimById(state.claimOrder[idx]);
+    claim.status = "active";
+    renderInterviewShell(claim);
+    await askNext(claim, null);
+  }
+
+  function renderInterviewShell(claim){
+    $("ivCategoryBadge").textContent = CATEGORY_TAG[claim.category] + " " + claim.category;
+    $("ivCategoryBadge").className = "badge badge-active";
+    $("ivRiskBadge").textContent = claim.riskLevel + " risk";
+    $("ivRiskBadge").className = "badge badge-" + claim.riskLevel;
+    $("ivClaimText").textContent = claim.text;
+    renderTranscript(claim);
+    renderClaimGauge(claim.confidenceScore);
+    renderProgress();
+    $("answerInput").value = "";
+    $("answerCharCount").textContent = "0 characters";
+  }
+
+  function renderTranscript(claim){
+    const el = $("transcript");
+    if(!claim.qaHistory.length){
+      el.innerHTML = `<div class="muted small">No exchanges yet for this claim.</div>`;
+      return;
+    }
+    el.innerHTML = claim.qaHistory.map((qa,i) => {
+      const ev = qa.evaluation;
+      const chips = ev ? `<div class="qa-eval">
+          <span class="chip">${ev.score}/100 · ${esc(ev.verdict)}</span>
+          ${(ev.strengths||[]).map(s=>`<span class="chip pos">+ ${esc(s)}</span>`).join("")}
+          ${(ev.weaknesses||[]).map(s=>`<span class="chip neg">− ${esc(s)}</span>`).join("")}
+        </div>` : "";
+      return `<div class="qa-block">
+        <div class="qa-q">Q${i+1}. ${esc(qa.question)}</div>
+        <div class="qa-a">${esc(qa.answer)}</div>
+        ${chips}
+      </div>`;
+    }).join("");
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function renderCurrentQuestion(q){
+    $("currentQText").textContent = q;
+    $("currentQBlock").style.display = "block";
+  }
+
+  function showTyping(show){
+    if(show){
+      $("currentQText").innerHTML = `<span class="typing"><span></span><span></span><span></span></span>`;
+    }
+  }
+
+  async function askNext(claim, lastAnswer){
+    showTyping(true);
+    setStatus("Interviewer is thinking", true);
+    try{
+      const rawText = await withRetryUI(
+        () => fetchClaudeText(interviewerSystem(state.audience), interviewerUser(claim, state.audience, state.track, lastAnswer)),
+        () => askNext(claim, lastAnswer)
+      );
+      let result;
+      try{
+        result = parseJsonLoose(rawText);
+      }catch(parseErr){
+        const score = regexNumber(rawText, "score");
+        result = {
+          evaluation: lastAnswer ? {
+            score: score == null ? 55 : score,
+            verdict: regexString(rawText, "verdict") || "developing",
+            strengths: regexStringArray(rawText, "strengths"),
+            weaknesses: regexStringArray(rawText, "weaknesses")
+          } : null,
+          action: regexString(rawText, "action") || "next_claim",
+          nextQuestion: regexString(rawText, "nextQuestion")
+        };
+      }
+
+      if(lastAnswer){
+        claim.qaHistory.push({
+          question: claim.pendingQuestion,
+          answer: lastAnswer,
+          evaluation: result.evaluation || null
+        });
+        if(result.evaluation && typeof result.evaluation.score === "number"){
+          claim.confidenceScore = clamp(Math.round(result.evaluation.score),0,100);
+        }
+        renderTranscript(claim);
+        renderClaimGauge(claim.confidenceScore);
+        saveActive();
+      }
+
+      const followupsSoFar = claim.qaHistory.length;
+      const mustStop = followupsSoFar > MAX_FOLLOWUPS;
+      const action = mustStop ? "next_claim" : (result.action || "next_claim");
+
+      if(action === "next_claim" || !result.nextQuestion){
+        finalizeClaim(claim);
+        renderDashboard();
+        await advanceToNextClaim();
+      }else{
+        claim.pendingQuestion = result.nextQuestion;
+        renderCurrentQuestion(result.nextQuestion);
+        saveActive();
+      }
+      setStatus("Awaiting your answer", true);
+    }catch(err){
+      $("currentQText").textContent = claim.pendingQuestion || "(question unavailable — try again)";
+      setStatus("Connection issue", false);
+    }
+  }
+
+  function finalizeClaim(claim){
+    if(claim.confidenceScore == null){
+      claim.status = "not_attempted";
+    }else if(claim.confidenceScore >= 75){
+      claim.status = "defended";
+    }else if(claim.confidenceScore >= 50){
+      claim.status = "developing";
+    }else{
+      claim.status = "weak";
+    }
+  }
+
+  function renderProgress(){
+    const total = state.claims.length;
+    const done = state.claims.filter(c => ["defended","developing","weak","skipped","not_attempted"].includes(c.status)).length;
+    const segs = 20;
+    const on = Math.round((done/total)*segs);
+    $("progressFuel").innerHTML = Array.from({length:segs}).map((_,i)=>`<i class="${i<on?'on':''}"></i>`).join("");
+    $("progressText").textContent = `${done} / ${total} claims covered`;
+  }
+
+  function renderClaimGauge(score){
+    const el = $("claimGauge");
+    if(score == null){
+      el.innerHTML = gaugeSVG(0, true);
+      $("claimGaugeLabel").textContent = "No data yet";
+    }else{
+      el.innerHTML = gaugeSVG(score, false);
+      $("claimGaugeLabel").textContent = score >= 75 ? "Holding up" : score >= 50 ? "Needs sharpening" : "Cracks under pressure";
+    }
+  }
+
+  function gaugeSVG(score, empty){
+    const r = 80, circumference = Math.PI * r;
+    const filled = empty ? 0 : (score/100) * circumference;
+    const angle = -90 + (empty ? 0 : (score/100) * 180);
+    return `<svg viewBox="0 0 200 110">
+      <path d="M20,100 A80,80 0 0,1 180,100" class="gauge-track"/>
+      <path d="M20,100 A80,80 0 0,1 180,100" class="gauge-fill" stroke-dasharray="${filled.toFixed(1)} ${circumference.toFixed(1)}"/>
+      <line x1="100" y1="100" x2="100" y2="30" class="gauge-needle" transform="rotate(${angle} 100 100)"/>
+      <circle cx="100" cy="100" r="6" class="gauge-hub"/>
+      <text x="100" y="92" class="gauge-value" text-anchor="middle">${empty ? "--" : score}</text>
+    </svg>`;
+  }
+
+  /* ================= REPORT FLOW ================= */
+  async function generateReport(){
+    showScreen("report");
+    $("reportLoading").style.display = "block";
+    $("reportContent").style.display = "none";
+    setStatus("Compiling report", true);
+    try{
+      const rawText = await withRetryUI(
+        () => fetchClaudeText(coachSystem(), coachUser(state.claims, state.audience, state.track)),
+        generateReport
+      );
+      let result;
+      try{
+        result = parseJsonLoose(rawText);
+      }catch(parseErr){
+        showToast("Report response was cut short — recovered what we could.", "info");
+        result = {
+          overallReadinessScore: regexNumber(rawText, "overallReadinessScore") || 50,
+          overallVerdict: regexString(rawText, "overallVerdict") || "",
+          topStrengths: regexStringArray(rawText, "topStrengths"),
+          topWeaknesses: regexStringArray(rawText, "topWeaknesses"),
+          perClaimFixes: regexStringMap(rawText, "perClaimFixes"),
+          suggestedStories: regexStringArray(rawText, "suggestedStories"),
+          closingNote: regexString(rawText, "closingNote") || ""
+        };
+      }
+      state.report = result;
+      renderReport(result);
+      const historyEntry = {
+        id: state.sessionId || uid(),
+        date: new Date().toISOString(),
+        readinessScore: result.overallReadinessScore,
+        claimsCount: state.claims.length,
+        audience: state.audience,
+        track: state.track,
+        resumeSnippet: state.resumeText.slice(0,140),
+        claims: state.claims,
+        report: result
+      };
+      saveHistoryEntry(historyEntry);
+      clearActive();
+      setStatus("Report ready", false);
+    }catch(err){
+      $("reportLoading").innerHTML = `<h3>Couldn't compile the report.</h3><p class="muted small">Check your connection and try again.</p><button class="btn" id="retryReportBtn">Retry</button>`;
+      $("retryReportBtn").addEventListener("click", generateReport);
+      setStatus("Idle", false);
+    }
+  }
+
+  function renderReport(report){
+    $("reportLoading").style.display = "none";
+    $("reportContent").style.display = "block";
+
+    $("overallGauge").innerHTML = gaugeSVG(clamp(report.overallReadinessScore,0,100), false);
+    $("overallScoreNum").textContent = report.overallReadinessScore;
+    $("overallVerdictText").textContent = report.overallVerdict || "";
+
+    const attempted = state.claims.filter(c => c.qaHistory.length > 0);
+    $("reportBars").innerHTML = state.claims.map(c => {
+      const score = c.confidenceScore == null ? 0 : c.confidenceScore;
+      const cls = c.status === "weak" ? "weak" : c.status === "developing" ? "developing" : c.status === "defended" ? "defended" : "";
+      return `<div class="bar-row">
+        <div class="name">${esc(c.text.slice(0,42))}${c.text.length>42?'…':''}</div>
+        <div class="bar-track"><div class="bar-fill ${cls}" style="width:${score}%"></div></div>
+        <div class="bar-val">${c.confidenceScore == null ? '—' : score}</div>
+      </div>`;
+    }).join("");
+
+    $("strengthsList").innerHTML = (report.topStrengths||[]).map(s => `<li>${esc(s)}</li>`).join("") || `<li class="muted">Not enough data yet.</li>`;
+    $("weaknessesList").innerHTML = (report.topWeaknesses||[]).map(s => `<li>${esc(s)}</li>`).join("") || `<li class="muted">Not enough data yet.</li>`;
+
+    const fixes = report.perClaimFixes || {};
+    const recHtml = Object.keys(fixes).map(id => {
+      const c = claimById(id);
+      if(!c) return "";
+      return `<div class="rec-item">
+        <div class="rc-claim">${CATEGORY_TAG[c.category]||''} ${esc(c.text.slice(0,60))}${c.text.length>60?'…':''}</div>
+        <div class="rc-fix">${esc(fixes[id])}</div>
+      </div>`;
+    }).join("");
+    $("recsList").innerHTML = recHtml || `<p class="muted small">No urgent fixes flagged — nice work.</p>`;
+
+    $("storiesList").innerHTML = (report.suggestedStories||[]).map(s => `<li>${esc(s)}</li>`).join("") || `<li class="muted">—</li>`;
+    $("closingNote").textContent = report.closingNote || "";
+  }
+
+  /* ================= HISTORY LIST (landing) ================= */
+  function renderHistory(){
+    const hist = getHistory();
+    $("histCount").textContent = hist.length + " session" + (hist.length===1?"":"s");
+    if(!hist.length){
+      $("historyList").innerHTML = `<div class="empty-state"><div class="glyph">◇</div>No sessions yet. Run your first defense above.</div>`;
+      return;
+    }
+    $("historyList").innerHTML = hist.map(h => `<div class="hist-item" data-id="${h.id}">
+      <div>
+        <div style="font-family:var(--mono);font-size:.8rem">${new Date(h.date).toLocaleString()}</div>
+        <div class="small muted">${h.claimsCount} claims · ${esc(h.audience)}</div>
+      </div>
+      <div class="btn-row">
+        <span class="badge ${h.readinessScore>=75?'badge-defended':h.readinessScore>=50?'badge-developing':'badge-weak'}">${h.readinessScore}/100</span>
+        <button class="btn btn-outline btn-sm view-hist" data-id="${h.id}">View Report</button>
+      </div>
+    </div>`).join("");
+    document.querySelectorAll(".view-hist").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const entry = hist.find(h => h.id === btn.getAttribute("data-id"));
+        if(!entry) return;
+        state.claims = entry.claims;
+        state.audience = entry.audience;
+        state.track = entry.track;
+        state.report = entry.report;
+        showScreen("report");
+        renderReport(entry.report);
+      });
+    });
+  }
+
+  /* ================= EXPORTS ================= */
+  function download(filename, content, mime){
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportJSON(){
+    download("defense-report.json", JSON.stringify({claims: state.claims, report: state.report, audience: state.audience, track: state.track}, null, 2), "application/json");
+  }
+
+  function exportText(){
+    const r = state.report || {};
+    let out = `DEFEND YOUR EXPERIENCE — DEFENSE REPORT\n`;
+    out += `Generated: ${new Date().toLocaleString()}\n`;
+    out += `Audience: ${state.audience} | Track: ${state.track}\n`;
+    out += `Overall Readiness: ${r.overallReadinessScore}/100\n${r.overallVerdict||""}\n\n`;
+    out += `WHAT HELD UP:\n` + (r.topStrengths||[]).map(s=>`  + ${s}`).join("\n") + `\n\n`;
+    out += `WHAT WILL GET PUSHED ON:\n` + (r.topWeaknesses||[]).map(s=>`  - ${s}`).join("\n") + `\n\n`;
+    out += `PER-CLAIM RESULTS:\n`;
+    state.claims.forEach(c => {
+      out += `\n[${c.status.toUpperCase()}] (${c.confidenceScore==null?'n/a':c.confidenceScore+'/100'}) ${c.text}\n`;
+      (c.qaHistory||[]).forEach((qa,i) => {
+        out += `  Q${i+1}: ${qa.question}\n  A${i+1}: ${qa.answer}\n`;
+      });
+      if(r.perClaimFixes && r.perClaimFixes[c.id]) out += `  FIX: ${r.perClaimFixes[c.id]}\n`;
+    });
+    out += `\nSTORIES TO BUILD OUT:\n` + (r.suggestedStories||[]).map(s=>`  * ${s}`).join("\n");
+    out += `\n\n${r.closingNote||""}\n`;
+    download("defense-report.txt", out, "text/plain");
+  }
+
+  function practiceWeakAgain(){
+    const weakIds = state.claims.filter(c => c.status === "weak" || c.status === "developing").map(c => c.id);
+    if(!weakIds.length){ showToast("No weak claims left to re-practice.", "success"); return; }
+    weakIds.forEach(id => {
+      const c = claimById(id);
+      c.status = "pending"; c.qaHistory = []; c.confidenceScore = null; c.pendingQuestion = null;
+    });
+    state.claimOrder = weakIds.concat(state.claims.filter(c => !weakIds.includes(c.id)).map(c=>c.id));
+    state.currentIndex = -1;
+    showScreen("interview");
+    advanceToNextClaim();
+  }
+
+  function startNewSession(){
+    state = {
+      phase: "landing", audience: $("audienceSelect").value, track: $("trackSelect").value,
+      resumeText: "", claims: [], claimOrder: [], currentIndex: -1, report: null, sessionId: uid()
+    };
+    clearActive();
+    resumeInput.value = "";
+    updateCharCount();
+    renderHistory();
+    showScreen("landing");
+  }
+
+  /* ================= FILE HANDLING ================= */
+  function updateCharCount(){
+    $("charCount").textContent = resumeInput.value.length + " characters";
+  }
+  function handleFile(file){
+    if(!file) return;
+    const isText = /\.(txt|md)$/i.test(file.name);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      resumeInput.value = e.target.result;
+      updateCharCount();
+      if(!isText){
+        showToast("That file type can't be parsed directly — check the pasted text looks right, or paste manually.", "info");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  dropzone.addEventListener("click", () => fileInput.click());
+  dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("drag"); });
+  dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag"));
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault(); dropzone.classList.remove("drag");
+    if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener("change", (e) => { if(e.target.files.length) handleFile(e.target.files[0]); });
+  resumeInput.addEventListener("input", updateCharCount);
+
+  /* ================= EVENT WIRING ================= */
+  $("analyzeBtn").addEventListener("click", () => {
+    const text = resumeInput.value.trim();
+    if(text.length < 40){
+      showToast("Add more content first — a full resume or write-up gives better claims to defend.", "info");
+      return;
+    }
+    state.resumeText = text;
+    state.audience = $("audienceSelect").value;
+    state.track = $("trackSelect").value;
+    state.sessionId = uid();
+    runExtraction();
+  });
+
+  $("backToLandingBtn").addEventListener("click", () => showScreen("landing"));
+  $("beginSessionBtn").addEventListener("click", () => beginSession(null));
+
+  $("answerInput").addEventListener("input", () => {
+    $("answerCharCount").textContent = $("answerInput").value.length + " characters";
+  });
+
+  $("submitAnswerBtn").addEventListener("click", async () => {
+    const answer = $("answerInput").value.trim();
+    if(!answer){ showToast("Type an answer before submitting.", "info"); return; }
+    const claim = claimById(state.claimOrder[state.currentIndex]);
+    $("submitAnswerBtn").disabled = true;
+    $("answerInput").disabled = true;
+    showTyping(true);
+    await askNext(claim, answer);
+    $("submitAnswerBtn").disabled = false;
+    $("answerInput").disabled = false;
+    $("answerInput").value = "";
+    $("answerCharCount").textContent = "0 characters";
+  });
+
+  $("skipClaimBtn").addEventListener("click", async () => {
+    const claim = claimById(state.claimOrder[state.currentIndex]);
+    claim.status = "skipped";
+    renderDashboard();
+    await advanceToNextClaim();
+  });
+
+  $("pauseBtn").addEventListener("click", () => {
+    saveActive();
+    showToast("Progress saved. Come back anytime — this browser will remember.", "success");
+  });
+
+  $("endSessionBtn").addEventListener("click", () => {
+    state.claims.forEach(c => { if(c.status === "pending" || c.status === "active") c.status = c.qaHistory.length ? c.status : "not_attempted"; if(c.status==="active") finalizeClaim(c); });
+    generateReport();
+  });
+
+  $("exportJsonBtn").addEventListener("click", exportJSON);
+  $("exportTextBtn").addEventListener("click", exportText);
+  $("printBtn").addEventListener("click", () => window.print());
+  $("practiceWeakBtn").addEventListener("click", practiceWeakAgain);
+  $("newSessionBtn").addEventListener("click", startNewSession);
+
+  /* ================= INIT ================= */
+  function init(){
+    resumeInput.value = PRESET_RESUME;
+    updateCharCount();
+    renderHistory();
+
+    const saved = loadActive();
+    if(saved && saved.claims && saved.claims.length){
+      state = saved;
+      $("audienceSelect").value = state.audience;
+      $("trackSelect").value = state.track;
+      if(state.phase === "interview"){
+        renderDashboard();
+        showScreen("interview");
+        const claim = claimById(state.claimOrder[state.currentIndex]);
+        if(claim){
+          renderInterviewShell(claim);
+          if(claim.pendingQuestion) renderCurrentQuestion(claim.pendingQuestion);
+        }
+        showToast("Resumed your saved session.", "success");
+      }else if(state.phase === "dashboard"){
+        renderDashboard();
+        showScreen("dashboard");
+      }else if(state.phase === "report" && state.report){
+        renderReport(state.report);
+        showScreen("report");
+      }
+    }
+    setStatus("Idle", false);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
