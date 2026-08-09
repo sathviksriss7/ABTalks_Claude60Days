@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>60-Day Claude AI Challenge — Skills Journey</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0F1535;
+    color: #1F2937;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  .hero {
+    background: linear-gradient(160deg, #1E2761 0%, #223080 55%, #0891B2 160%);
+    color: white;
+    padding: 64px 48px 56px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -120px; right: -120px;
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    bottom: -160px; left: -80px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .hero-kicker {
+    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+    color: #7DD3E8; font-weight: 700; margin-bottom: 14px; position: relative;
+  }
+  .hero-title {
+    font-size: 42px; font-weight: 800; line-height: 1.15; margin-bottom: 14px; position: relative;
+  }
+  .hero-sub {
+    font-size: 16px; color: #C9D3F0; max-width: 640px; line-height: 1.6; position: relative;
+  }
+
+  .section { background: #F7F9FC; padding: 52px 48px; }
+  .section.alt { background: #FFFFFF; }
+  .section-title {
+    font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: #0891B2; font-weight: 700; margin-bottom: 10px;
+  }
+  .section-heading { font-size: 26px; font-weight: 800; color: #1E2761; margin-bottom: 8px; }
+  .section-desc { font-size: 14.5px; color: #6B7280; max-width: 640px; margin-bottom: 34px; line-height: 1.6; }
+
+  /* Journey timeline */
+  .journey {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    position: relative;
+  }
+  .journey::before {
+    content: "";
+    position: absolute;
+    top: 22px; left: 4%; right: 4%;
+    height: 2px;
+    background: linear-gradient(90deg, #C9D3F0, #0891B2);
+    z-index: 0;
+  }
+  .stage {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  .stage-dot {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: white;
+    border: 3px solid #0891B2;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin: 0 auto 12px auto;
+    box-shadow: 0 4px 12px rgba(30,39,97,0.15);
+  }
+  .stage-label { font-size: 11.5px; font-weight: 700; color: #1E2761; line-height: 1.3; }
+  .stage-sub { font-size: 10px; color: #9CA3AF; margin-top: 3px; }
+
+  /* Skill cards */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .skill-card {
+    background: white;
+    border: 1px solid #E5E9F5;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 2px 10px rgba(30,39,97,0.05);
+  }
+  .skill-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, #1E2761, #0891B2);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 17px; margin-bottom: 12px;
+  }
+  .skill-name { font-size: 14.5px; font-weight: 700; color: #1E2761; margin-bottom: 6px; }
+  .skill-evidence { font-size: 12px; color: #6B7280; line-height: 1.5; }
+
+  /* Capstone spotlight */
+  .capstone-box {
+    background: linear-gradient(135deg, #1E2761, #142055);
+    border-radius: 18px;
+    padding: 42px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .capstone-box::before {
+    content: "";
+    position: absolute; top: -80px; right: -60px;
+    width: 240px; height: 240px; border-radius: 50%;
+    background: rgba(8,145,178,0.25);
+  }
+  .capstone-label {
+    display: inline-block;
+    background: rgba(8,145,178,0.25);
+    border: 1px solid #0891B2;
+    color: #7DD3E8;
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 999px; margin-bottom: 18px;
+    position: relative;
+  }
+  .capstone-title { font-size: 28px; font-weight: 800; margin-bottom: 10px; position: relative; }
+  .capstone-desc { font-size: 14.5px; color: #C9D3F0; line-height: 1.6; max-width: 620px; margin-bottom: 26px; position: relative; }
+  .stat-row { display: flex; gap: 34px; flex-wrap: wrap; position: relative; }
+  .stat { }
+  .stat-num { font-size: 30px; font-weight: 800; color: #7DD3E8; }
+  .stat-label { font-size: 11.5px; color: #9CA6D6; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  /* Debugging saga strip */
+  .saga {
+    display: flex;
+    gap: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #E5E9F5;
+  }
+  .saga-step {
+    flex: 1;
+    background: white;
+    padding: 16px 14px;
+    border-right: 1px solid #E5E9F5;
+    font-size: 11.5px;
+    color: #4B5563;
+    line-height: 1.5;
+  }
+  .saga-step:last-child { border-right: none; background: #EFF6FF; }
+  .saga-step .n { color: #0891B2; font-weight: 800; font-size: 13px; }
+
+  .footer {
+    background: #0F1535;
+    color: #9CA6D6;
+    text-align: center;
+    padding: 36px 24px;
+    font-size: 12.5px;
+    line-height: 1.8;
+  }
+  .footer strong { color: white; }
+  .footer a { color: #7DD3E8; text-decoration: none; }
+
+  @media (max-width: 800px) {
+    .journey { grid-template-columns: repeat(3, 1fr); row-gap: 28px; }
+    .journey::before { display: none; }
+    .skills-grid { grid-template-columns: 1fr 1fr; }
+    .saga { flex-direction: column; }
+    .saga-step { border-right: none; border-bottom: 1px solid #E5E9F5; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-kicker">AB Talks &middot; 60-Day Claude AI Challenge</div>
+    <div class="hero-title">From First Prompt to a Live, Shipped AI Product</div>
+    <div class="hero-sub">
+      Sixty days of building AI fluency — prompting, reasoning, research workflows, automation,
+      product thinking, and increasingly sophisticated projects — culminating in a 10-day capstone
+      that took <strong>PriorIQ</strong> from a blank page to a tested, secure, publicly deployed v1.0.0.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">The Journey</div>
+    <div class="section-heading">Skills Built Across the 60 Days</div>
+    <div class="section-desc">Each stage compounded into the next — the capstone didn't require new fundamentals, it required applying all of them together, under real constraints, for ten straight days.</div>
+
+    <div class="journey">
+      <div class="stage">
+        <div class="stage-dot">🧭</div>
+        <div class="stage-label">AI Foundations</div>
+        <div class="stage-sub">How LLMs actually work</div>
+      </div>
+      <div class="stage">
+        <div class="stage-dot">✍️</div>
+        <div class="stage-label">Effective Prompting</div>
+        <div class="stage-sub">Precision &amp; structure</div>
+      </div>
+      <div class="stage">
+        <div class="stage-dot">🔍</div>
+        <div class="stage-label">Reasoning &amp; Research</div>
+        <div class="stage-sub">Verify, don't assume</div>
+      </div>
+      <div class="stage">
+        <div class="stage-dot">⚙️</div>
+        <div class="stage-label">Automation &amp; Agentic Workflows</div>
+        <div class="stage-sub">AI that takes action</div>
+      </div>
+      <div class="stage">
+        <div class="stage-dot">🧩</div>
+        <div class="stage-label">Product Thinking</div>
+        <div class="stage-sub">Scope with discipline</div>
+      </div>
+      <div class="stage">
+        <div class="stage-dot">🚀</div>
+        <div class="stage-label">Shipping Real Products</div>
+        <div class="stage-sub">PriorIQ v1.0.0, live</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section alt">
+    <div class="section-title">Validated In Practice</div>
+    <div class="section-heading">Skills the Capstone Actually Exercised</div>
+    <div class="section-desc">Not a claims list — every card below maps to something that genuinely happened during the 10-day build.</div>
+
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon">🎯</div>
+        <div class="skill-name">Product Discovery &amp; Scope Discipline</div>
+        <div class="skill-evidence">Day 1: chose a defensible, shippable scope over an ambitious one — and never regretted the cuts by Day 9.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🏗️</div>
+        <div class="skill-name">System Architecture</div>
+        <div class="skill-evidence">Full technical design — diagrams, schema, API contracts — before a line of app code was written.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🔄</div>
+        <div class="skill-name">Adapting Under Real Constraints</div>
+        <div class="skill-evidence">Day 5: a planned AI provider's free tier didn't hold up. Verified an alternative, got sign-off, pivoted without losing momentum.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🐛</div>
+        <div class="skill-name">Systematic Debugging</div>
+        <div class="skill-evidence">Resolved a 3-stage AI integration failure by reading real error messages at every step, never by guessing.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🛡️</div>
+        <div class="skill-name">Adversarial Security Testing</div>
+        <div class="skill-evidence">Day 8: XSS injection attempts, extreme values, simulated storage failure — run before writing a single fix.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">♿</div>
+        <div class="skill-name">Accessibility Engineering</div>
+        <div class="skill-evidence">Focus management, ARIA live regions, and an accessible custom modal replacing a native browser dialog.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">✅</div>
+        <div class="skill-name">Testing Discipline</div>
+        <div class="skill-evidence">100+ automated Playwright checks, written and maintained from Day 3 through launch — not bolted on at the end.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🎨</div>
+        <div class="skill-name">UI/UX Craft</div>
+        <div class="skill-evidence">A dedicated senior-review day that audited a genuinely working UI and still found real, fixable gaps.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">📦</div>
+        <div class="skill-name">Release Engineering</div>
+        <div class="skill-evidence">Public launch polish, semantic versioning, and a tagged v1.0.0 GitHub release.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Case Study</div>
+    <div class="section-heading">The Debugging Saga That Proved It All Comes Together</div>
+    <div class="section-desc">Day 5's AI integration didn't work the first time, or the second. Here's the actual sequence — each step diagnosed from real evidence, not guesswork.</div>
+
+    <div class="saga">
+      <div class="saga-step"><span class="n">1</span><br/>Chosen AI provider's free credit unavailable on this account — verified via the actual billing page, not assumed.</div>
+      <div class="saga-step"><span class="n">2</span><br/>Pivoted to a genuinely free alternative provider, with explicit sign-off before rewriting the integration.</div>
+      <div class="saga-step"><span class="n">3</span><br/>New model silently deprecated for new accounts — a 404 that only made sense after checking the provider's own model list.</div>
+      <div class="saga-step"><span class="n">4</span><br/>Upgraded error handling to surface the provider's real error text — turning every future issue into a fast fix.</div>
+      <div class="saga-step"><span class="n">5</span><br/>Found the model's reasoning mode silently exhausting the entire response budget before ever answering.</div>
+      <div class="saga-step"><span class="n">6</span><br/>Final fix verified live: correct model, right token budget, explicit prompting — shipped and confirmed working.</div>
+    </div>
+  </div>
+
+  <div class="section alt">
+    <div class="capstone-box">
+      <span class="capstone-label">The Capstone</span>
+      <div class="capstone-title">PriorIQ — AI Copilot for Roadmap Prioritization</div>
+      <div class="capstone-desc">
+        An AI-powered tool that scores roadmap items with RICE, flags inconsistent or overly optimistic
+        estimates, and generates exec-ready rationale for every ranking — live, free to run, and built
+        entirely solo across a real 10-day sprint that mirrored a genuine software development lifecycle.
+      </div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-num">10</div><div class="stat-label">Days, Solo Build</div></div>
+        <div class="stat"><div class="stat-num">100+</div><div class="stat-label">Automated Tests</div></div>
+        <div class="stat"><div class="stat-num">$0</div><div class="stat-label">Ongoing Cost</div></div>
+        <div class="stat"><div class="stat-num">v1.0.0</div><div class="stat-label">Publicly Released</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Built across the <strong>AB Talks 60-Day Claude AI Challenge</strong>, capstone delivered with <strong>Claude</strong> as AI pair programmer.<br/>
+    <a href="https://sathviksriss7.github.io/prioriq/" target="_blank" rel="noopener">Live demo</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://github.com/sathviksriss7/prioriq" target="_blank" rel="noopener">Source on GitHub</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://www.abtalks.in/" target="_blank" rel="noopener">abtalks.in</a>
+  </div>
+
+</div>
+</body>
+</html>
